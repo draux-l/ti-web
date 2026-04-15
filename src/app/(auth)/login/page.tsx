@@ -6,13 +6,20 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { toast } from "sonner"
-import { Loader2, User, Lock, AlertCircle } from "lucide-react"
+import { Loader2, User, Lock, AlertCircle, Mail } from "lucide-react"
 
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp"
 
 const loginSchema = z.object({
   username: z.string().min(1, "El usuario es requerido"),
@@ -34,9 +41,18 @@ const CREDENTIALS: Record<string, { password: string; role: string; name: string
   admin: { password: "123456", role: "admin", name: "Admin" },
 }
 
+type ForgotStep = "email" | "code" | "newPassword"
+
 export default function LoginPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const [isForgotOpen, setIsForgotOpen] = useState(false)
+  const [forgotStep, setForgotStep] = useState<ForgotStep>("email")
+  const [resetEmail, setResetEmail] = useState("")
+  const [resetCode, setResetCode] = useState("")
+  const [generatedCode, setGeneratedCode] = useState("")
+  const [newPassword, setNewPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
 
   const {
     register,
@@ -59,7 +75,6 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginForm) => {
     setIsLoading(true)
 
-    // Simulate network delay
     await new Promise((resolve) => setTimeout(resolve, 800))
 
     const user = CREDENTIALS[data.username]
@@ -77,6 +92,38 @@ export default function LoginPage() {
     })
 
     router.push(ROLE_REDIRECT[user.role])
+  }
+
+  const handleCloseForgot = () => {
+    setIsForgotOpen(false)
+    setForgotStep("email")
+    setResetEmail("")
+    setResetCode("")
+    setGeneratedCode("")
+    setNewPassword("")
+    setConfirmPassword("")
+  }
+
+  const handleSendCode = async () => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(resetEmail)) {
+      toast.error("Por favor, ingresa un correo válido.")
+      return
+    }
+    setForgotStep("code")
+  }
+
+  const handleVerifyCode = async () => {
+    setForgotStep("newPassword")
+  }
+
+  const handleResendCode = async () => {
+    await new Promise((resolve) => setTimeout(resolve, 500))
+    const code = Math.floor(100000 + Math.random() * 900000).toString()
+    setGeneratedCode(code)
+    toast.success("Código reenviado", {
+      description: `Nuevo código: ${code}`,
+    })
   }
 
   return (
@@ -140,6 +187,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 className="text-sm text-[#00A3E0] hover:underline"
+                onClick={() => setIsForgotOpen(true)}
               >
                 ¿Olvidaste tu contraseña?
               </button>
@@ -199,7 +247,6 @@ export default function LoginPage() {
         </CardContent>
       </Card>
 
-      {/* Footer banner */}
       <div className="mt-6 flex w-full max-w-md items-center gap-3 rounded-xl bg-slate-100 px-4 py-3">
         <AlertCircle className="size-5 shrink-0 text-amber-500" />
         <p className="text-xs text-gray-500">
@@ -212,6 +259,161 @@ export default function LoginPage() {
           </a>
         </p>
       </div>
+
+      <Dialog open={isForgotOpen} onOpenChange={handleCloseForgot}>
+        <DialogContent className="rounded-2xl bg-white p-6 sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-gray-900">
+              {forgotStep === "email" && "Recuperar contraseña"}
+              {forgotStep === "code" && "Verificar código"}
+              {forgotStep === "newPassword" && "Nueva contraseña"}
+            </DialogTitle>
+          </DialogHeader>
+
+          {forgotStep === "email" && (
+            <div className="space-y-4">
+              <p className="text-sm text-gray-500">
+                Ingresa tu correo electrónico y te enviaremos un código de verificación.
+              </p>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
+                <Input
+                  type="email"
+                  placeholder="correo@ejemplo.com"
+                  className="border-none bg-slate-100 rounded-full pl-10"
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                />
+              </div>
+              <div className="flex gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="flex-1 rounded-full"
+                  onClick={handleCloseForgot}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="button"
+                  className="flex-1 bg-[#00A3E0] text-white hover:bg-[#00A3E0]/90 rounded-full"
+                  onClick={handleSendCode}
+                >
+                  Enviar código
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {forgotStep === "code" && (
+            <div className="space-y-4">
+              <p className="text-sm text-gray-500">
+                Hemos enviado un código de 6 dígitos a <span className="font-medium text-gray-700">{resetEmail}</span>
+              </p>
+              <div className="flex justify-center">
+                <InputOTP
+                  maxLength={6}
+                  value={resetCode}
+                  onChange={(value) => setResetCode(value)}
+                >
+                  <InputOTPGroup>
+                    <InputOTPSlot index={0} />
+                    <InputOTPSlot index={1} />
+                    <InputOTPSlot index={2} />
+                    <InputOTPSlot index={3} />
+                    <InputOTPSlot index={4} />
+                    <InputOTPSlot index={5} />
+                  </InputOTPGroup>
+                </InputOTP>
+              </div>
+              <div className="flex gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="flex-1 rounded-full"
+                  onClick={handleCloseForgot}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="button"
+                  className="flex-1 bg-[#00A3E0] text-white hover:bg-[#00A3E0]/90 rounded-full"
+                  onClick={handleVerifyCode}
+                >
+                  Verificar
+                </Button>
+              </div>
+              <div className="text-center">
+                <button
+                  type="button"
+                  className="text-sm text-[#00A3E0] hover:underline"
+                  onClick={handleResendCode}
+                >
+                  Reenviar código
+                </button>
+              </div>
+            </div>
+          )}
+
+          {forgotStep === "newPassword" && (
+            <div className="space-y-4">
+              <p className="text-sm text-gray-500">
+                Ingresa tu nueva contraseña.
+              </p>
+              <div className="space-y-2">
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
+                  <Input
+                    type="password"
+                    placeholder="Nueva contraseña"
+                    className="border-none bg-slate-100 rounded-full pl-10"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
+                  <Input
+                    type="password"
+                    placeholder="Confirmar contraseña"
+                    className="border-none bg-slate-100 rounded-full pl-10"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
+                </div>
+                {confirmPassword.length > 0 && newPassword !== confirmPassword && (
+                  <p className="text-sm text-destructive">Las contraseñas no coinciden</p>
+                )}
+              </div>
+              <div className="flex gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="flex-1 rounded-full"
+                  onClick={handleCloseForgot}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="button"
+                  className="flex-1 bg-[#00A3E0] text-white hover:bg-[#00A3E0]/90 rounded-full"
+                  disabled={newPassword.length < 6 || newPassword !== confirmPassword}
+                  onClick={() => {
+                    toast.success("Contraseña actualizada", {
+                      description: "Tu contraseña ha sido cambiada exitosamente.",
+                    })
+                    handleCloseForgot()
+                  }}
+                >
+                  Actualizar Contraseña
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
