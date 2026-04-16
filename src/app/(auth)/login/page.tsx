@@ -30,15 +30,15 @@ const loginSchema = z.object({
 type LoginForm = z.infer<typeof loginSchema>
 
 const ROLE_REDIRECT: Record<string, string> = {
-  estudiante: "/dashboard/student",
+  student: "/dashboard/student",
   instructor: "/dashboard/instructor",
   admin: "/dashboard/admin",
 }
 
 const CREDENTIALS: Record<string, { password: string; role: string; name: string }> = {
-  ander: { password: "123456", role: "estudiante", name: "Ander" },
-  pareja: { password: "123456", role: "instructor", name: "Pareja" },
-  admin: { password: "123456", role: "admin", name: "Admin" },
+  ander: { password: "123456", role: "student", name: "Ander García" },
+  pareja: { password: "123456", role: "instructor", name: "Pareja Instructor" },
+  admin: { password: "123456", role: "admin", name: "Administrador" },
 }
 
 type ForgotStep = "email" | "code" | "newPassword"
