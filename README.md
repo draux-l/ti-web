@@ -313,7 +313,8 @@ npm run type-check # Verificación de tipos TypeScript
 
 Solo para ambiente local/desarrollo. No usar en producción.
 
+
 UsuarioRolContraseñaanderEstudiante123456parejaInstructor123456adminAdmin123456superadminSuperAdmin123456
 
 🤝 Equipo
-Desarrollado por el equipo Antigravity para Tecsup.
+Desarrollado por el equipo Antigravity para Tecsup. 
