@@ -1,19 +1,30 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 import { StudentDashboard } from "@/components/features/student/StudentDashboard"
 import { StudentCourseDetail } from "@/components/features/student/StudentCourseDetail"
-import { StudentProgress } from "@/components/features/student/StudentProgress"
 import { AccessCodeModal } from "@/components/features/student/AccessCodeModal"
 
 type View = "dashboard" | "courses" | "progress" | "courseDetail"
 type SelectedCourse = string | null
 
 export default function StudentPage() {
+  const searchParams = useSearchParams()
   const [currentView, setCurrentView] = useState<View>("dashboard")
   const [selectedCourse, setSelectedCourse] = useState<SelectedCourse>(null)
   const [isXRAccessOpen, setIsXRAccessOpen] = useState(false)
   const [autoTriggerXR, setAutoTriggerXR] = useState(false)
+
+  useEffect(() => {
+    const view = searchParams.get("view")
+    const course = searchParams.get("course")
+    
+    if (view === "courseDetail" && course) {
+      setSelectedCourse(course)
+      setCurrentView("courseDetail")
+    }
+  }, [searchParams])
 
   const handleNavigate = (view: "dashboard" | "courses" | "progress") => {
     setCurrentView(view)

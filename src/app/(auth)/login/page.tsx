@@ -50,7 +50,6 @@ export default function LoginPage() {
   const [forgotStep, setForgotStep] = useState<ForgotStep>("email")
   const [resetEmail, setResetEmail] = useState("")
   const [resetCode, setResetCode] = useState("")
-  const [generatedCode, setGeneratedCode] = useState("")
   const [newPassword, setNewPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
 

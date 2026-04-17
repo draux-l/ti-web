@@ -100,7 +100,7 @@ export default function StudentCoursesPage() {
   const [autoTriggerXR, setAutoTriggerXR] = useState(false)
 
   const handleContinue = (courseId: string) => {
-    router.push(`/dashboard/student?course=${courseId}`)
+    router.push(`/dashboard/student?view=courseDetail&course=${courseId}`)
   }
 
   return (
