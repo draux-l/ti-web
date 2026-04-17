@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { ArrowLeft, Play, FileText, CheckCircle2, Circle, Lock, Clock, Users, Award, CheckCircle, XCircle } from "lucide-react"
+import { ArrowLeft, Play, FileText, CheckCircle2, Circle, Lock, Clock, Users, Award, Calendar, MonitorSmartphone } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -9,41 +9,24 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog"
 
-interface QuizQuestion {
-  question: string
-  correct: boolean
-  userAnswer?: boolean
+interface ExperienceData {
+  finalScore: number
+  attempts: number
+  status: "completed" | "in_progress" | "failed" | "pending"
+  timeSpent: number
+  deviceType: "vr_headset" | "desktop" | "mobile" | "tablet"
+  startedAt: string
+  completedAt: string
+  isGroup: boolean
+  memberCount: number
 }
-
-interface TeamMember {
-  id: string
-  name: string
-  avatar: string
-  role: string
-}
-
-interface ModuleFeedback {
-  note: number
-  xrTime: string
-  type: "Individual" | "Grupal"
-}
-
-const mockQuizData: QuizQuestion[] = [
-  { question: "La corriente fluye del polo positivo al negativo", correct: true, userAnswer: true },
-  { question: "En un circuito en serie, la corriente es diferente en cada componente", correct: false, userAnswer: false },
-  { question: "La Ley de Ohm establece que V = I × R", correct: true, userAnswer: true },
-  { question: "Los capacitores almacenan energía en forma de campo magnético", correct: false, userAnswer: false },
-  { question: "La potencia se mide en Watts", correct: true, userAnswer: true },
-  { question: "En un circuito paralelo, el voltaje es igual en todas las ramas", correct: true, userAnswer: false },
-  { question: "La resistencia total en paralelo se calcula como la suma de las resistencias", correct: false, userAnswer: false },
-  { question: "Un cortocircuito es una conexión de baja resistencia", correct: true, userAnswer: true },
-]
 
 const mockTeamMembers: TeamMember[] = [
   { id: "1", name: "María González", avatar: "MG", role: "Líder de Equipo" },
   { id: "2", name: "Carlos Rodríguez", avatar: "CR", role: "Especialista" },
   { id: "3", name: "Ana Martínez", avatar: "AM", role: "Analista" },
   { id: "4", name: "Pedro Sánchez", avatar: "PS", role: "Técnico" },
+  { id: "5", name: "Laura Torres", avatar: "LT", role: "Coordinadora" },
 ]
 
 interface StudentCourseDetailProps {
@@ -52,16 +35,16 @@ interface StudentCourseDetailProps {
   onOpenXRCode: () => void
 }
 
-const mockCourseDetails: Record<string, { name: string; description: string; modules: { id: string; title: string; completed: boolean; locked: boolean; duration: string; feedback?: ModuleFeedback }[] }> = {
+const mockCourseDetails: Record<string, { name: string; description: string; modules: { id: string; title: string; completed: boolean; locked: boolean; duration: string; feedback?: ExperienceData }[] }> = {
   "1": {
     name: "Electricidad Industrial",
     description: "Aprende los fundamentos de la electricidad industrial, circuitos trifásicos y sistemas de distribución.",
     modules: [
-      { id: "1-1", title: "Introducción a la Electricidad", completed: true, locked: false, duration: "45 min", feedback: { note: 16, xrTime: "35 min", type: "Individual" } },
-      { id: "1-2", title: "Circuitos en Serie y Paralelo", completed: true, locked: false, duration: "60 min", feedback: { note: 14, xrTime: "48 min", type: "Grupal" } },
-      { id: "1-3", title: "Ley de Ohm y Potencia", completed: true, locked: false, duration: "55 min", feedback: { note: 18, xrTime: "42 min", type: "Individual" } },
-      { id: "1-4", title: "Sistemas Trifásicos", completed: true, locked: false, duration: "75 min", feedback: { note: 15, xrTime: "68 min", type: "Grupal" } },
-      { id: "1-5", title: "Motores Eléctricos", completed: true, locked: false, duration: "90 min", feedback: { note: 17, xrTime: "82 min", type: "Individual" } },
+      { id: "1-1", title: "Introducción a la Electricidad", completed: true, locked: false, duration: "45 min", feedback: { finalScore: 16, attempts: 1, status: "completed", timeSpent: 35, deviceType: "vr_headset", startedAt: "2024-01-15", completedAt: "15/01/2024", isGroup: false, memberCount: 1 } },
+      { id: "1-2", title: "Circuitos en Serie y Paralelo", completed: true, locked: false, duration: "60 min", feedback: { finalScore: 14, attempts: 2, status: "completed", timeSpent: 48, deviceType: "desktop", startedAt: "2024-01-16", completedAt: "16/01/2024", isGroup: true, memberCount: 3 } },
+      { id: "1-3", title: "Ley de Ohm y Potencia", completed: true, locked: false, duration: "55 min", feedback: { finalScore: 18, attempts: 1, status: "completed", timeSpent: 42, deviceType: "vr_headset", startedAt: "2024-01-17", completedAt: "17/01/2024", isGroup: false, memberCount: 1 } },
+      { id: "1-4", title: "Sistemas Trifásicos", completed: true, locked: false, duration: "75 min", feedback: { finalScore: 15, attempts: 1, status: "completed", timeSpent: 68, deviceType: "desktop", startedAt: "2024-01-18", completedAt: "18/01/2024", isGroup: true, memberCount: 4 } },
+      { id: "1-5", title: "Motores Eléctricos", completed: true, locked: false, duration: "90 min", feedback: { finalScore: 17, attempts: 1, status: "completed", timeSpent: 82, deviceType: "vr_headset", startedAt: "2024-01-19", completedAt: "19/01/2024", isGroup: false, memberCount: 1 } },
       { id: "1-6", title: "Análisis de Circuitos VR", completed: false, locked: false, duration: "120 min" },
       { id: "1-7", title: "Diagnóstico de Fallas", completed: false, locked: true, duration: "90 min" },
       { id: "1-8", title: "Evaluación Final", completed: false, locked: true, duration: "60 min" },
@@ -71,10 +54,10 @@ const mockCourseDetails: Record<string, { name: string; description: string; mod
     name: "Mecánica de Maquinaria Pesada",
     description: "Conoce los principales sistemas mecánicos de maquinaria pesada y su mantenimiento preventivo.",
     modules: [
-      { id: "2-1", title: "Fundamentos de Mecánica", completed: true, locked: false, duration: "50 min", feedback: { note: 13, xrTime: "42 min", type: "Individual" } },
-      { id: "2-2", title: "Sistemas Hidráulicos", completed: true, locked: false, duration: "70 min", feedback: { note: 12, xrTime: "65 min", type: "Grupal" } },
-      { id: "2-3", title: "Motor Diesel", completed: true, locked: false, duration: "80 min", feedback: { note: 15, xrTime: "72 min", type: "Individual" } },
-      { id: "2-4", title: "Transmisión y Tren de Fuerza", completed: true, locked: false, duration: "65 min", feedback: { note: 14, xrTime: "58 min", type: "Grupal" } },
+      { id: "2-1", title: "Fundamentos de Mecánica", completed: true, locked: false, duration: "50 min", feedback: { finalScore: 13, attempts: 1, status: "completed", timeSpent: 42, deviceType: "mobile", startedAt: "2024-01-20", completedAt: "20/01/2024", isGroup: false, memberCount: 1 } },
+      { id: "2-2", title: "Sistemas Hidráulicos", completed: true, locked: false, duration: "70 min", feedback: { finalScore: 12, attempts: 2, status: "completed", timeSpent: 65, deviceType: "desktop", startedAt: "2024-01-21", completedAt: "21/01/2024", isGroup: true, memberCount: 2 } },
+      { id: "2-3", title: "Motor Diesel", completed: true, locked: false, duration: "80 min", feedback: { finalScore: 15, attempts: 1, status: "completed", timeSpent: 72, deviceType: "vr_headset", startedAt: "2024-01-22", completedAt: "22/01/2024", isGroup: false, memberCount: 1 } },
+      { id: "2-4", title: "Transmisión y Tren de Fuerza", completed: true, locked: false, duration: "65 min", feedback: { finalScore: 14, attempts: 1, status: "completed", timeSpent: 58, deviceType: "tablet", startedAt: "2024-01-23", completedAt: "23/01/2024", isGroup: true, memberCount: 3 } },
       { id: "2-5", title: "Simulación VR - Excavadora", completed: false, locked: false, duration: "120 min" },
       { id: "2-6", title: "Mantenimiento Preventivo", completed: false, locked: true, duration: "55 min" },
       { id: "2-7", title: "Diagnóstico de Averías", completed: false, locked: true, duration: "75 min" },
@@ -88,13 +71,15 @@ function FeedbackPanel({
   onOpenQuiz,
   onOpenTeam 
 }: { 
-  feedback: ModuleFeedback
+  feedback: ExperienceData
   onOpenQuiz: () => void
   onOpenTeam: () => void
 }) {
+  const typeLabel = feedback.memberCount === 1 ? "Individual" : "Grupal"
+  
   return (
     <div className="mt-4 rounded-xl bg-green-50 p-4">
-      <h4 className="mb-3 text-sm font-semibold text-green-800">Feedback de tu práctica</h4>
+      <h4 className="mb-3 text-sm font-semibold text-green-700">Feedback de tu práctica</h4>
       <div className="grid grid-cols-3 gap-4">
         <button 
           onClick={onOpenQuiz}
@@ -104,7 +89,7 @@ function FeedbackPanel({
           <div>
             <p className="text-xs text-gray-500">Nota</p>
             <p className="font-semibold text-green-700">
-              {feedback.note}/20
+              {feedback.finalScore}
             </p>
           </div>
         </button>
@@ -112,10 +97,10 @@ function FeedbackPanel({
           <Clock className="size-4 text-green-600" />
           <div>
             <p className="text-xs text-gray-500">Sesión XR</p>
-            <p className="font-semibold text-gray-900">{feedback.xrTime}</p>
+            <p className="font-semibold text-gray-900">{feedback.timeSpent} min</p>
           </div>
         </div>
-        {feedback.type === "Grupal" ? (
+        {feedback.memberCount > 1 ? (
           <button 
             onClick={onOpenTeam}
             className="flex items-center gap-2 rounded-lg bg-green-100 p-3 transition-all hover:bg-green-200 cursor-pointer"
@@ -124,7 +109,7 @@ function FeedbackPanel({
             <div>
               <p className="text-xs text-gray-500">Tipo</p>
               <p className="font-semibold text-green-700">
-                {feedback.type}
+                {typeLabel}
               </p>
             </div>
           </button>
@@ -133,7 +118,7 @@ function FeedbackPanel({
             <Users className="size-4 text-green-600" />
             <div>
               <p className="text-xs text-gray-500">Tipo</p>
-              <p className="font-semibold text-gray-900">{feedback.type}</p>
+              <p className="font-semibold text-gray-900">{typeLabel}</p>
             </div>
           </div>
         )}
@@ -146,23 +131,20 @@ export function StudentCourseDetail({ courseId, onBack, onOpenXRCode }: StudentC
   const [expandedFeedback, setExpandedFeedback] = useState<string | null>(null)
   const [quizModalOpen, setQuizModalOpen] = useState(false)
   const [teamModalOpen, setTeamModalOpen] = useState(false)
-  const [selectedFeedback, setSelectedFeedback] = useState<ModuleFeedback | null>(null)
+  const [selectedFeedback, setSelectedFeedback] = useState<ExperienceData | null>(null)
   const course = mockCourseDetails[courseId] || mockCourseDetails["1"]
   const completedCount = course.modules.filter((m) => m.completed).length
   const progress = Math.round((completedCount / course.modules.length) * 100)
 
-  const handleOpenQuiz = (feedback: ModuleFeedback) => {
+  const handleOpenQuiz = (feedback: ExperienceData) => {
     setSelectedFeedback(feedback)
     setQuizModalOpen(true)
   }
 
-  const handleOpenTeam = (feedback: ModuleFeedback) => {
+  const handleOpenTeam = (feedback: ExperienceData) => {
     setSelectedFeedback(feedback)
     setTeamModalOpen(true)
   }
-
-  const correctAnswers = mockQuizData.filter(q => q.correct).length
-  const totalQuestions = mockQuizData.length
 
   return (
     <div className="space-y-6">
@@ -277,51 +259,43 @@ export function StudentCourseDetail({ courseId, onBack, onOpenXRCode }: StudentC
         <DialogContent className="max-w-lg rounded-2xl shadow-xl border-0 bg-white p-0 overflow-hidden">
           <div className="bg-gradient-to-r from-[#00A3E0] to-[#00AEEF] p-6 text-white">
             <DialogTitle className="text-xl font-bold text-white mb-1">
-              Cuestionario de Revisión XR
+              Detalles de la Actividad XR
             </DialogTitle>
             <DialogDescription className="text-white/80 text-sm">
-              Revisa tus respuestas de la actividad
+              Información de tu sesión de práctica
             </DialogDescription>
           </div>
           
           <div className="p-6">
-            <div className="flex items-center justify-center gap-4 mb-6 p-4 bg-gray-50 rounded-xl">
-              <div className="text-center">
-                <p className="text-3xl font-bold text-[#00A3E0]">{correctAnswers}</p>
-                <p className="text-xs text-gray-500">Correctas</p>
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="p-4 bg-gray-50 rounded-xl text-center">
+                <Calendar className="size-6 text-[#00A3E0] mx-auto mb-2" />
+                <p className="text-2xl font-bold text-gray-900">{selectedFeedback?.completedAt || "—"}</p>
+                <p className="text-xs text-gray-500">Fecha</p>
               </div>
-              <div className="h-12 w-px bg-gray-300" />
-              <div className="text-center">
-                <p className="text-3xl font-bold text-red-500">{totalQuestions - correctAnswers}</p>
-                <p className="text-xs text-gray-500">Incorrectas</p>
+              <div className="p-4 bg-gray-50 rounded-xl text-center">
+                <p className="text-2xl font-bold text-[#00A3E0]">{selectedFeedback?.finalScore || "—"}</p>
+                <p className="text-xs text-gray-500">Nota</p>
               </div>
-              <div className="h-12 w-px bg-gray-300" />
-              <div className="text-center">
-                <p className="text-3xl font-bold text-gray-900">{selectedFeedback?.note}/20</p>
-                <p className="text-xs text-gray-500">Nota Final</p>
+              <div className="p-4 bg-gray-50 rounded-xl text-center">
+                <Clock className="size-6 text-[#00A3E0] mx-auto mb-2" />
+                <p className="text-2xl font-bold text-gray-900">{selectedFeedback?.timeSpent || "0"} min</p>
+                <p className="text-xs text-gray-500">Tiempo</p>
+              </div>
+              <div className="p-4 bg-gray-50 rounded-xl text-center">
+                <p className="text-2xl font-bold text-gray-900">{selectedFeedback?.attempts || 1}</p>
+                <p className="text-xs text-gray-500">Intentos</p>
               </div>
             </div>
 
-            <div className="space-y-3 max-h-72 overflow-y-auto pr-2">
-              {mockQuizData.map((item, index) => (
-                <div
-                  key={index}
-                  className={`flex items-start gap-3 p-3 rounded-xl border transition-all ${
-                    item.correct
-                      ? "bg-green-50 border-green-200"
-                      : "bg-red-50 border-red-200"
-                  }`}
-                >
-                  {item.correct ? (
-                    <CheckCircle className="size-5 text-green-600 flex-shrink-0 mt-0.5" />
-                  ) : (
-                    <XCircle className="size-5 text-red-500 flex-shrink-0 mt-0.5" />
-                  )}
-                  <span className={`text-sm ${item.correct ? "text-green-800" : "text-red-800"}`}>
-                    {item.question}
-                  </span>
+            <div className="p-4 bg-gray-50 rounded-xl">
+              <div className="flex items-center gap-3">
+                <MonitorSmartphone className="size-6 text-[#00A3E0]" />
+                <div>
+                  <p className="text-sm text-gray-500">Dispositivo</p>
+                  <p className="font-semibold text-gray-900 capitalize">{selectedFeedback?.deviceType?.replace("_", " ") || "—"}</p>
                 </div>
-              ))}
+              </div>
             </div>
           </div>
 
@@ -338,12 +312,14 @@ export function StudentCourseDetail({ courseId, onBack, onOpenXRCode }: StudentC
 
       <Dialog open={teamModalOpen} onOpenChange={setTeamModalOpen}>
         <DialogContent className="max-w-md rounded-2xl shadow-xl border-0 bg-white p-0 overflow-hidden">
-          <div className="bg-gradient-to-r from-[#FFB800] to-[#FFC933] p-6 text-gray-900">
-            <DialogTitle className="text-xl font-bold text-gray-900 mb-1">
-              Integrantes del Equipo
+          <div className="bg-gradient-to-r from-[#00A3E0] to-[#00AEEF] p-6 text-white">
+            <DialogTitle className="text-xl font-bold text-white mb-1">
+              {selectedFeedback?.memberCount === 1 ? "Participante" : "Integrantes del Equipo"}
             </DialogTitle>
-            <DialogDescription className="text-gray-700/80 text-sm">
-              Miembros que participaron en esta actividad grupal
+            <DialogDescription className="text-white/80 text-sm">
+              {selectedFeedback?.memberCount === 1 
+                ? "Miembro que participó en esta actividad individual" 
+                : "Miembros que participaron en esta actividad grupal"}
             </DialogDescription>
           </div>
           
@@ -372,7 +348,7 @@ export function StudentCourseDetail({ courseId, onBack, onOpenXRCode }: StudentC
           <div className="p-4 bg-gray-50 border-t">
             <button
               onClick={() => setTeamModalOpen(false)}
-              className="w-full rounded-xl bg-[#FFB800] py-3 text-sm font-semibold text-gray-900 transition-colors hover:bg-[#FFB800]/90"
+              className="w-full rounded-xl bg-[#00A3E0] py-3 text-sm font-semibold text-white transition-colors hover:bg-[#00A3E0]/90"
             >
               Cerrar
             </button>
