@@ -198,9 +198,7 @@
 ### Group_Experience
 | Campo | Tipo | Clave | Obligatorio | Descripción |
 |---|---|---|---|---|
-| `group_id` | integer | PK, FK → Group.id | Sí | — |
-| `experience_id` | integer | PK, FK → Experience.id | Sí | — |
-| `final_score` | float | — | No | Puntaje obtenido por el grupo |
+| `group_id` | integer | PK, FK → Group.id | Sí | — | 
 | `attemps` | integer | — | No | Intentos utilizados |
 | `status` | varchar(15) | — | Sí | completed / in_progress / failed / pending |
 | `mandatory` | boolean | — | Sí | Si es obligatoria para el grupo |
