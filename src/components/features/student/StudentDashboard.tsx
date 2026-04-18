@@ -39,10 +39,6 @@ const mockCourses = [
 export function StudentDashboard({ onNavigate, onSelectCourse, onOpenXRCode }: StudentDashboardProps) {
   const router = useRouter()
 
-  const handleVerTodos = () => {
-    router.push("/dashboard/student/courses")
-  }
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -59,10 +55,10 @@ export function StudentDashboard({ onNavigate, onSelectCourse, onOpenXRCode }: S
         </button>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-3">
         <button
-          onClick={handleVerTodos}
-          className="flex items-center gap-4 rounded-2xl bg-[#00A3E0] p-6 text-white transition-transform hover:scale-[1.02]"
+          onClick={() => router.push("/dashboard/student/courses")}
+          className="flex items-center justify-between gap-4 rounded-2xl bg-[#00A3E0] p-6 text-white transition-transform hover:scale-[1.02]"
         >
           <BookOpen className="size-10" />
           <div className="text-left">
@@ -72,8 +68,8 @@ export function StudentDashboard({ onNavigate, onSelectCourse, onOpenXRCode }: S
         </button>
 
         <button
-          onClick={() => onNavigate("progress")}
-          className="flex items-center gap-4 rounded-2xl bg-[#FFB800] p-6 text-gray-900 transition-transform hover:scale-[1.02]"
+          onClick={() => router.push("/dashboard/student/progress")}
+          className="flex items-center justify-between gap-4 rounded-2xl bg-[#FFB800] p-6 text-gray-900 transition-transform hover:scale-[1.02]"
         >
           <TrendingUp className="size-10" />
           <div className="text-left">
@@ -83,8 +79,8 @@ export function StudentDashboard({ onNavigate, onSelectCourse, onOpenXRCode }: S
         </button>
 
         <button
-          onClick={() => onNavigate("courses")}
-          className="flex items-center gap-4 rounded-2xl bg-gray-100 p-6 text-gray-700 transition-transform hover:scale-[1.02]"
+          onClick={() => router.push("/dashboard/student/courses")}
+          className="flex items-center justify-between gap-4 rounded-2xl bg-gray-100 p-6 text-gray-700 transition-transform hover:scale-[1.02]"
         >
           <Clock className="size-10" />
           <div className="text-left">
@@ -98,7 +94,7 @@ export function StudentDashboard({ onNavigate, onSelectCourse, onOpenXRCode }: S
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-gray-900">Cursos en progreso</h2>
           <button
-            onClick={handleVerTodos}
+            onClick={() => router.push("/dashboard/student/courses")}
             className="text-sm text-[#00A3E0] hover:underline"
           >
             Ver todos
@@ -133,7 +129,7 @@ export function StudentDashboard({ onNavigate, onSelectCourse, onOpenXRCode }: S
               </div>
 
               <button
-                onClick={() => onSelectCourse(course.id)}
+                onClick={() => router.push(`/dashboard/student/courses?view=courseDetail&course=${course.id}`)}
                 className="w-full rounded-full bg-[#00A3E0] py-2 text-sm font-medium text-white transition-colors hover:bg-[#00A3E0]/90"
               >
                 Continuar

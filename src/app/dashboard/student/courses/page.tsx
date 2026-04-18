@@ -1,9 +1,10 @@
 "use client"
 
-import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useState, useEffect } from "react"
 import { Zap, Wrench, Shield, Monitor } from "lucide-react"
 import { AccessCodeModal } from "@/components/features/student/AccessCodeModal"
+import { StudentCourseDetail } from "@/components/features/student/StudentCourseDetail"
 
 interface CourseCardProps {
   id: string
@@ -94,49 +95,95 @@ const courses = [
   },
 ]
 
+type View = "courses" | "courseDetail"
+
 export default function StudentCoursesPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const [currentView, setCurrentView] = useState<View>("courses")
+  const [selectedCourse, setSelectedCourse] = useState<string | null>(null)
   const [isXRAccessOpen, setIsXRAccessOpen] = useState(false)
   const [autoTriggerXR, setAutoTriggerXR] = useState(false)
 
+  useEffect(() => {
+    const view = searchParams.get("view")
+    const course = searchParams.get("course")
+    
+    if (view === "courseDetail" && course) {
+      setSelectedCourse(course)
+      setCurrentView("courseDetail")
+    } else {
+      setCurrentView("courses")
+      setSelectedCourse(null)
+    }
+  }, [searchParams])
+
   const handleContinue = (courseId: string) => {
-    router.push(`/dashboard/student?view=courseDetail&course=${courseId}`)
+    router.push(`/dashboard/student/courses?view=courseDetail&course=${courseId}`)
+  }
+
+  const handleBackToCourses = () => {
+    router.push("/dashboard/student/courses")
+  }
+
+  const handleOpenXRCode = (autoTrigger = false) => {
+    setAutoTriggerXR(autoTrigger)
+    setIsXRAccessOpen(true)
+  }
+
+  const renderContent = () => {
+    switch (currentView) {
+      case "courseDetail":
+        return (
+          <StudentCourseDetail
+            courseId={selectedCourse || "1"}
+            onBack={handleBackToCourses}
+            onOpenXRCode={() => handleOpenXRCode(true)}
+          />
+        )
+      case "courses":
+      default:
+        return (
+          <>
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Mis Cursos</h1>
+                <p className="mt-1 text-gray-500">Gestiona tu aprendizaje</p>
+              </div>
+              <button
+                onClick={() => {
+                  setAutoTriggerXR(false)
+                  setIsXRAccessOpen(true)
+                }}
+                className="flex items-center gap-2 rounded-full bg-[#00AEEF] px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-[#00AEEF]/90 hover:shadow-lg"
+              >
+                <Monitor className="size-5" />
+                Código de Acceso XR
+              </button>
+            </div>
+
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {courses.map((course) => (
+                <CourseCard
+                  key={course.id}
+                  {...course}
+                  onContinue={handleContinue}
+                />
+              ))}
+            </div>
+          </>
+        )
+    }
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Mis Cursos</h1>
-          <p className="mt-1 text-gray-500">Gestiona tu aprendizaje</p>
-        </div>
-        <button
-          onClick={() => {
-            setAutoTriggerXR(false)
-            setIsXRAccessOpen(true)
-          }}
-          className="flex items-center gap-2 rounded-full bg-[#00AEEF] px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-[#00AEEF]/90 hover:shadow-lg"
-        >
-          <Monitor className="size-5" />
-          Código de Acceso XR
-        </button>
-      </div>
-
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {courses.map((course) => (
-          <CourseCard
-            key={course.id}
-            {...course}
-            onContinue={handleContinue}
-          />
-        ))}
-      </div>
-
+    <>
+      {renderContent()}
       <AccessCodeModal
         isOpen={isXRAccessOpen}
         onClose={() => setIsXRAccessOpen(false)}
         autoTrigger={autoTriggerXR}
       />
-    </div>
+    </>
   )
 }

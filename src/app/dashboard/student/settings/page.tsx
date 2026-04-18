@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useRouter } from "next/navigation"
 
 import {
   User,
@@ -94,6 +95,7 @@ const languages = [
 ] as const
 
 export default function SettingsPage() {
+  const router = useRouter()
   const [activeTab, setActiveTab] = React.useState("profile")
   const [user, setUser] = React.useState<UserProfile>({
     first_name: "Ander",
@@ -262,19 +264,35 @@ export default function SettingsPage() {
 
       <Tabs value={activeTab}>
         <TabsList>
-          <TabsTrigger value="profile" onClick={() => setActiveTab("profile")}>
+          <TabsTrigger 
+            value="profile" 
+            className="min-w-[140px]"
+            onClick={() => router.push("/dashboard/student/settings")}
+          >
             <User className="mr-2 size-4" />
             Perfil
           </TabsTrigger>
-          <TabsTrigger value="emails" onClick={() => setActiveTab("emails")}>
+          <TabsTrigger 
+            value="emails" 
+            className="min-w-[140px]"
+            onClick={() => router.push("/dashboard/student/settings?tab=emails")}
+          >
             <Mail className="mr-2 size-4" />
             Correos
           </TabsTrigger>
-          <TabsTrigger value="phones" onClick={() => setActiveTab("phones")}>
+          <TabsTrigger 
+            value="phones" 
+            className="min-w-[140px]"
+            onClick={() => router.push("/dashboard/student/settings?tab=phones")}
+          >
             <Phone className="mr-2 size-4" />
             Teléfonos
           </TabsTrigger>
-          <TabsTrigger value="devices" onClick={() => setActiveTab("devices")}>
+          <TabsTrigger 
+            value="devices" 
+            className="min-w-[140px]"
+            onClick={() => router.push("/dashboard/student/settings?tab=devices")}
+          >
             <Smartphone className="mr-2 size-4" />
             Dispositivos XR
           </TabsTrigger>

@@ -21,6 +21,13 @@ interface ExperienceData {
   memberCount: number
 }
 
+interface TeamMember {
+  id: string
+  name: string
+  avatar: string
+  role: string
+}
+
 const mockTeamMembers: TeamMember[] = [
   { id: "1", name: "María González", avatar: "MG", role: "Líder de Equipo" },
   { id: "2", name: "Carlos Rodríguez", avatar: "CR", role: "Especialista" },
@@ -78,47 +85,47 @@ function FeedbackPanel({
   const typeLabel = feedback.memberCount === 1 ? "Individual" : "Grupal"
   
   return (
-    <div className="mt-4 rounded-xl bg-green-50 p-4">
-      <h4 className="mb-3 text-sm font-semibold text-green-700">Feedback de tu práctica</h4>
+    <div className="mt-4 rounded-xl bg-[#F7F7F7] p-4">
+      <h4 className="mb-3 text-sm font-semibold text-[#000000]">Feedback de tu práctica</h4>
       <div className="grid grid-cols-3 gap-4">
         <button 
           onClick={onOpenQuiz}
-          className="flex items-center gap-2 rounded-lg bg-green-100 p-3 transition-all hover:bg-green-200 cursor-pointer"
+          className="flex items-center gap-2 rounded-lg bg-white p-3 transition-all hover:bg-gray-50 cursor-pointer"
         >
-          <Award className="size-4 text-green-600" />
+          <Award className="size-4 text-[#00A3E0]" />
           <div>
             <p className="text-xs text-gray-500">Nota</p>
-            <p className="font-semibold text-green-700">
+            <p className="font-semibold text-[#00A3E0]">
               {feedback.finalScore}
             </p>
           </div>
         </button>
-        <div className="flex items-center gap-2 rounded-lg bg-green-100 p-3">
-          <Clock className="size-4 text-green-600" />
+        <div className="flex items-center gap-2 rounded-lg bg-white p-3">
+          <Clock className="size-4 text-[#00A3E0]" />
           <div>
             <p className="text-xs text-gray-500">Sesión XR</p>
-            <p className="font-semibold text-gray-900">{feedback.timeSpent} min</p>
+            <p className="font-semibold text-[#00A3E0]">{feedback.timeSpent} min</p>
           </div>
         </div>
         {feedback.memberCount > 1 ? (
           <button 
             onClick={onOpenTeam}
-            className="flex items-center gap-2 rounded-lg bg-green-100 p-3 transition-all hover:bg-green-200 cursor-pointer"
+            className="flex items-center gap-2 rounded-lg bg-white p-3 transition-all hover:bg-gray-50 cursor-pointer"
           >
-            <Users className="size-4 text-green-600" />
+            <Users className="size-4 text-[#00A3E0]" />
             <div>
               <p className="text-xs text-gray-500">Tipo</p>
-              <p className="font-semibold text-green-700">
+              <p className="font-semibold text-[#00A3E0]">
                 {typeLabel}
               </p>
             </div>
           </button>
         ) : (
-          <div className="flex items-center gap-2 rounded-lg bg-green-100 p-3">
-            <Users className="size-4 text-green-600" />
+          <div className="flex items-center gap-2 rounded-lg bg-white p-3">
+            <Users className="size-4 text-[#00A3E0]" />
             <div>
               <p className="text-xs text-gray-500">Tipo</p>
-              <p className="font-semibold text-gray-900">{typeLabel}</p>
+              <p className="font-semibold text-[#00A3E0]">{typeLabel}</p>
             </div>
           </div>
         )}
@@ -192,7 +199,7 @@ export function StudentCourseDetail({ courseId, onBack, onOpenXRCode }: StudentC
                 module.locked
                   ? "bg-gray-50 opacity-60"
                   : module.completed
-                  ? "bg-green-50"
+                  ? "bg-gray-100"
                   : "bg-gray-50 hover:bg-gray-100"
               }`}
             >
@@ -201,7 +208,7 @@ export function StudentCourseDetail({ courseId, onBack, onOpenXRCode }: StudentC
                   {module.locked ? (
                     <Lock className="size-4 text-gray-400" />
                   ) : module.completed ? (
-                    <CheckCircle2 className="size-5 text-green-600" />
+                    <CheckCircle2 className="size-5 text-[#00A3E0]" />
                   ) : (
                     <Circle className="size-5 text-gray-400" />
                   )}
@@ -233,7 +240,7 @@ export function StudentCourseDetail({ courseId, onBack, onOpenXRCode }: StudentC
                     onClick={() => setExpandedFeedback(expandedFeedback === module.id ? null : module.id)}
                     className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
                       expandedFeedback === module.id
-                        ? "border-green-500 bg-green-100 text-green-700"
+                        ? "border-[#00A3E0] bg-[#00A3E0] text-white"
                         : "border-[#00A3E0] text-[#00A3E0] hover:bg-blue-50"
                     }`}
                   >
@@ -334,7 +341,7 @@ export function StudentCourseDetail({ courseId, onBack, onOpenXRCode }: StudentC
                     <div className="size-12 rounded-full bg-gradient-to-br from-[#00A3E0] to-[#00AEEF] flex items-center justify-center text-white font-semibold text-sm">
                       {member.avatar}
                     </div>
-                    <div className="absolute -bottom-1 -right-1 size-4 rounded-full bg-green-500 border-2 border-white" />
+                    <div className="absolute -bottom-1 -right-1 size-4 rounded-full bg-[#00A3E0] border-2 border-white" />
                   </div>
                   <div className="flex-1">
                     <p className="font-semibold text-gray-900">{member.name}</p>
