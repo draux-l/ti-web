@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import Link from "next/link"
 import {
   Home,
@@ -65,6 +65,7 @@ const menuItems: Record<
 export function Sidebar({ role, userName, onLogout }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const pathname = usePathname()
+  const router = useRouter()
   const items = menuItems[role] || []
 
   return (
@@ -146,7 +147,10 @@ export function Sidebar({ role, userName, onLogout }: SidebarProps) {
             side="right"
             className="w-56 z-[100] shadow-xl border border-gray-200 bg-white"
           >
-            <DropdownMenuItem className="cursor-pointer focus:bg-slate-100 py-2">
+            <DropdownMenuItem
+              onClick={() => router.push(`/dashboard/${role}/settings`)}
+              className="cursor-pointer focus:bg-slate-100 py-2"
+            >
               <Settings className="mr-2 h-4 w-4" />
               Configuración
             </DropdownMenuItem>
