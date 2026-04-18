@@ -6,6 +6,7 @@ import Link from "next/link"
 import {
   Home,
   Users,
+  Layout,
   ClipboardList,
   Box,
   Settings,
@@ -44,8 +45,10 @@ const menuItems: Record<
   ],
   instructor: [
     { label: "Inicio", href: "/dashboard/instructor", icon: Home },
-    { label: "Mis Grupos", href: "/dashboard/instructor/groups", icon: Users },
-    { label: "Calificaciones", href: "/dashboard/instructor/grades", icon: BarChart3 },
+    { label: "Gestión de Grupos", href: "/dashboard/instructor/groups", icon: Users },
+    { label: "Control de Experiencias", href: "/dashboard/instructor/experiences", icon: Layout },
+    { label: "Calificaciones y Progreso", href: "/dashboard/instructor/grades", icon: TrendingUp },
+    { label: "Configuración", href: "/dashboard/instructor/settings", icon: Settings },
   ],
   admin: [
     { label: "Inicio", href: "/dashboard/admin", icon: Home },
@@ -96,7 +99,9 @@ export function Sidebar({ role, userName, onLogout }: SidebarProps) {
 
       <nav className="flex-1 space-y-1 p-4">
         {items.map((item) => {
-          const isActive = pathname === item.href
+          const isActive =
+            pathname === item.href ||
+            (item.href !== "/dashboard/instructor" && pathname.startsWith(item.href))
           const Icon = item.icon
           return (
             <Link
@@ -147,8 +152,10 @@ export function Sidebar({ role, userName, onLogout }: SidebarProps) {
             className="w-56 z-[100] shadow-xl border border-gray-200 bg-white"
           >
             <DropdownMenuItem className="cursor-pointer focus:bg-slate-100 py-2">
-              <Settings className="mr-2 h-4 w-4" />
-              Configuración
+              <Link href={`/dashboard/${role}/settings`} className="flex items-center">
+                <Settings className="mr-2 h-4 w-4" />
+                Configuración
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
