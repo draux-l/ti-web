@@ -86,14 +86,15 @@ export function Sidebar({ role, userName, onLogout, isCollapsed: controlledColla
           isCollapsed ? "w-20" : "w-64"
         }`}
       >
-        <div className="flex h-16 items-center justify-center border-b border-gray-100 px-4">
+        <div className="flex h-16 items-center border-b border-gray-100 px-4">
           <div className="flex size-10 items-center justify-center rounded-xl bg-[#00A3E0]">
             <span className="text-xl font-bold text-white">T</span>
           </div>
           {!isCollapsed && (
-            <span className="ml-3 text-lg font-bold text-gray-900">
-              Tecsup Inmersivo
-            </span>
+            <div className="ml-3 flex flex-col">
+              <span className="text-lg font-bold text-gray-900">TECSUP</span>
+              <span className="text-xs text-gray-500">RUC: 20117592899</span>
+            </div>
           )}
         </div>
 
