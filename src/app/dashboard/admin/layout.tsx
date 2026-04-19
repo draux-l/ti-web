@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Sidebar } from "@/components/Sidebar"
 
@@ -8,6 +9,7 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode
 }) {
+  const [isCollapsed, setIsCollapsed] = useState(false)
   const router = useRouter()
   const userName = "Administrador"
   const role = "admin"
@@ -18,8 +20,19 @@ export default function AdminLayout({
 
   return (
     <div className="flex h-screen bg-slate-50">
-      <Sidebar role={role} userName={userName} onLogout={handleLogout} />
-      <main className="flex-1 overflow-y-auto p-8">{children}</main>
+      <Sidebar 
+        role={role} 
+        userName={userName} 
+        onLogout={handleLogout} 
+        isCollapsed={isCollapsed}
+        onToggleCollapse={setIsCollapsed}
+      />
+      <main 
+        className="flex-1 overflow-y-auto p-8 transition-all duration-300 ease-in-out"
+        style={{ marginLeft: isCollapsed ? "5rem" : "16rem" }}
+      >
+        {children}
+      </main>
     </div>
   )
 }
