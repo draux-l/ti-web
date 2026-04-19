@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import Link from "next/link"
 import {
   Home,
@@ -68,6 +68,7 @@ export function Sidebar({ role, userName, onLogout, isCollapsed: controlledColla
   const [internalCollapsed, setInternalCollapsed] = useState(false)
   const isCollapsed = controlledCollapsed ?? internalCollapsed
   const pathname = usePathname()
+  const router = useRouter()
   const items = menuItems[role] || []
 
   const handleToggle = () => {
@@ -150,7 +151,10 @@ export function Sidebar({ role, userName, onLogout, isCollapsed: controlledColla
               side="right"
               className="w-56 z-[100] shadow-xl border border-gray-200 bg-white"
             >
-              <DropdownMenuItem className="cursor-pointer focus:bg-slate-100 py-2">
+              <DropdownMenuItem
+                onClick={() => router.push(`/dashboard/${role}/settings`)}
+                className="cursor-pointer focus:bg-slate-100 py-2"
+              >
                 <Settings className="mr-2 h-4 w-4" />
                 Configuración
               </DropdownMenuItem>
