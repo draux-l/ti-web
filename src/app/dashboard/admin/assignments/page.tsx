@@ -1,9 +1,11 @@
 "use client"
 
-import { useState } from "react"
-import { Check, ChevronRight, UserCircle, Users, BookOpen } from "lucide-react"
+import { useState, useMemo } from "react"
+import { Check, ChevronRight, UserCircle, Users, BookOpen, Search, Filter, X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
@@ -17,16 +19,16 @@ const STEPS = [
 
 // Usamos mas mocks para asegurar que el scroll se active de verdad
 const MOCK_INSTRUCTORS = [
-  { id: "inst1", name: "ANGELES ALIAGA, SUSANA ANDREA", email: "angeles@gmail.com", courses: "" },
-  { id: "inst2", name: "GELDRA CHAPELL, ZONIA MARTINA", email: "angeles@gmail.com", courses: "" },
-  { id: "inst3", name: "PADILLA VILLANUEVA, WILLIAM EDGAR", email: "angeles@gmail.com", courses: "" },
-  { id: "inst4", name: "ACUÑA ZUÑIGA, RAMON ALBERTO", email: "angeles@gmail.com", courses: "" },
-  { id: "inst5", name: "ANSIE PLAZA, SUSANA ANDREA", email: "angeles@gmail.com", courses: "" },
-  { id: "inst6", name: "MENDOZA CASTRO, CARLOS", email: "angeles@gmail.com", courses: "" },
-  { id: "inst7", name: "SILVA PEREZ, MARIA", email: "angeles@gmail.com", courses: "" },
-  { id: "inst8", name: "QUISPE CHURA, JOSE", email: "angeles@gmail.com", courses: "" },
-  { id: "inst9", name: "FLORES CONDORI, ANA", email: "angeles@gmail.com", courses: "" },
-  { id: "inst10", name: "RODRIGUEZ PAZ, LUIS", email: "angeles@gmail.com", courses: "" },
+  { id: "inst1", name: "ANGELES ALIAGA, SUSANA ANDREA", email: "angeles@gmail.com", courses: "", dni: "12345678", telefono: "987654321", especialidad: "Desarrollo" },
+  { id: "inst2", name: "GELDRA CHAPELL, ZONIA MARTINA", email: "angeles@gmail.com", courses: "", dni: "23456789", telefono: "987654322", especialidad: "Redes" },
+  { id: "inst3", name: "PADILLA VILLANUEVA, WILLIAM EDGAR", email: "angeles@gmail.com", courses: "", dni: "34567890", telefono: "987654323", especialidad: "Diseño" },
+  { id: "inst4", name: "ACUÑA ZUÑIGA, RAMON ALBERTO", email: "angeles@gmail.com", courses: "", dni: "45678901", telefono: "987654324", especialidad: "Desarrollo" },
+  { id: "inst5", name: "ANSIE PLAZA, SUSANA ANDREA", email: "angeles@gmail.com", courses: "", dni: "56789012", telefono: "987654325", especialidad: "Redes" },
+  { id: "inst6", name: "MENDOZA CASTRO, CARLOS", email: "angeles@gmail.com", courses: "", dni: "67890123", telefono: "987654326", especialidad: "Ciberseguridad" },
+  { id: "inst7", name: "SILVA PEREZ, MARIA", email: "angeles@gmail.com", courses: "", dni: "78901234", telefono: "987654327", especialidad: "Diseño" },
+  { id: "inst8", name: "QUISPE CHURA, JOSE", email: "angeles@gmail.com", courses: "", dni: "89012345", telefono: "987654328", especialidad: "Desarrollo" },
+  { id: "inst9", name: "FLORES CONDORI, ANA", email: "angeles@gmail.com", courses: "", dni: "90123456", telefono: "987654329", especialidad: "Ciberseguridad" },
+  { id: "inst10", name: "RODRIGUEZ PAZ, LUIS", email: "angeles@gmail.com", courses: "", dni: "01234567", telefono: "987654330", especialidad: "Redes" },
 ]
 
 const MOCK_STUDENTS = [...MOCK_INSTRUCTORS]
@@ -35,6 +37,28 @@ export default function CourseAssignmentsPage() {
   const [currentStep, setCurrentStep] = useState(1)
   const [selectedInstructor, setSelectedInstructor] = useState<string>("")
   const [selectedStudents, setSelectedStudents] = useState<string[]>([])
+
+  const [searchQueryName, setSearchQueryName] = useState("")
+  const [filterType, setFilterType] = useState<string>("")
+  const [filterQuery, setFilterQuery] = useState("")
+
+  const filteredInstructors = useMemo(() => {
+    return MOCK_INSTRUCTORS.filter((instructor) => {
+      const matchesName = instructor.name.toLowerCase().includes(searchQueryName.toLowerCase());
+      
+      let matchesFilter = true;
+      if (filterType && filterQuery) {
+        if (filterType === "dni") {
+          matchesFilter = instructor.dni.includes(filterQuery);
+        } else if (filterType === "telefono") {
+          matchesFilter = instructor.telefono.includes(filterQuery);
+        } else if (filterType === "especialidad") {
+          matchesFilter = instructor.especialidad.toLowerCase() === filterQuery.toLowerCase();
+        }
+      }
+      return matchesName && matchesFilter;
+    });
+  }, [searchQueryName, filterType, filterQuery]);
 
   const handleSelectAllStudents = () => {
     if (selectedStudents.length === MOCK_STUDENTS.length) {
@@ -51,7 +75,7 @@ export default function CourseAssignmentsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-5xl mx-auto pb-10">
+    <div className="flex flex-col gap-6 w-full max-w-5xl mx-auto pb-">
       
       {/* STEPPER HEADER */}
       <div className="w-full flex justify-between px-10 pt-6"> 
@@ -71,7 +95,7 @@ export default function CourseAssignmentsPage() {
                   {/* Circle */}
                   <div 
                     className={`
-                      w-14 h-14 rounded-full flex items-center justify-center font-bold text-lg transition-all duration-300
+                      w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg transition-all duration-300
                       ${isCompleted ? 'bg-[#34d399] text-white shadow-md' : ''}
                       ${isCurrent ? 'bg-[#00A3E0] text-white shadow-md' : ''}
                       ${!isCompleted && !isCurrent ? 'bg-slate-100 text-slate-400 border border-slate-200' : ''}
@@ -80,7 +104,7 @@ export default function CourseAssignmentsPage() {
                     {step.id}
                   </div>
                   {/* Text */}
-                  <span className={`text-sm font-medium ${isCurrent || isCompleted ? 'text-slate-800' : 'text-slate-400'} absolute -bottom-7 whitespace-nowrap`}>
+                  <span className={`text-xs font-medium ${isCurrent || isCompleted ? 'text-slate-800' : 'text-slate-400'} absolute -bottom-7 whitespace-nowrap`}>
                     {step.title}
                   </span>
                 </div>
@@ -104,44 +128,101 @@ export default function CourseAssignmentsPage() {
 
       {/* STEP CONTENT */}
       {/* Forzamos el height fijo a un tamaño exacto h-[500px] para que se aktive el overflow-y-auto obligatoriamente */}
-      <Card className="shadow-lg shadow-slate-200/40 border-slate-200/60 h-[550px] mt-10 rounded-2xl flex flex-col relative overflow-hidden bg-white">
+      <Card className="shadow-lg shadow-slate-200/40 border-slate-200/60 h-[470px] mt-10 rounded-2xl flex flex-col relative overflow-hidden bg-white">
         
         {currentStep === 1 && (
           <div className="flex-1 flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500 h-full relative px-10  pt-6">
             <CardHeader className="flex-none bg-white z-10 pb-4">
               <div className="flex items-center gap-2 text-slate-800 mb-1">
                 <Users className="w-5 h-5 text-slate-500" />
-                <CardTitle className="text-lg">Paso 1 : Seleccionar Instructor Responsable del Grupo</CardTitle>
+                <CardTitle className="text-sm 2xl:text-lg">Paso 1 : Seleccionar Instructor Responsable del Grupo</CardTitle>
               </div>
-              <CardDescription className="text-slate-500 pl-7">Selecciona al instructor que estará a cargo del grupo</CardDescription>
+              <CardDescription className="text-sm 2xl:text-base text-slate-500 pl-7">Selecciona al instructor que estará a cargo del grupo</CardDescription>
             </CardHeader>
             
+            {/* Filtros */}
+            <div className="flex items-center gap-4 px-4 pb-4">
+              <div className="relative flex-1 max-w-sm">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500" />
+                <Input
+                  type="text"
+                  placeholder="Buscar instructores..."
+                  className="w-full bg-slate-100/50 border-slate-200 pl-9 text-sm"
+                  value={searchQueryName}
+                  onChange={(e) => setSearchQueryName(e.target.value)}
+                />
+              </div>
+              <div className="flex flex-wrap items-center gap-2 z-20">
+                <Select value={filterType} onValueChange={(val) => { setFilterType(val); setFilterQuery(""); }}>
+                  <SelectTrigger className="w-[140px] bg-white border-slate-200 text-slate-700">
+                    <Filter className="w-4 h-4 mr-2 text-slate-500" />
+                    <SelectValue placeholder="Filtrar" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="telefono">Teléfono</SelectItem>
+                    <SelectItem value="dni">DNI</SelectItem>
+                    <SelectItem value="especialidad">Especialidad</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {filterType && filterType !== "especialidad" && (
+                  <div className="relative w-[200px] animate-in fade-in slide-in-from-left-4 duration-300">
+                     <Input
+                        type="text"
+                        placeholder={`Buscar por ${filterType}...`}
+                        className="w-full bg-white border-slate-200 text-sm pr-8"
+                        value={filterQuery}
+                        onChange={(e) => setFilterQuery(e.target.value)}
+                      />
+                      {filterQuery && (
+                        <button onClick={() => setFilterQuery("")} className="absolute right-2 top-2.5 text-slate-400 hover:text-slate-600">
+                          <X className="h-4 w-4" />
+                        </button>
+                      )}
+                  </div>
+                )}
+                {filterType === "especialidad" && (
+                   <div className="w-[200px] animate-in fade-in slide-in-from-left-4 duration-300">
+                      <Select value={filterQuery} onValueChange={setFilterQuery}>
+                        <SelectTrigger className="w-full bg-white border-slate-200 text-slate-700">
+                          <SelectValue placeholder="Seleccionar..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Desarrollo">Desarrollo</SelectItem>
+                          <SelectItem value="Redes">Redes</SelectItem>
+                          <SelectItem value="Diseño">Diseño</SelectItem>
+                          <SelectItem value="Ciberseguridad">Ciberseguridad</SelectItem>
+                        </SelectContent>
+                      </Select>
+                   </div>
+                )}
+              </div>
+            </div>
+
             {/* Table Container with Scroll */}
             <div className="flex-1 z-10 overflow-y-auto px-6 pb-28 custom-scrollba">
               <Table>
                 <TableHeader className="sticky top-0 z-10 shadow-sm border-b">
-                  <TableRow className="border-b-2 hover:bg-transparent">
+                  <TableRow className="border-b-2 text-xs hover:bg-transparent">
                     <TableHead className="w-[50px]"></TableHead>
                     <TableHead className="font-bold text-slate-800">Nombre</TableHead>
                     <TableHead className="font-bold text-slate-800">Correo</TableHead>
-                    <TableHead className="font-bold text-slate-800 text-right">Cursos asignados</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   <RadioGroup value={selectedInstructor} onValueChange={setSelectedInstructor} asChild>
                     <>
-                      {MOCK_INSTRUCTORS.map((instructor) => (
+                      {filteredInstructors.map((instructor) => (
                         <TableRow 
                           key={instructor.id} 
-                          className="hover:bg-slate-50 cursor-pointer border-b border-slate-100" 
+                          className="text-[10px] hover:bg-slate-50 cursor-pointer border-b border-slate-100" 
                           onClick={() => setSelectedInstructor(instructor.id)}
                         >
                           <TableCell className="w-[50px]">
                             <RadioGroupItem value={instructor.id} id={instructor.id} className="text-[#00A3E0] border-slate-300 fill-[#00A3E0]" />
                           </TableCell>
-                          <TableCell className="font-medium text-slate-600 text-sm py-4">{instructor.name}</TableCell>
-                          <TableCell className="text-slate-500 text-sm py-4">{instructor.email}</TableCell>
-                          <TableCell className="text-right text-slate-500 text-sm py-4">{instructor.courses}</TableCell>
+                          <TableCell className="font-medium text-slate-600 2xl:text-sm py-2">{instructor.name}</TableCell>
+                          <TableCell className="text-slate-500 2xl:text-sm py-2">{instructor.email}</TableCell>
                         </TableRow>
                       ))}
                     </>
@@ -173,26 +254,26 @@ export default function CourseAssignmentsPage() {
             <CardHeader className="flex-none bg-white z-10 pb-4">
               <div className="flex items-center gap-2 text-slate-800 mb-1">
                 <Users className="w-5 h-5 text-slate-500" />
-                <CardTitle className="text-lg">Paso 2 : Seleccionar Alumnos</CardTitle>
+                <CardTitle className="text-sm 2xl:text-lg">Paso 2 : Seleccionar Alumnos</CardTitle>
               </div>
-              <CardDescription className="text-slate-500 pl-7 mb-4">Selecciona los alumnos que participarán en este grupo</CardDescription>
-              <div className="pl-7">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={handleSelectAllStudents}
-                  className="w-fit text-slate-700 border-slate-300 hover:bg-slate-50"
-                >
-                  {selectedStudents.length === MOCK_STUDENTS.length ? "Deseleccionar todos" : "Seleccionar todos"}
-                </Button>
-              </div>
+              <CardDescription className="text-sm 2xl:text-base text-slate-500 pl-7 mb-4">Selecciona los alumnos que participarán en este grupo</CardDescription>
+              
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleSelectAllStudents}
+                className="w-fit text-slate-700 border-slate-300 hover:bg-slate-50"
+              >
+                {selectedStudents.length === MOCK_STUDENTS.length ? "Deseleccionar todos" : "Seleccionar todos"}
+              </Button>
+              
             </CardHeader>
 
             {/* Table Container with Scroll */}
             <div className="flex-1 overflow-y-auto px-6 pb-28 custom-scrollbar">
               <Table>
                 <TableHeader className="bg-white sticky top-0 z-10 shadow-sm border-b">
-                  <TableRow className="border-b-2 hover:bg-transparent">
+                  <TableRow className="border-b-2 text-xs hover:bg-transparent">
                     <TableHead className="w-[50px]"></TableHead>
                     <TableHead className="font-bold text-slate-800">Nombre</TableHead>
                     <TableHead className="font-bold text-slate-800">Correo</TableHead>
@@ -203,7 +284,7 @@ export default function CourseAssignmentsPage() {
                   {MOCK_STUDENTS.map((student) => (
                     <TableRow 
                       key={student.id} 
-                      className="hover:bg-slate-50 border-b border-slate-100"
+                      className="text-[10px] hover:bg-slate-50 border-b border-slate-100"
                     >
                       <TableCell className="w-[50px]">
                         <Checkbox 
@@ -213,19 +294,19 @@ export default function CourseAssignmentsPage() {
                         />
                       </TableCell>
                       <TableCell 
-                        className="font-medium text-slate-600 text-sm py-4 cursor-pointer"
+                        className="font-medium text-slate-600 2xl:text-sm py-2 cursor-pointer"
                         onClick={() => handleToggleStudent(student.id)}
                       >
                         {student.name}
                       </TableCell>
                       <TableCell 
-                        className="text-slate-500 text-sm py-4 cursor-pointer"
+                        className="text-slate-500 2xl:text-sm py-2 cursor-pointer"
                         onClick={() => handleToggleStudent(student.id)}
                       >
                         {student.email}
                       </TableCell>
                       <TableCell 
-                        className="text-right text-slate-500 text-sm py-4 cursor-pointer"
+                        className="text-right text-slate-500 2xl:text-sm py-2 cursor-pointer"
                         onClick={() => handleToggleStudent(student.id)}
                       >
                         {student.courses}
@@ -266,9 +347,9 @@ export default function CourseAssignmentsPage() {
             <CardHeader className="flex-none bg-white z-10 pb-4">
               <div className="flex items-center gap-2 text-slate-800 mb-1">
                 <BookOpen className="w-5 h-5 text-slate-500" />
-                <CardTitle className="text-lg">Paso 3 : Seleccionar Curso</CardTitle>
+                <CardTitle className="text-sm 2xl:text-lg">Paso 3 : Seleccionar Curso</CardTitle>
               </div>
-              <CardDescription className="text-slate-500 pl-7">Determina el curso y finaliza la asignación</CardDescription>
+              <CardDescription className="text-sm 2xl:text-base text-slate-500 pl-7">Determina el curso y finaliza la asignación</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-6 flex-1 items-center justify-center border-2 border-dashed border-slate-200 rounded-lg m-6 mb-24 bg-slate-50/50">
                <p className="text-slate-400 font-medium text-sm">Selector de Cursos aquí (Placeholder para el siguiente hito)</p>

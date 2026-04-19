@@ -51,7 +51,6 @@ const menuItems: Record<
     { label: "Inicio", href: "/dashboard/admin", icon: Home },
     { label: "Usuarios", href: "/dashboard/admin/users", icon: Users },
     { label: "Asignaciones", href: "/dashboard/admin/assignments", icon: ClipboardList },
-    { label: "Licencias VR", href: "/dashboard/admin/vr-licenses", icon: Box },
     { label: "Configuración", href: "/dashboard/admin/settings", icon: Settings },
   ],
   superadmin: [
