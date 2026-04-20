@@ -11,8 +11,8 @@ type Tab = "perfil" | "notificaciones" | "seguridad"
 
 export default function InstructorSettingsPage() {
   const [tab, setTab] = useState<Tab>("perfil")
-  const [name, setName] = useState("Pareja Instructor")
-  const [lastName, setLastName] = useState("Quispe")
+  const [name, setName] = useState("Benjamin")
+  const [lastName, setLastName] = useState("Pareja")
   const [position, setPosition] = useState("Instructor Senior VR")
   const [phone, setPhone] = useState("+51 999 888 777")
   const [specialty, setSpecialty] = useState("Mantenimiento de equipos de perforación")

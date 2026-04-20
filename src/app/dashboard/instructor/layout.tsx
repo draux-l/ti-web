@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Eye, Home, Users, Layout, TrendingUp, Settings, Menu, X } from "lucide-react"
+import { Home, Users, Layout, TrendingUp, Settings, Menu, X, Eye } from "lucide-react"
 
 import { Sidebar } from "@/components/Sidebar"
 import { Button } from "@/components/ui/button"
@@ -36,22 +36,19 @@ export default function InstructorLayout({
 
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 md:px-8">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center">
             <Button
               variant="ghost"
-              className="h-9 w-9 rounded-full p-0 md:hidden"
+              className="h-9 w-9 rounded-full p-0"
               onClick={() => setIsMobileMenuOpen(true)}
             >
               <Menu className="size-5" />
             </Button>
-            <h2 className="text-sm font-semibold tracking-wider text-gray-500 uppercase">
-              Panel del Instructor
-            </h2>
           </div>
           <Button
             onClick={() => window.open("/dashboard/student", "_blank")}
             variant="outline"
-            className="rounded-full border-[#00AEEF] text-[#00AEEF] hover:bg-blue-50 hover:text-[#0098d1]"
+            className="h-11 rounded-full border-[#00AEEF] px-5 text-[#00AEEF] hover:bg-blue-50 hover:text-[#0098d1]"
           >
             <Eye className="size-4" />
             <span className="hidden sm:inline">Visualizar vista de alumno</span>

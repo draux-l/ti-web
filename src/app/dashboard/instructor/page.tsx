@@ -95,18 +95,17 @@ export default function InstructorHomePage() {
               >
                 <Link href={item.href}>
                   Ir al módulo
-                  <ArrowRight className="size-4" />
                 </Link>
               </Button>
             </CardContent>
           </Card>
         ))}
 
-        <Card className="rounded-3xl bg-[#1A1A2E] text-white shadow-sm lg:col-span-3">
+        <Card className="rounded-3xl bg-[#F0F0F0] text-white shadow-sm lg:col-span-3">
           <CardContent className="flex flex-col gap-4 py-6 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="text-lg font-semibold">Piloto Sandvik listo para seguimiento</p>
-              <p className="text-sm text-white/80">
+              <p className="text-lg text-black font-semibold">Piloto Sandvik listo para seguimiento</p>
+              <p className="text-sm text-black/80">
                 Controla fallas en aceros de perforación y valida resultados de cada sesión.
               </p>
             </div>
@@ -115,8 +114,7 @@ export default function InstructorHomePage() {
               className="h-11 rounded-full bg-[#00AEEF] px-5 text-white hover:bg-[#0098d1]"
             >
               <Link href="/dashboard/instructor/experiences">
-                <Layout className="size-4" />
-                Revisar experiencias
+                             Revisar experiencias
               </Link>
             </Button>
           </CardContent>

@@ -98,7 +98,7 @@ export default function InstructorGradesPage() {
       <section className="grid gap-4 xl:grid-cols-3">
         <Card className="rounded-3xl bg-white shadow-sm xl:col-span-2">
           <CardHeader>
-            <CardTitle>Promedio por Squad (Gráfico de Barras)</CardTitle>
+            <CardTitle>Promedio por Squad</CardTitle>
           </CardHeader>
           <CardContent className="h-[280px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -123,7 +123,7 @@ export default function InstructorGradesPage() {
             <CardTitle>Promedio actual</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            <p className="text-5xl font-bold">{avgScore}</p>
+            <p className="text-9xl font-bold">{avgScore}</p>
             <p className="text-sm">Actualizado automáticamente al editar notas finales.</p>
           </CardContent>
         </Card>
