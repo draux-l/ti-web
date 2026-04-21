@@ -19,7 +19,7 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="flex h-screen bg-slate-50">
+    <div className="relative h-screen bg-slate-50">
       <Sidebar 
         role={role} 
         userName={userName} 
@@ -28,8 +28,8 @@ export default function AdminLayout({
         onToggleCollapse={setIsCollapsed}
       />
       <main 
-        className="flex-1 overflow-y-auto p-8 transition-all duration-300 ease-in-out"
-        style={{ marginLeft: isCollapsed ? "5rem" : "16rem" }}
+        className="absolute inset-y-0 right-0 overflow-y-auto p-8 transition-all duration-300 ease-in-out"
+        style={{ left: isCollapsed ? "5rem" : "16rem" }}
       >
         {children}
       </main>
