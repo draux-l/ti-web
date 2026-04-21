@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -24,13 +24,102 @@ const MOCK_ALUMNOS = [
 const MOCK_INSTRUCTORES = [
   { id: 1, name: "Carlos Mendoza", dni: "41234567", email: "carlos.mendoza@tecsup.edu.pe", status: "Activo" },
   { id: 2, name: "Maria Gonzalez López", dni: "42345678", email: "maria.gonzalez@tecsup.edu.pe", status: "Activo" },
-  { id: 3, name: "Jorge Silva", dni: "43456789", email: "jorge.silva@tecsup.edu.pe", status: "Mantenimiento" }, // just showing a different status
+  { id: 3, name: "Jorge Silva", dni: "43456789", email: "jorge.silva@tecsup.edu.pe", status: "Mantenimiento" },
 ]
 
 export default function UsersManagementPage() {
   const [activeTab, setActiveTab] = useState("alumnos")
+  
+  const [alumnos, setAlumnos] = useState(MOCK_ALUMNOS)
+  const [instructores, setInstructores] = useState(MOCK_INSTRUCTORES)
 
-  const renderTable = (data: typeof MOCK_ALUMNOS) => (
+  const [isAddOpen, setIsAddOpen] = useState(false)
+  const [isEditOpen, setIsEditOpen] = useState(false)
+
+  // Combined Form Data
+  const [formData, setFormData] = useState({
+    id: 0,
+    nombre: "",
+    apellidos: "",
+    dni: "",
+    email: "",
+    rol: "alumno",
+    status: "Activo"
+  })
+
+  // Handle Add user
+  const handleAddSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    const fullName = `${formData.nombre} ${formData.apellidos}`.trim()
+    const newUser = {
+      id: Date.now(),
+      name: fullName,
+      dni: formData.dni,
+      email: formData.email,
+      status: formData.status
+    }
+    
+    if (formData.rol === "alumno") {
+      setAlumnos([...alumnos, newUser])
+      if(activeTab !== "alumnos") setActiveTab("alumnos")
+    } else {
+      setInstructores([...instructores, newUser])
+      if(activeTab !== "instructores") setActiveTab("instructores")
+    }
+    
+    setIsAddOpen(false)
+    resetForm()
+  }
+
+  // Handle Edit User
+  const handleEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    const updatedUser = {
+      id: formData.id,
+      name: formData.nombre, // In edit we'll just put the full name in "nombre" for simplicity, or we can just use name directly.
+      dni: formData.dni,
+      email: formData.email,
+      status: formData.status
+    }
+
+    if (formData.rol === "alumno") {
+      setAlumnos(alumnos.map(a => a.id === updatedUser.id ? updatedUser : a))
+    } else {
+      setInstructores(instructores.map(i => i.id === updatedUser.id ? updatedUser : i))
+    }
+
+    setIsEditOpen(false)
+    resetForm()
+  }
+
+  const openEditModal = (user: any, role: string) => {
+    setFormData({
+      id: user.id,
+      nombre: user.name, // using full name in nombre field for edit
+      apellidos: "",
+      dni: user.dni,
+      email: user.email,
+      rol: role,
+      status: user.status
+    })
+    setIsEditOpen(true)
+  }
+
+  const deleteUser = (id: number, role: string) => {
+    if (window.confirm("¿Estás seguro que deseas eliminar este usuario?")) {
+      if (role === "alumno") {
+        setAlumnos(alumnos.filter(a => a.id !== id))
+      } else {
+        setInstructores(instructores.filter(i => i.id !== id))
+      }
+    }
+  }
+
+  const resetForm = () => {
+    setFormData({ id: 0, nombre: "", apellidos: "", dni: "", email: "", rol: "alumno", status: "Activo" })
+  }
+
+  const renderTable = (data: typeof MOCK_ALUMNOS, role: string) => (
     <div className="rounded-md border border-slate-200 mt-4 overflow-hidden">
       <Table>
         <TableHeader className="bg-slate-50">
@@ -43,7 +132,11 @@ export default function UsersManagementPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.map((user) => (
+          {data.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={5} className="text-center py-6 text-slate-500">No hay usuarios registrados</TableCell>
+            </TableRow>
+          ) : data.map((user) => (
             <TableRow key={user.id} className="hover:bg-slate-50/50 transition-colors">
               <TableCell className="font-medium text-slate-900">{user.name}</TableCell>
               <TableCell className="text-slate-500">{user.dni}</TableCell>
@@ -62,10 +155,10 @@ export default function UsersManagementPage() {
               </TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-[#00A3E0] hover:bg-blue-50">
+                  <Button onClick={() => openEditModal(user, role)} variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-[#00A3E0] hover:bg-blue-50">
                     <Pencil className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-red-600 hover:bg-red-50">
+                  <Button onClick={() => deleteUser(user.id, role)} variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-red-600 hover:bg-red-50">
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
@@ -89,57 +182,60 @@ export default function UsersManagementPage() {
             Administra instructores y alumnos de tu institución
           </p>
         </div>
-        <Dialog>
-          {/* Base UI no utiliza asChild, así que le aplicamos las clases del Button directamente al Trigger */}
-          <DialogTrigger className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm ring-offset-background disabled:pointer-events-none disabled:opacity-50 h-10 bg-[#00A3E0] hover:bg-[#008cc0] shadow-md shadow-blue-500/20 text-white font-medium transition-all px-6">
-            <UserPlus className="w-4 h-4 mr-2" />
-            Añadir Usuario
+        
+        {/* ADD USER DIALOG */}
+        <Dialog open={isAddOpen} onOpenChange={(val) => { setIsAddOpen(val); if(!val) resetForm(); }}>
+          <DialogTrigger asChild>
+            <Button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm ring-offset-background h-10 bg-[#00A3E0] hover:bg-[#008cc0] shadow-md shadow-blue-500/20 text-white font-medium transition-all px-6">
+              <UserPlus className="w-4 h-4 mr-2" />
+              Añadir Usuario
+            </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Nuevo Usuario</DialogTitle>
-              <DialogDescription>
-                Completa los datos del nuevo usuario
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="nombre">Nombre</Label>
-                  <Input id="nombre" placeholder="Ej: Juan" className="bg-slate-50/50" />
+            <form onSubmit={handleAddSubmit}>
+              <DialogHeader>
+                <DialogTitle>Nuevo Usuario</DialogTitle>
+                <DialogDescription>
+                  Completa los datos del nuevo usuario
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="nombre">Nombre</Label>
+                    <Input id="nombre" required value={formData.nombre} onChange={e => setFormData({...formData, nombre: e.target.value})} placeholder="Ej: Juan" className="bg-slate-50/50" />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="apellidos">Apellidos</Label>
+                    <Input id="apellidos" required value={formData.apellidos} onChange={e => setFormData({...formData, apellidos: e.target.value})} placeholder="Ej: Pérez García" className="bg-slate-50/50" />
+                  </div>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="apellidos">Apellidos</Label>
-                  <Input id="apellidos" placeholder="Ej: Pérez García" className="bg-slate-50/50" />
+                  <Label htmlFor="dni">DNI</Label>
+                  <Input id="dni" required value={formData.dni} onChange={e => setFormData({...formData, dni: e.target.value})} placeholder="Ej: 43567890" className="bg-slate-50/50" />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="email">Email Institucional</Label>
+                  <Input id="email" type="email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} placeholder="nombre.apellido@tecsup.edu.pe" className="bg-slate-50/50" />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="rol">Rol</Label>
+                  <Select value={formData.rol} onValueChange={v => setFormData({...formData, rol: v})}>
+                    <SelectTrigger id="rol" className="bg-slate-50/50">
+                      <SelectValue placeholder="Selecciona un rol" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="alumno">Alumno</SelectItem>
+                      <SelectItem value="instructor">Instructor</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="dni">DNI</Label>
-                <Input id="dni" placeholder="Ej: 43567890" className="bg-slate-50/50" />
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="email">Email Institucional</Label>
-                <Input id="email" type="email" placeholder="nombre.apellido@tecsup.edu.pe" className="bg-slate-50/50" />
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="rol">Rol</Label>
-                <Select defaultValue="alumno">
-                  <SelectTrigger id="rol" className="bg-slate-50/50">
-                    <SelectValue placeholder="Selecciona un rol" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="alumno">Alumno</SelectItem>
-                    <SelectItem value="instructor">Instructor</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <DialogFooter>
-              <DialogClose className="inline-flex h-10 items-center justify-center whitespace-nowrap rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 ring-offset-background transition-colors hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
-                Cancelar
-              </DialogClose>
-              <Button type="submit" className="bg-[#00A3E0] hover:bg-[#008cc0] text-white">Crear Usuario</Button>
-            </DialogFooter>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setIsAddOpen(false)}>Cancelar</Button>
+                <Button type="submit" className="bg-[#00A3E0] hover:bg-[#008cc0] text-white">Crear Usuario</Button>
+              </DialogFooter>
+            </form>
           </DialogContent>
         </Dialog>
       </div>
@@ -150,34 +246,80 @@ export default function UsersManagementPage() {
           <CardDescription>Gestiona instructores y alumnos de la institución</CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="alumnos" className="w-full" onValueChange={setActiveTab}>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2 lg:w-[400px] bg-slate-100/80 p-1">
               <TabsTrigger 
                 value="alumnos" 
                 className="data-[state=active]:bg-white data-[state=active]:text-[#00A3E0] data-[state=active]:shadow-sm rounded-md transition-all"
               >
                 <GraduationCap className="w-4 h-4 mr-2" />
-                Alumnos (5)
+                Alumnos ({alumnos.length})
               </TabsTrigger>
               <TabsTrigger 
                 value="instructores"
                 className="data-[state=active]:bg-white data-[state=active]:text-[#00A3E0] data-[state=active]:shadow-sm rounded-md transition-all"
               >
                 <Users className="w-4 h-4 mr-2" />
-                Instructores (3)
+                Instructores ({instructores.length})
               </TabsTrigger>
             </TabsList>
             <div className="mt-6">
               <TabsContent value="alumnos" className="m-0 focus-visible:outline-none focus-visible:ring-0">
-                {renderTable(MOCK_ALUMNOS)}
+                {renderTable(alumnos, "alumno")}
               </TabsContent>
               <TabsContent value="instructores" className="m-0 focus-visible:outline-none focus-visible:ring-0">
-                {renderTable(MOCK_INSTRUCTORES)}
+                {renderTable(instructores, "instructor")}
               </TabsContent>
             </div>
           </Tabs>
         </CardContent>
       </Card>
+
+      {/* EDIT USER DIALOG */}
+      <Dialog open={isEditOpen} onOpenChange={(val) => { setIsEditOpen(val); if(!val) resetForm(); }}>
+        <DialogContent className="sm:max-w-[425px]">
+          <form onSubmit={handleEditSubmit}>
+            <DialogHeader>
+              <DialogTitle>Editar Usuario</DialogTitle>
+              <DialogDescription>
+                Modifica los datos del usuario seleccionado.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="edit-nombre">Nombre Completo</Label>
+                <Input id="edit-nombre" required value={formData.nombre} onChange={e => setFormData({...formData, nombre: e.target.value})} className="bg-slate-50/50" />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="edit-dni">DNI</Label>
+                <Input id="edit-dni" required value={formData.dni} onChange={e => setFormData({...formData, dni: e.target.value})} className="bg-slate-50/50" />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="edit-email">Email Institucional</Label>
+                <Input id="edit-email" type="email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="bg-slate-50/50" />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="edit-status">Estado</Label>
+                <Select value={formData.status} onValueChange={v => setFormData({...formData, status: v})}>
+                  <SelectTrigger id="edit-status" className="bg-slate-50/50">
+                    <SelectValue placeholder="Selecciona un estado" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Activo">Activo</SelectItem>
+                    <SelectItem value="Inactivo">Inactivo</SelectItem>
+                    <SelectItem value="Mantenimiento">Mantenimiento</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setIsEditOpen(false)}>Cancelar</Button>
+              <Button type="submit" className="bg-[#00A3E0] hover:bg-[#008cc0] text-white">Guardar Cambios</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
     </div>
   )
 }

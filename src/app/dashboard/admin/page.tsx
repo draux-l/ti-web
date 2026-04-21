@@ -8,6 +8,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { useLanguage } from "@/contexts/LanguageContext"
 
 const USER_DISTRIBUTION_DATA = [
   { name: "Estudiantes", value: 70, color: "#0ea5e9" }, // sky-500
@@ -30,166 +31,61 @@ const MONTH_NAMES = [
   "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
 ]
 
-function FunctionalCalendar() {
-  const [currentDate, setCurrentDate] = useState(new Date())
-  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date())
-
-  const year = currentDate.getFullYear()
-  const month = currentDate.getMonth()
-
-  const handlePrevMonth = () => setCurrentDate(new Date(year, month - 1, 1))
-  const handleNextMonth = () => setCurrentDate(new Date(year, month + 1, 1))
-  const handlePrevYear = () => setCurrentDate(new Date(year - 1, month, 1))
-  const handleNextYear = () => setCurrentDate(new Date(year + 1, month, 1))
-
-  const firstDayOfMonth = new Date(year, month, 1)
-  const lastDayOfMonth = new Date(year, month + 1, 0)
-  
-  let firstDayOfWeek = firstDayOfMonth.getDay()
-  firstDayOfWeek = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1
-
-  const days = []
-  
-  const prevMonthLastDay = new Date(year, month, 0).getDate()
-  for (let i = firstDayOfWeek - 1; i >= 0; i--) {
-    days.push({
-      date: new Date(year, month - 1, prevMonthLastDay - i),
-      isCurrentMonth: false,
-    })
-  }
-  
-  for (let i = 1; i <= lastDayOfMonth.getDate(); i++) {
-    days.push({
-      date: new Date(year, month, i),
-      isCurrentMonth: true,
-    })
-  }
-  
-  const remainingCells = 42 - days.length
-  for (let i = 1; i <= remainingCells; i++) {
-    days.push({
-      date: new Date(year, month + 1, i),
-      isCurrentMonth: false,
-    })
-  }
-
-  const today = new Date()
-  const isSameDate = (d1: Date, d2: Date | null) => 
-    d2 && d1.getDate() === d2.getDate() && 
-    d1.getMonth() === d2.getMonth() && 
-    d1.getFullYear() === d2.getFullYear()
-
-  return (
-    <Card className="shadow-sm border-slate-200/60 pb-2">
-      <CardHeader className="flex flex-row items-center justify-between pt-6 pb-4">
-        <div className="flex items-center gap-3">
-            <button onClick={handlePrevYear} className="text-slate-400 hover:text-[#0ea5e9] transition-colors">
-              <ChevronsLeft className="w-4 h-4" />
-            </button>
-            <button onClick={handlePrevMonth} className="text-slate-400 hover:text-[#0ea5e9] transition-colors">
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-        </div>
-        <h3 className="text-sm font-bold text-slate-800 tracking-wide capitalize">
-          {MONTH_NAMES[month]} {year}
-        </h3>
-        <div className="flex items-center gap-3">
-          <button onClick={handleNextMonth} className="text-slate-400 hover:text-[#0ea5e9] transition-colors">
-              <ChevronRight className="w-4 h-4" />
-          </button>
-          <button onClick={handleNextYear} className="text-slate-400 hover:text-[#0ea5e9] transition-colors">
-              <ChevronsRight className="w-4 h-4" />
-          </button>
-        </div>
-      </CardHeader>
-      <CardContent className="px-5 relative">
-        <div className="grid grid-cols-7 gap-y-3 gap-x-1 text-center justify-items-center">
-          {/* Header row */}
-          <span className="text-[10px] font-bold text-slate-500 w-8 h-6">LUN</span>
-          <span className="text-[10px] font-bold text-slate-500 w-8 h-6">MAR</span>
-          <span className="text-[10px] font-bold text-slate-500 w-8 h-6">MIE</span>
-          <span className="text-[10px] font-bold text-slate-500 w-8 h-6">JUE</span>
-          <span className="text-[10px] font-bold text-slate-500 w-8 h-6">VIE</span>
-          <span className="text-[10px] font-bold text-slate-800 w-8 h-6">SAB</span>
-          <span className="text-[10px] font-bold text-slate-800 w-8 h-6">DOM</span>
-          
-          {/* Days */}
-          {days.map((d, index) => {
-            const isWeekend = index % 7 === 5 || index % 7 === 6
-            const selected = isSameDate(d.date, selectedDate)
-            
-            let cellClasses = "text-xs font-medium w-8 h-8 flex items-center justify-center cursor-pointer transition-colors"
-            
-            if (!d.isCurrentMonth) {
-              cellClasses += " text-slate-300"
-            } else if (selected) {
-              cellClasses = "w-8 h-8 flex items-center justify-center relative cursor-pointer bg-[#0ea5e9] bg-opacity-20"
-            } else if (isWeekend) {
-              cellClasses += " font-bold text-red-500 hover:bg-slate-100 rounded-sm"
-            } else {
-              cellClasses += " text-slate-600 hover:bg-slate-100 rounded-sm"
-            }
-
-            return (
-                <div 
-                  key={index} 
-                  className={cellClasses} 
-                  onClick={() => setSelectedDate(d.date)}
-                >
-                  <span className={selected ? "text-xs font-bold text-[#0ea5e9]" : ""}>
-                    {d.date.getDate()}
-                  </span>
-                </div>
-            )
-          })}
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
 
 export default function AdminDashboard() {
+  const { t } = useLanguage()
   return (
     <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto">
       {/* HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700">
-            Panel de Administración
+            {t("dashboard", "title")}
           </h1>
           <p className="text-sm text-slate-500 mt-1">
-            Gestiona recursos y usuarios
+            {t("dashboard", "subtitle")}
           </p>
         </div>
         <Link href="/dashboard/admin/assignments">
           <Button className="bg-[#00A3E0] hover:bg-[#008cc0] shadow-md shadow-blue-500/20 text-white font-medium transition-all px-6">
             <Users className="w-4 h-4 mr-2" />
-            Asignar Alumno a Curso
+            {t("dashboard", "assignBtn")}
           </Button>
         </Link>
       </div>
 
       {/* METRICS ROW */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-full">
         <Card className="shadow-sm border-slate-200/60 overflow-hidden relative group">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-semibold text-slate-600">Instructores</CardTitle>
+            <CardTitle className="text-sm font-semibold text-slate-600">{t("dashboard", "instructors")}</CardTitle>
             <Users className="w-4 h-4 text-slate-300" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-slate-900">3</div>
-            <p className="text-xs text-slate-500 font-medium mt-1">Activos este periodo</p>
+            <p className="text-xs text-slate-500 font-medium mt-1">{t("dashboard", "instructorsSub")}</p>
           </CardContent>
         </Card>
 
         <Card className="shadow-sm border-slate-200/60 overflow-hidden relative group">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-semibold text-slate-600">Alumnos</CardTitle>
+            <CardTitle className="text-sm font-semibold text-slate-600">{t("dashboard", "students")}</CardTitle>
             <Users className="w-4 h-4 text-slate-300" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-slate-900">5</div>
-            <p className="text-xs text-slate-500 font-medium mt-1">Matriculados</p>
+            <p className="text-xs text-slate-500 font-medium mt-1">{t("dashboard", "studentsSub")}</p>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-sm border-slate-200/60 overflow-hidden relative group">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-sm font-semibold text-slate-600">{t("dashboard", "courses")}</CardTitle>
+            <BookOpen className="w-4 h-4 text-slate-300" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-slate-900">2</div>
+            <p className="text-xs text-slate-500 font-medium mt-1">{t("dashboard", "coursesSub")}</p>
           </CardContent>
         </Card>
       </div>
@@ -202,8 +98,8 @@ export default function AdminDashboard() {
           {/* PIE CHART CARD */}
           <Card className="shadow-sm border-slate-200/60">
             <CardHeader>
-              <CardTitle className="text-base font-semibold text-slate-800">Distribucion de usuarios</CardTitle>
-              <CardDescription>Distribucion actual de estudiantes e instructores en el sistema LMS</CardDescription>
+              <CardTitle className="text-base font-semibold text-slate-800">{t("dashboard", "userDist")}</CardTitle>
+              <CardDescription>{t("dashboard", "userDistSub")}</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col items-center">
               <div className="h-[220px] w-full">
@@ -260,8 +156,8 @@ export default function AdminDashboard() {
           {/* COURSES CARD */}
           <Card className="shadow-sm border-slate-200/60">
             <CardHeader>
-              <CardTitle className="text-base font-semibold text-slate-800">Cursos Disponibles</CardTitle>
-              <CardDescription>Programas XR activos en la plataforma</CardDescription>
+              <CardTitle className="text-base font-semibold text-slate-800">{t("dashboard", "coursesAvail")}</CardTitle>
+              <CardDescription>{t("dashboard", "coursesAvailSub")}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex flex-col gap-4">
@@ -287,14 +183,13 @@ export default function AdminDashboard() {
           </Card>
         </div>
 
-        {/* RIGHT COLUMN: Calendar & Activity */}
+        {/* RIGHT COLUMN: Activity */}
         <div className="lg:col-span-5 flex flex-col gap-6">
-          <FunctionalCalendar />
 
           {/* RECENT ACTIVITY CARD */}
           <Card className="shadow-sm border-slate-200/60 flex-1">
             <CardHeader className="py-5">
-              <CardTitle className="text-sm font-semibold text-slate-700">Actividad reciente</CardTitle>
+              <CardTitle className="text-sm font-semibold text-slate-700">{t("dashboard", "recentAct")}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex flex-col gap-3">
