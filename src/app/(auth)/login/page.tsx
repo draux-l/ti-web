@@ -98,7 +98,6 @@ export default function LoginPage() {
     setForgotStep("email")
     setResetEmail("")
     setResetCode("")
-    setGeneratedCode("")
     setNewPassword("")
     setConfirmPassword("")
   }
@@ -119,7 +118,6 @@ export default function LoginPage() {
   const handleResendCode = async () => {
     await new Promise((resolve) => setTimeout(resolve, 500))
     const code = Math.floor(100000 + Math.random() * 900000).toString()
-    setGeneratedCode(code)
     toast.success("Código reenviado", {
       description: `Nuevo código: ${code}`,
     })

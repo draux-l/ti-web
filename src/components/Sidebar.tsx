@@ -47,6 +47,7 @@ const menuItems: Record<
   instructor: [
     { label: "Inicio", href: "/dashboard/instructor", icon: Home },
     { label: "Mis Grupos", href: "/dashboard/instructor/groups", icon: Users },
+    { label: "Experiencias", href: "/dashboard/instructor/experiences", icon: BookOpen },
     { label: "Calificaciones", href: "/dashboard/instructor/grades", icon: BarChart3 },
   ],
   admin: [
@@ -101,7 +102,9 @@ export function Sidebar({ role, userName, onLogout, isCollapsed: controlledColla
 
         <nav className="flex-1 space-y-1 p-4">
           {items.map((item) => {
-            const isActive = pathname === item.href
+            const isActive =
+              pathname === item.href ||
+              (item.href !== `/dashboard/${role}` && pathname.startsWith(item.href))
             const Icon = item.icon
             return (
               <Link
