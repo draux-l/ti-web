@@ -7,7 +7,6 @@ import {
   Home,
   Users,
   ClipboardList,
-  Box,
   Settings,
   Building,
   BookOpen,
@@ -16,6 +15,7 @@ import {
   ChevronRight,
   ChevronLeft,
   LogOut,
+  Lock,
 } from "lucide-react"
 
 import {
@@ -26,49 +26,48 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { useLanguage } from "@/contexts/LanguageContext"
 
 interface SidebarProps {
   role: "student" | "instructor" | "admin" | "superadmin"
   userName: string
   onLogout: () => void
+  onChangePassword?: () => void
   isCollapsed?: boolean
   onToggleCollapse?: (collapsed: boolean) => void
 }
 
-const menuItems: Record<
-  string,
-  { label: string; href: string; icon: React.ElementType }[]
-> = {
-  student: [
-    { label: "Inicio", href: "/dashboard/student", icon: Home },
-    { label: "Mis Cursos", href: "/dashboard/student/courses", icon: BookOpen },
-    { label: "Mi Progreso", href: "/dashboard/student/progress", icon: TrendingUp },
-  ],
-  instructor: [
-    { label: "Inicio", href: "/dashboard/instructor", icon: Home },
-    { label: "Mis Grupos", href: "/dashboard/instructor/groups", icon: Users },
-    { label: "Experiencias", href: "/dashboard/instructor/experiences", icon: BookOpen },
-    { label: "Calificaciones", href: "/dashboard/instructor/grades", icon: BarChart3 },
-  ],
-  admin: [
-    { label: "Inicio", href: "/dashboard/admin", icon: Home },
-    { label: "Usuarios", href: "/dashboard/admin/users", icon: Users },
-    { label: "Asignaciones", href: "/dashboard/admin/assignments", icon: ClipboardList },
-    { label: "Configuración", href: "/dashboard/admin/settings", icon: Settings },
-  ],
-  superadmin: [
-    { label: "Inicio", href: "/dashboard/superadmin", icon: Home },
-    { label: "Instituciones", href: "/dashboard/superadmin/institutions", icon: Building },
-    { label: "Reportes", href: "/dashboard/superadmin/reports", icon: BarChart3 },
-    { label: "Ajustes Sistema", href: "/dashboard/superadmin/system", icon: Settings },
-  ],
-}
-
-export function Sidebar({ role, userName, onLogout, isCollapsed: controlledCollapsed, onToggleCollapse }: SidebarProps) {
+export function Sidebar({ role, userName, onLogout, onChangePassword, isCollapsed: controlledCollapsed, onToggleCollapse }: SidebarProps) {
   const [internalCollapsed, setInternalCollapsed] = useState(false)
   const isCollapsed = controlledCollapsed ?? internalCollapsed
   const pathname = usePathname()
-  const router = useRouter()
+  const { t } = useLanguage()
+
+  const menuItems: Record<string, { label: string; href: string; icon: React.ElementType }[]> = {
+    student: [
+      { label: t("sidebar", "inicio"), href: "/dashboard/student", icon: Home },
+      { label: t("sidebar", "misCursos"), href: "/dashboard/student/courses", icon: BookOpen },
+      { label: t("sidebar", "miProgreso"), href: "/dashboard/student/progress", icon: TrendingUp },
+    ],
+    instructor: [
+      { label: t("sidebar", "inicio"), href: "/dashboard/instructor", icon: Home },
+      { label: t("sidebar", "misGrupos"), href: "/dashboard/instructor/groups", icon: Users },
+      { label: t("sidebar", "calificaciones"), href: "/dashboard/instructor/grades", icon: BarChart3 },
+    ],
+    admin: [
+      { label: t("sidebar", "inicio"), href: "/dashboard/admin", icon: Home },
+      { label: t("sidebar", "usuarios"), href: "/dashboard/admin/users", icon: Users },
+      { label: t("sidebar", "cursos"), href: "/dashboard/admin/courses", icon: BookOpen },
+      { label: t("sidebar", "asignaciones"), href: "/dashboard/admin/assignments", icon: ClipboardList },
+    ],
+    superadmin: [
+      { label: t("sidebar", "inicio"), href: "/dashboard/superadmin", icon: Home },
+      { label: t("sidebar", "instituciones"), href: "/dashboard/superadmin/institutions", icon: Building },
+      { label: t("sidebar", "reportes"), href: "/dashboard/superadmin/reports", icon: BarChart3 },
+      { label: t("sidebar", "ajustesSistema"), href: "/dashboard/superadmin/system", icon: Settings },
+    ],
+  }
+
   const items = menuItems[role] || []
 
   const handleToggle = () => {
@@ -101,9 +100,7 @@ export function Sidebar({ role, userName, onLogout, isCollapsed: controlledColla
 
         <nav className="flex-1 space-y-1 p-4">
           {items.map((item) => {
-            const isActive =
-              pathname === item.href ||
-              (item.href !== `/dashboard/${role}` && pathname.startsWith(item.href))
+            const isActive = pathname === item.href
             const Icon = item.icon
             return (
               <Link
@@ -123,27 +120,35 @@ export function Sidebar({ role, userName, onLogout, isCollapsed: controlledColla
               </Link>
             )
           })}
+          
+          {onChangePassword && (
+            <Link
+              href="#"
+              onClick={(e) => { e.preventDefault(); onChangePassword(); }}
+              className={`flex items-center rounded-lg py-2.5 text-sm font-medium transition-colors ${
+                isCollapsed ? "justify-center px-0" : "gap-3 px-4"
+              } text-gray-600 hover:bg-gray-50 hover:text-gray-900`}
+              title={isCollapsed ? t("sidebar", "configuracion") : undefined}
+            >
+              <Settings className="size-5 shrink-0" />
+              {!isCollapsed && <span>{t("sidebar", "configuracion")}</span>}
+            </Link>
+          )}
         </nav>
 
         <div className="border-t border-gray-100 p-4">
           <DropdownMenu>
-            <DropdownMenuTrigger
-              render={
-                <button
-                  className={`flex w-full items-center rounded-lg py-2 transition-colors hover:bg-gray-100 focus:outline-none border-none bg-transparent ${
-                    isCollapsed ? "justify-center px-0" : "px-2"
-                  }`}
-                />
-              }
-            >
-              <Avatar className="h-9 w-9">
+            <DropdownMenuTrigger className={`flex w-full items-center rounded-lg py-2 transition-colors hover:bg-gray-100 focus:outline-none border-none bg-transparent ${
+              isCollapsed ? "justify-center px-0" : "px-2"
+            }`}>
+              <Avatar className="h-9 w-9 shrink-0">
                 <AvatarFallback className="bg-blue-100 text-blue-600 font-bold">
                   {userName.substring(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               {!isCollapsed && (
-                <div className="ml-3 flex flex-col items-start text-sm">
-                  <span className="font-semibold text-gray-700">{userName}</span>
+                <div className="ml-3 flex flex-col items-start text-sm overflow-hidden">
+                  <span className="font-semibold text-gray-700 truncate w-full text-left">{userName}</span>
                   <span className="text-xs text-gray-500 capitalize">{role}</span>
                 </div>
               )}
@@ -153,20 +158,22 @@ export function Sidebar({ role, userName, onLogout, isCollapsed: controlledColla
               side="right"
               className="w-56 z-[100] shadow-xl border border-gray-200 bg-white"
             >
-              <DropdownMenuItem
-                onClick={() => router.push(`/dashboard/${role}/settings`)}
-                className="cursor-pointer focus:bg-slate-100 py-2"
-              >
-                <Settings className="mr-2 h-4 w-4" />
-                Configuración
-              </DropdownMenuItem>
+              {onChangePassword && (
+                <DropdownMenuItem 
+                  onClick={onChangePassword}
+                  className="cursor-pointer focus:bg-slate-100 py-2"
+                >
+                  <Lock className="mr-2 h-4 w-4" />
+                  {t("topbar", "passwordChange")}
+                </DropdownMenuItem>
+              )}
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={onLogout}
                 className="cursor-pointer focus:bg-red-50 text-red-600 py-2"
               >
                 <LogOut className="mr-2 h-4 w-4" />
-                Cerrar Sesión
+                {t("sidebar", "cerrarSesion")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

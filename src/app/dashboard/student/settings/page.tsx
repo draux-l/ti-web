@@ -330,7 +330,7 @@ export default function SettingsPage() {
               <div className="space-y-2">
                 <Label>Idioma preferido</Label>
                 <Select>
-                  <SelectTrigger placeholder="Seleccionar idioma">
+                  <SelectTrigger>
                     <SelectValue>
                       {languages.find((l) => l.value === user.preferred_language)?.label}
                     </SelectValue>
@@ -423,14 +423,14 @@ export default function SettingsPage() {
                     <div className="flex items-center gap-1">
                       <Button
                         variant="ghost"
-                        size="icon-sm"
+                        size="icon"
                         onClick={() => handleEditEmail(email)}
                       >
                         <Edit2 className="size-4" />
                       </Button>
                       <Button
                         variant="ghost"
-                        size="icon-sm"
+                        size="icon"
                         onClick={() => handleDeleteEmail(email.id)}
                       >
                         <Trash2 className="size-4 text-destructive" />
@@ -562,14 +562,14 @@ export default function SettingsPage() {
                     <div className="flex items-center gap-1">
                       <Button
                         variant="ghost"
-                        size="icon-sm"
+                        size="icon"
                         onClick={() => handleEditPhone(phone)}
                       >
                         <Edit2 className="size-4" />
                       </Button>
                       <Button
                         variant="ghost"
-                        size="icon-sm"
+                        size="icon"
                         onClick={() => handleDeletePhone(phone.id)}
                       >
                         <Trash2 className="size-4 text-destructive" />
@@ -697,7 +697,7 @@ export default function SettingsPage() {
                         Última sincronización:{" "}
                         {new Date(device.last_sync).toLocaleString("es-PE")}
                       </span>
-                      <Button variant="ghost" size="icon-sm">
+                      <Button variant="ghost" size="icon">
                         <RefreshCw className="size-4" />
                       </Button>
                     </div>
