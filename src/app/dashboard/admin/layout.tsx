@@ -1,16 +1,8 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Sidebar } from "@/components/Sidebar"
-import { LogOut, Settings, Globe, Lock } from "lucide-react"
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 
 import {
   Dialog,
@@ -23,7 +15,6 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
-import { useLanguage } from "@/contexts/LanguageContext"
 
 export default function AdminLayout({
   children,
@@ -31,17 +22,12 @@ export default function AdminLayout({
   children: React.ReactNode
 }) {
   const router = useRouter()
-  const { setLanguage, t } = useLanguage()
   const userName = "Administrador"
   const role = "admin"
 
-  const [mounted, setMounted] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState(false)
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false)
   const [passwords, setPasswords] = useState({ old: "", new: "", repeat: "" })
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
 
   const handleLogout = () => {
     router.push("/login")
@@ -58,34 +44,22 @@ export default function AdminLayout({
     setPasswords({ old: "", new: "", repeat: "" })
   }
 
-  if (!mounted) {
-    return (
-      <div className="flex h-screen bg-slate-50 w-full overflow-hidden opacity-0">
-        <div className="flex-1" />
-      </div>
-    )
-  }
-
   return (
-    <div className="flex h-screen bg-slate-50 w-full overflow-hidden">
-      <Sidebar role={role} userName={userName} onLogout={handleLogout} onChangePassword={() => setIsPasswordModalOpen(true)} />
+    <div className="relative h-screen bg-slate-50">
+      <Sidebar 
+        role={role} 
+        userName={userName} 
+        onLogout={handleLogout}
+        onChangePassword={() => setIsPasswordModalOpen(true)}
+        isCollapsed={isCollapsed}
+        onToggleCollapse={setIsCollapsed}
+      />
       
       <div className="flex flex-col flex-1 h-full min-w-0">
-        <header className="h-16 flex items-center justify-end px-8 border-b border-slate-200 bg-white shadow-sm flex-shrink-0 gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger className="rounded-full p-2 text-slate-500 hover:text-[#00A3E0] hover:bg-blue-50 transition-colors">
-              <Globe className="w-5 h-5" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-40 z-[100] shadow-xl border border-gray-200 bg-white">
-              <DropdownMenuItem onClick={() => setLanguage("es")} className="cursor-pointer focus:bg-slate-100 py-2">{t('topbar', 'es')}</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setLanguage("en")} className="cursor-pointer focus:bg-slate-100 py-2">{t('topbar', 'en')}</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setLanguage("pt")} className="cursor-pointer focus:bg-slate-100 py-2">{t('topbar', 'pt')}</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setLanguage("fr")} className="cursor-pointer focus:bg-slate-100 py-2">{t('topbar', 'fr')}</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </header>
-
-        <main className="flex-1 overflow-y-auto p-8 relative bg-slate-50">
+        <main 
+          className="flex-1 overflow-y-auto p-8 relative bg-slate-50 transition-all duration-300 ease-in-out"
+          style={{ marginLeft: isCollapsed ? "5rem" : "16rem" }}
+        >
           {children}
         </main>
       </div>
@@ -94,7 +68,7 @@ export default function AdminLayout({
         <DialogContent className="sm:max-w-[425px]">
           <form onSubmit={handlePasswordSubmit}>
             <DialogHeader>
-              <DialogTitle>{t('topbar', 'passwordChange')}</DialogTitle>
+              <DialogTitle>Cambiar contraseña</DialogTitle>
               <DialogDescription>
                 Ingresa tu contraseña actual y la nueva contraseña que deseas utilizar.
               </DialogDescription>
