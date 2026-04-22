@@ -5,6 +5,7 @@ import { useState, useEffect } from "react"
 import { Zap, Wrench, Shield, Monitor } from "lucide-react"
 import { AccessCodeModal } from "@/components/features/student/AccessCodeModal"
 import { StudentCourseDetail } from "@/components/features/student/StudentCourseDetail"
+import { useHeaderButton } from "@/contexts/HeaderButtonContext"
 
 interface CourseCardProps {
   id: string
@@ -49,6 +50,7 @@ type View = "courses" | "courseDetail"
 export function StudentCourses() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { setHeaderButton } = useHeaderButton()
   const [currentView, setCurrentView] = useState<View>("courses")
   const [selectedCourse, setSelectedCourse] = useState<string | null>(null)
   const [isXRAccessOpen, setIsXRAccessOpen] = useState(false)
@@ -66,6 +68,15 @@ export function StudentCourses() {
     }
   }, [searchParams])
 
+  useEffect(() => {
+    setHeaderButton({
+      icon: Monitor,
+      label: "XR",
+      onClick: () => { setAutoTriggerXR(false); setIsXRAccessOpen(true) },
+    })
+    return () => setHeaderButton(null)
+  }, [setHeaderButton])
+
   const handleContinue = (courseId: string) => router.push(`/dashboard/student/courses?view=courseDetail&course=${courseId}`)
   const handleBackToCourses = () => router.push("/dashboard/student/courses")
   const handleOpenXRCode = (autoTrigger = false) => { setAutoTriggerXR(autoTrigger); setIsXRAccessOpen(true) }
@@ -78,7 +89,7 @@ export function StudentCourses() {
         <>
           <div className="flex items-center justify-between">
             <div><h1 className="text-2xl font-bold text-gray-900">Mis Cursos</h1><p className="mt-1 text-gray-500">Gestiona tu aprendizaje</p></div>
-            <button onClick={() => { setAutoTriggerXR(false); setIsXRAccessOpen(true) }} className="flex items-center gap-2 rounded-full bg-[#00AEEF] px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-[#00AEEF]/90 hover:shadow-lg"><Monitor className="size-5" />Código de Acceso XR</button>
+            <button onClick={() => { setAutoTriggerXR(false); setIsXRAccessOpen(true) }} className="hidden md:flex items-center gap-2 rounded-full bg-[#00AEEF] px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-[#00AEEF]/90 hover:shadow-lg"><Monitor className="size-5" />Código de Acceso XR</button>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{courses.map(course => <CourseCard key={course.id} {...course} onContinue={handleContinue} />)}</div>
         </>

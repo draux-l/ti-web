@@ -1,8 +1,10 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useEffect } from "react"
+import { useRouter, usePathname } from "next/navigation"
+import Link from "next/link"
 import { Sidebar } from "@/components/Sidebar"
+import { Menu, X, Plus, Users, BookOpen, UserPlus } from "lucide-react"
 
 import {
   Dialog,
@@ -15,19 +17,36 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
+import { HeaderButtonProvider, useHeaderButton } from "@/contexts/HeaderButtonContext"
 
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+const MOBILE_MENU_ITEMS: Record<string, { label: string; href: string; icon: React.ElementType }[]> = {
+  "/dashboard/admin": [
+    { label: "Inicio", href: "/dashboard/admin", icon: Users },
+    { label: "Usuarios", href: "/dashboard/admin/users", icon: Users },
+    { label: "Cursos", href: "/dashboard/admin/courses", icon: BookOpen },
+    { label: "Asignaciones", href: "/dashboard/admin/assignments", icon: Users },
+  ],
+}
+
+function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const router = useRouter()
-  const userName = "Administrador"
-  const role = "admin"
-
+  const pathname = usePathname()
+  const { headerButton } = useHeaderButton()
+  
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [passwords, setPasswords] = useState({ old: "", new: "", repeat: "" })
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    checkMobile()
+    window.addEventListener("resize", checkMobile)
+    return () => window.removeEventListener("resize", checkMobile)
+  }, [])
+
+  const menuItems = MOBILE_MENU_ITEMS["/dashboard/admin"] || []
 
   const handleLogout = () => {
     router.push("/login")
@@ -46,23 +65,98 @@ export default function AdminLayout({
 
   return (
     <div className="relative h-screen bg-slate-50">
-      <Sidebar 
-        role={role} 
-        userName={userName} 
-        onLogout={handleLogout}
-        onChangePassword={() => setIsPasswordModalOpen(true)}
-        isCollapsed={isCollapsed}
-        onToggleCollapse={setIsCollapsed}
-      />
-      
-      <div className="flex flex-col flex-1 h-full min-w-0">
+      <div className="hidden md:block">
+        <Sidebar 
+          role="admin" 
+          userName="Administrador" 
+          onLogout={handleLogout}
+          onChangePassword={() => setIsPasswordModalOpen(true)}
+          isCollapsed={isCollapsed}
+          onToggleCollapse={setIsCollapsed}
+        />
+      </div>
+
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 md:hidden">
+          <Button
+            variant="ghost"
+            className="h-9 w-9 rounded-full p-0"
+            onClick={() => setIsMobileMenuOpen(true)}
+          >
+            <Menu className="size-5" />
+          </Button>
+          {headerButton && (
+            <button
+              onClick={headerButton.onClick}
+              className="flex items-center gap-1 rounded-full bg-sky-500 px-3 py-1.5 text-xs font-medium text-white transition-all hover:bg-sky-600"
+            >
+              <headerButton.icon className="size-3.5" />
+              {headerButton.label}
+            </button>
+          )}
+        </header>
+        
         <main 
-          className="flex-1 overflow-y-auto p-8 relative bg-slate-50 transition-all duration-300 ease-in-out"
-          style={{ marginLeft: isCollapsed ? "5rem" : "16rem" }}
+          className="flex-1 overflow-y-auto p-4 md:p-8 relative bg-slate-50 transition-all duration-300 ease-in-out"
+          style={!isMobile && !isCollapsed ? { marginLeft: "16rem" } : isMobile ? {} : { marginLeft: "5rem" }}
         >
           {children}
         </main>
       </div>
+
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-40 md:hidden">
+          <button
+            type="button"
+            aria-label="Cerrar menú"
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+          <aside className="relative z-10 h-full w-[280px] border-r border-gray-200 bg-white p-4 shadow-xl">
+            <div className="mb-6 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="flex size-9 items-center justify-center rounded-xl bg-[#00AEEF]">
+                  <span className="text-sm font-bold text-white">T</span>
+                </div>
+                <span className="text-sm font-bold text-[#1A1A2E]">TECSUP</span>
+              </div>
+              <Button
+                variant="ghost"
+                className="h-9 w-9 rounded-full p-0"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <X className="size-4" />
+              </Button>
+            </div>
+            <nav className="space-y-2">
+              {menuItems.map((item) => {
+                const Icon = item.icon
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-slate-100"
+                  >
+                    <Icon className="size-4 text-[#00AEEF]" />
+                    {item.label}
+                  </Link>
+                )
+              })}
+            </nav>
+            <Button
+              variant="outline"
+              className="mt-6 w-full rounded-full border-red-300 text-red-600 hover:bg-red-50"
+              onClick={() => {
+                setIsMobileMenuOpen(false)
+                router.push("/login")
+              }}
+            >
+              Cerrar sesión
+            </Button>
+          </aside>
+        </div>
+      )}
 
       <Dialog open={isPasswordModalOpen} onOpenChange={(val) => { setIsPasswordModalOpen(val); if (!val) setPasswords({ old: "", new: "", repeat: "" }) }}>
         <DialogContent className="sm:max-w-[425px]">
@@ -95,5 +189,17 @@ export default function AdminLayout({
         </DialogContent>
       </Dialog>
     </div>
+  )
+}
+
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <HeaderButtonProvider>
+      <AdminLayoutContent>{children}</AdminLayoutContent>
+    </HeaderButtonProvider>
   )
 }

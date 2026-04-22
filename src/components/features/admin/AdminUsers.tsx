@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Users, UserPlus, Pencil, Trash2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useHeaderButton } from "@/contexts/HeaderButtonContext"
 
 const MOCK_ALUMNOS = [
   { id: 1, name: "Ana García Pérez", dni: "47890123", email: "ana.garcia@tecsup.edu.pe", status: "Activo" },
@@ -34,6 +35,16 @@ export function AdminUsers() {
   const [isAddOpen, setIsAddOpen] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [formData, setFormData] = useState({ id: 0, nombre: "", apellidos: "", dni: "", email: "", rol: "alumno", status: "Activo" })
+  const { setHeaderButton } = useHeaderButton()
+
+  useEffect(() => {
+    setHeaderButton({
+      icon: UserPlus,
+      label: "Agregar",
+      onClick: () => setIsAddOpen(true),
+    })
+    return () => setHeaderButton(null)
+  }, [setHeaderButton])
 
   const resetForm = () => setFormData({ id: 0, nombre: "", apellidos: "", dni: "", email: "", rol: "alumno", status: "Activo" })
 
@@ -111,7 +122,7 @@ export function AdminUsers() {
         </div>
         <Dialog open={isAddOpen} onOpenChange={(val) => { setIsAddOpen(val); if (!val) resetForm(); }}>
           <DialogTrigger>
-            <Button className="bg-[#00A3E0] hover:bg-[#008cc0] text-white"><UserPlus className="w-4 h-4 mr-2" />Agregar Usuario</Button>
+            <Button className="hidden md:flex bg-[#00A3E0] hover:bg-[#008cc0] text-white"><UserPlus className="w-4 h-4 mr-2" />Agregar Usuario</Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[500px]">
             <form onSubmit={handleAddSubmit}>

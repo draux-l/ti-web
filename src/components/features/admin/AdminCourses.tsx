@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { BookOpen, Plus, Pencil, Trash2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useHeaderButton } from "@/contexts/HeaderButtonContext"
 
 const MOCK_COURSES = [
   { id: 1, name: "Fundamentos de Realidad Virtual", specialty: "Desarrollo", description: "Introducción a los conceptos básicos de VR y entornos inmersivos.", students: 14, status: "Activo" },
@@ -21,8 +22,17 @@ export function AdminCourses() {
   const [courses, setCourses] = useState(MOCK_COURSES)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-  
   const [formData, setFormData] = useState({ id: 0, name: "", specialty: "", description: "", status: "Activo" })
+  const { setHeaderButton } = useHeaderButton()
+
+  useEffect(() => {
+    setHeaderButton({
+      icon: Plus,
+      label: "Añadir",
+      onClick: () => setIsDialogOpen(true),
+    })
+    return () => setHeaderButton(null)
+  }, [setHeaderButton])
 
   const handleAddCourse = (e: React.FormEvent) => {
     e.preventDefault()
@@ -63,7 +73,7 @@ export function AdminCourses() {
         
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger>
-            <Button className="bg-[#00A3E0] hover:bg-[#008cc0] shadow-md shadow-blue-500/20 text-white font-medium transition-all px-6">
+            <Button className="hidden md:flex bg-[#00A3E0] hover:bg-[#008cc0] shadow-md shadow-blue-500/20 text-white font-medium transition-all px-6">
               <Plus className="w-4 h-4 mr-2" />
               Añadir Curso
             </Button>

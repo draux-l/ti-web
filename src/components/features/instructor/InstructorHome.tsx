@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { Layout, TrendingUp, Users, Clock3, ArrowRight } from "lucide-react"
+import { Layout, TrendingUp, Users, Clock3, ArrowRight, Eye } from "lucide-react"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -21,9 +21,18 @@ const quickLinks = [
 export function InstructorHome() {
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-bold text-[#1A1A2E] md:text-3xl">Bienvenido de vuelta, Instructor</h1>
-        <p className="text-sm text-gray-500 md:text-base">Supervisa el avance de tus grupos y gestiona experiencias de aprendizaje XR.</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-[#1A1A2E] md:text-3xl">Bienvenido de vuelta, Instructor</h1>
+          <p className="text-sm text-gray-500 md:text-base">Supervisa el avance de tus grupos y gestiona experiencias de aprendizaje XR.</p>
+        </div>
+        <button
+          onClick={() => window.open("/dashboard/student", "_blank")}
+          className="hidden md:flex items-center gap-2 rounded-full bg-[#00AEEF] px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-[#00AEEF]/90 hover:shadow-lg"
+        >
+          <Eye className="size-5" />
+          Visualizar vista de alumno
+        </button>
       </div>
 
       <section className="grid gap-4 md:grid-cols-3">

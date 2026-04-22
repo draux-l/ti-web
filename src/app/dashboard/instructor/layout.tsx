@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Home, Users, Layout, TrendingUp, Settings, Menu, X, Eye } from "lucide-react"
 
@@ -14,8 +14,16 @@ export default function InstructorLayout({
   children: React.ReactNode
 }) {
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
   const router = useRouter()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    checkMobile()
+    window.addEventListener("resize", checkMobile)
+    return () => window.removeEventListener("resize", checkMobile)
+  }, [])
 
   const mobileMenuItems = [
     { label: "Inicio", href: "/dashboard/instructor", icon: Home },
@@ -38,29 +46,25 @@ export default function InstructorLayout({
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 md:px-8">
-          <div className="flex items-center">
-            <Button
-              variant="ghost"
-              className="h-9 w-9 rounded-full p-0"
-              onClick={() => setIsMobileMenuOpen(true)}
-            >
-              <Menu className="size-5" />
-            </Button>
-          </div>
+        <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 md:hidden">
           <Button
-            onClick={() => window.open("/dashboard/student", "_blank")}
-            variant="outline"
-            className="h-11 rounded-full border-[#00AEEF] px-5 text-[#00AEEF] hover:bg-blue-50 hover:text-[#0098d1]"
+            variant="ghost"
+            className="h-9 w-9 rounded-full p-0"
+            onClick={() => setIsMobileMenuOpen(true)}
           >
-            <Eye className="size-4" />
-            <span className="hidden sm:inline">Visualizar vista de alumno</span>
-            <span className="sm:hidden">Vista alumno</span>
+            <Menu className="size-5" />
           </Button>
+          <button
+            onClick={() => window.open("/dashboard/student", "_blank")}
+            className="flex items-center gap-1 rounded-full bg-sky-500 px-3 py-1.5 text-xs font-medium text-white transition-all hover:bg-sky-600"
+          >
+            <Eye className="size-3.5" />
+            Vista
+          </button>
         </header>
         <main 
           className="min-h-0 flex-1 overflow-y-auto p-4 md:p-8 transition-all duration-300 ease-in-out"
-          style={{ marginLeft: isCollapsed ? "5rem" : "16rem" }}
+          style={!isCollapsed && !isMobile ? { marginLeft: "16rem" } : isMobile ? {} : { marginLeft: "5rem" }}
         >
           {children}
         </main>

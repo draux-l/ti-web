@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect } from "react"
 import Link from "next/link"
 import { Users, BookOpen, CheckCircle } from "lucide-react"
 
@@ -7,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { useLanguage } from "@/contexts/LanguageContext"
+import { useHeaderButton } from "@/contexts/HeaderButtonContext"
 
 const COURSES_DATA = [
   { id: 1, name: "Fundamentos de Realidad Virtual", students: 14, status: "Activo" },
@@ -21,6 +23,16 @@ const RECENT_ACTIVITY = [
 
 export function AdminDashboard() {
   const { t } = useLanguage()
+  const { setHeaderButton } = useHeaderButton()
+
+  useEffect(() => {
+    setHeaderButton({
+      icon: Users,
+      label: "Asignar",
+      onClick: () => window.location.href = "/dashboard/admin/assignments",
+    })
+    return () => setHeaderButton(null)
+  }, [setHeaderButton])
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto">
@@ -34,7 +46,7 @@ export function AdminDashboard() {
           </p>
         </div>
         <Link href="/dashboard/admin/assignments">
-          <Button className="bg-[#00A3E0] hover:bg-[#008cc0] shadow-md shadow-blue-500/20 text-white font-medium transition-all px-6">
+          <Button className="bg-[#00A3E0] hover:bg-[#008cc0] shadow-md shadow-blue-500/20 text-white font-medium transition-all px-6 hidden md:flex">
             <Users className="w-4 h-4 mr-2" />
             {t("dashboard", "assignBtn")}
           </Button>

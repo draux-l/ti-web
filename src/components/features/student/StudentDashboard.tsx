@@ -1,7 +1,9 @@
 "use client"
 
 import { useRouter } from "next/navigation"
+import { useEffect } from "react"
 import { BookOpen, TrendingUp, Clock, Monitor } from "lucide-react"
+import { useHeaderButton } from "@/contexts/HeaderButtonContext"
 
 interface StudentDashboardProps {
   onNavigate: (view: "dashboard" | "courses" | "progress") => void
@@ -38,6 +40,16 @@ const mockCourses = [
 
 export function StudentDashboard({ onNavigate, onSelectCourse, onOpenXRCode }: StudentDashboardProps) {
   const router = useRouter()
+  const { setHeaderButton } = useHeaderButton()
+
+  useEffect(() => {
+    setHeaderButton({
+      icon: Monitor,
+      label: "XR",
+      onClick: onOpenXRCode,
+    })
+    return () => setHeaderButton(null)
+  }, [setHeaderButton, onOpenXRCode])
 
   return (
     <div className="space-y-6">
@@ -48,7 +60,7 @@ export function StudentDashboard({ onNavigate, onSelectCourse, onOpenXRCode }: S
         </div>
         <button
           onClick={onOpenXRCode}
-          className="flex items-center gap-2 rounded-full bg-[#00AEEF] px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-[#00AEEF]/90 hover:shadow-lg"
+          className="hidden md:flex items-center gap-2 rounded-full bg-[#00AEEF] px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-[#00AEEF]/90 hover:shadow-lg"
         >
           <Monitor className="size-5" />
           Código de Acceso XR
