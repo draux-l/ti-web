@@ -1,14 +1,22 @@
 "use client"
 
+import * as React from "react"
 import { useEffect } from "react"
 import Link from "next/link"
-import { Users, BookOpen, CheckCircle } from "lucide-react"
+import { Users, BookOpen, CheckCircle, TrendingUp } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { useLanguage } from "@/contexts/LanguageContext"
 import { useHeaderButton } from "@/contexts/HeaderButtonContext"
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "@/components/ui/chart"
+import { Pie, PieChart, ResponsiveContainer, Cell } from "recharts"
 
 const COURSES_DATA = [
   { id: 1, name: "Fundamentos de Realidad Virtual", students: 14, status: "Activo" },
@@ -21,8 +29,23 @@ const RECENT_ACTIVITY = [
   { id: 3, text: "Luciano Aragonó el curso: Introducción a Unity XR", time: "Hace 50 min" },
 ]
 
+const userDistData = [
+  { type: "Estudiantes", count: 70, fill: "#00AEEF" },
+  { type: "Instructores", count: 30, fill: "#FFB800" },
+]
+
+const chartConfig = {
+  count: { label: "Usuarios" },
+  Estudiantes: { label: "Estudiantes", color: "#00AEEF" },
+  Instructores: { label: "Instructores", color: "#FFB800" },
+} satisfies ChartConfig
+
 export function AdminDashboard() {
   const { t } = useLanguage()
+
+  const totalUsers = React.useMemo(() => {
+    return userDistData.reduce((acc, curr) => acc + curr.count, 0)
+  }, [])
   const { setHeaderButton } = useHeaderButton()
 
   useEffect(() => {
@@ -95,22 +118,37 @@ export function AdminDashboard() {
               <CardTitle className="text-base font-semibold text-slate-800">{t("dashboard", "userDist")}</CardTitle>
               <CardDescription>{t("dashboard", "userDistSub")}</CardDescription>
             </CardHeader>
-            <CardContent className="flex flex-col items-center">
-              <div className="flex items-center gap-12 py-8">
-                <div className="flex flex-col items-center">
-                  <div className="w-24 h-24 rounded-full bg-sky-500 flex items-center justify-center">
-                    <span className="text-white font-bold text-2xl">70%</span>
-                  </div>
-                  <span className="mt-3 text-sm font-medium text-slate-600">Estudiantes</span>
-                </div>
-                <div className="flex flex-col items-center">
-                  <div className="w-24 h-24 rounded-full bg-sky-200 flex items-center justify-center">
-                    <span className="text-slate-700 font-bold text-2xl">30%</span>
-                  </div>
-                  <span className="mt-3 text-sm font-medium text-slate-600">Instructores</span>
+            <CardContent className="relative flex items-center justify-center p-4">
+              <div className="relative w-[240px] h-[240px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={userDistData}
+                      dataKey="count"
+                      nameKey="type"
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={90}
+                      paddingAngle={2}
+                    >
+                      {userDistData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.fill} />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-3xl font-bold text-[#1A1A2E]">{totalUsers}%</span>
+                  <span className="text-sm text-gray-500">Total</span>
                 </div>
               </div>
             </CardContent>
+            <CardFooter className="flex flex-col gap-2 text-sm">
+              <div className="flex items-center gap-2 font-medium text-slate-700">
+                Distribución de usuarios <TrendingUp className="h-4 w-4" />
+              </div>
+            </CardFooter>
           </Card>
 
           <Card className="shadow-sm border-slate-200/60">
