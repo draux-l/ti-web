@@ -131,22 +131,32 @@ export function AdminAssignments() {
               )}
             </div>
             <div className="flex-1 z-10 overflow-y-auto px-6 pb-28">
-              <Table>
-                <TableHeader className="sticky top-0 z-10 shadow-sm border-b">
-                  <TableRow className="border-b-2 text-xs"><TableHead className="w-[50px]"></TableHead><TableHead className="font-bold text-slate-800">Nombre</TableHead><TableHead className="font-bold text-slate-800">Correo</TableHead></TableRow>
-                </TableHeader>
-                <TableBody>
-                  <RadioGroup value={selectedInstructor} onValueChange={setSelectedInstructor}>
+              <RadioGroup value={selectedInstructor} onValueChange={setSelectedInstructor}>
+                <Table>
+                  <TableHeader className="sticky top-0 z-10 shadow-sm border-b">
+                    <TableRow className="border-b-2 text-xs">
+                      <TableHead className="w-[50px]"></TableHead>
+                      <TableHead className="font-bold text-slate-800">Nombre</TableHead>
+                      <TableHead className="font-bold text-slate-800">Correo</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                     {filteredInstructors.map((instructor) => (
-                      <TableRow key={instructor.id} className="text-[10px] hover:bg-slate-50 cursor-pointer border-b border-slate-100" onClick={() => setSelectedInstructor(instructor.id)}>
-                        <TableCell className="w-[50px]"><RadioGroupItem value={instructor.id} className="text-[#00A3E0] border-slate-300" /></TableCell>
+                      <TableRow 
+                        key={instructor.id} 
+                        className="text-[10px] hover:bg-slate-50 cursor-pointer border-b border-slate-100" 
+                        onClick={() => setSelectedInstructor(instructor.id)}
+                      >
+                        <TableCell className="w-[50px]">
+                          <RadioGroupItem value={instructor.id} className="text-[#00A3E0] border-slate-300" />
+                        </TableCell>
                         <TableCell className="font-medium text-slate-600 2xl:text-sm py-2">{instructor.name}</TableCell>
                         <TableCell className="text-slate-500 2xl:text-sm py-2">{instructor.email}</TableCell>
                       </TableRow>
                     ))}
-                  </RadioGroup>
-                </TableBody>
-              </Table>
+                  </TableBody>
+                </Table>
+              </RadioGroup>
             </div>
             <div className="absolute bottom-0 left-0 w-full z-20 flex flex-col">
               <div className="h-10 w-full bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none" />
