@@ -49,6 +49,7 @@ function StudentLayoutContent({ children }: { children: React.ReactNode }) {
           role={role} 
           userName={userName} 
           onLogout={handleLogout}
+          onSettings={() => router.push("/dashboard/student/settings")}
           isCollapsed={isCollapsed}
           onToggleCollapse={setIsCollapsed}
         />

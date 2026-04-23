@@ -40,6 +40,7 @@ export default function InstructorLayout({
           role="instructor"
           userName="Pareja Instructor"
           onLogout={() => router.push("/login")}
+          onSettings={() => router.push("/dashboard/instructor/settings")}
           isCollapsed={isCollapsed}
           onToggleCollapse={setIsCollapsed}
         />

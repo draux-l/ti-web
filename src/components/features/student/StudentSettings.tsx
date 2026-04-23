@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 
 import {
   User,
@@ -96,7 +96,8 @@ const languages = [
 
 export function StudentSettings() {
   const router = useRouter()
-  const [activeTab, setActiveTab] = React.useState("profile")
+  const searchParams = useSearchParams()
+  const [activeTab, setActiveTab] = React.useState(() => searchParams.get("tab") || "profile")
   const [user, setUser] = React.useState<UserProfile>({
     first_name: "Ander",
     last_name: "García",
@@ -262,12 +263,11 @@ export function StudentSettings() {
         <p className="text-gray-500">Gestiona tu perfil y preferencias</p>
       </div>
 
-      <Tabs value={activeTab}>
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger 
             value="profile" 
             className="min-w-[140px]"
-            onClick={() => router.push("/dashboard/student/settings")}
           >
             <User className="mr-2 size-4" />
             Perfil
@@ -275,7 +275,6 @@ export function StudentSettings() {
           <TabsTrigger 
             value="emails" 
             className="min-w-[140px]"
-            onClick={() => router.push("/dashboard/student/settings?tab=emails")}
           >
             <Mail className="mr-2 size-4" />
             Correos
@@ -283,7 +282,6 @@ export function StudentSettings() {
           <TabsTrigger 
             value="phones" 
             className="min-w-[140px]"
-            onClick={() => router.push("/dashboard/student/settings?tab=phones")}
           >
             <Phone className="mr-2 size-4" />
             Teléfonos
@@ -291,7 +289,6 @@ export function StudentSettings() {
           <TabsTrigger 
             value="devices" 
             className="min-w-[140px]"
-            onClick={() => router.push("/dashboard/student/settings?tab=devices")}
           >
             <Smartphone className="mr-2 size-4" />
             Dispositivos XR

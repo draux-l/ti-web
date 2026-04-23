@@ -33,11 +33,12 @@ interface SidebarProps {
   userName: string
   onLogout: () => void
   onChangePassword?: () => void
+  onSettings?: () => void
   isCollapsed?: boolean
   onToggleCollapse?: (collapsed: boolean) => void
 }
 
-export function Sidebar({ role, userName, onLogout, onChangePassword, isCollapsed: controlledCollapsed, onToggleCollapse }: SidebarProps) {
+export function Sidebar({ role, userName, onLogout, onChangePassword, onSettings, isCollapsed: controlledCollapsed, onToggleCollapse }: SidebarProps) {
   const [internalCollapsed, setInternalCollapsed] = useState(false)
   const isCollapsed = controlledCollapsed ?? internalCollapsed
   const pathname = usePathname()
@@ -119,21 +120,7 @@ export function Sidebar({ role, userName, onLogout, onChangePassword, isCollapse
                 {!isCollapsed && <span>{item.label}</span>}
               </Link>
             )
-          })}
-          
-          {onChangePassword && (
-            <Link
-              href="#"
-              onClick={(e) => { e.preventDefault(); onChangePassword(); }}
-              className={`flex items-center rounded-lg py-2.5 text-sm font-medium transition-colors ${
-                isCollapsed ? "justify-center px-0" : "gap-3 px-4"
-              } text-gray-600 hover:bg-gray-50 hover:text-gray-900`}
-              title={isCollapsed ? t("sidebar", "configuracion") : undefined}
-            >
-              <Settings className="size-5 shrink-0" />
-              {!isCollapsed && <span>{t("sidebar", "configuracion")}</span>}
-            </Link>
-          )}
+})}
         </nav>
 
         <div className="border-t border-gray-100 p-4">
@@ -165,6 +152,15 @@ export function Sidebar({ role, userName, onLogout, onChangePassword, isCollapse
                 >
                   <Lock className="mr-2 h-4 w-4" />
                   {t("topbar", "passwordChange")}
+                </DropdownMenuItem>
+              )}
+              {onSettings && (
+                <DropdownMenuItem 
+                  onClick={onSettings}
+                  className="cursor-pointer focus:bg-slate-100 py-2"
+                >
+                  <Settings className="mr-2 h-4 w-4" />
+                  {t("sidebar", "configuracion")}
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />
