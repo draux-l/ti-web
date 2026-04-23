@@ -59,8 +59,8 @@ export function InstructorHome() {
             <CardHeader><CardTitle className="text-lg">{item.title}</CardTitle></CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-gray-500">{item.description}</p>
-              <Button asChild variant="outline" className="rounded-full border-[#00AEEF] text-[#00AEEF] hover:bg-blue-50 hover:text-[#0098d1]">
-                <Link href={item.href}>Ir al módulo <ArrowRight className="ml-2 size-4" /></Link>
+              <Button variant="outline" className="rounded-full border-[#00AEEF] text-[#00AEEF] hover:bg-blue-50 hover:text-[#0098d1]">
+                <Link href={item.href} className="flex items-center">Ir al módulo <ArrowRight className="ml-2 size-4" /></Link>
               </Button>
             </CardContent>
           </Card>

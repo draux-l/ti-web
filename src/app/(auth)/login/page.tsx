@@ -1,14 +1,15 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { toast } from "sonner"
-import { Loader2, User, Lock, AlertCircle, Mail } from "lucide-react"
+import { Loader2, Lock, AlertCircle, Mail } from "lucide-react"
 
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
@@ -20,6 +21,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp"
+import tecsupLogin from "@/app/assets/tecsup_login.png"
 
 const loginSchema = z.object({
   username: z.string().min(1, "El usuario es requerido"),
@@ -124,141 +126,157 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 px-4 py-12">
-      <Card className="w-full max-w-md rounded-2xl bg-white shadow-lg">
-        <CardHeader className="space-y-4 text-center">
-          <div className="mx-auto flex size-14 items-center justify-center rounded-xl bg-[#00A3E0]">
-            <span className="text-3xl font-bold text-white">T</span>
-          </div>
-          <div className="space-y-1">
-            <h1 className="text-2xl font-bold text-gray-900">Tecsup Inmersivo</h1>
-            <p className="text-sm text-gray-400">Plataforma de Gestión XR</p>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="space-y-2">
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
-                <Input
-                  type="text"
-                  placeholder="Usuario"
-                  className="border-none bg-slate-100 pl-10"
-                  aria-invalid={!!errors.username}
-                  {...register("username")}
-                />
+    <div className="flex min-h-svh flex-col items-center justify-center bg-muted p-6 md:p-10">
+      <div className="w-full max-w-md md:max-w-4xl">
+        <Card className="overflow-hidden p-0 border-none shadow-none ring-0">
+          <CardContent className="grid p-0 md:grid-cols-2">
+            <form onSubmit={handleSubmit(onSubmit)} className="p-6 md:p-8">
+              <div className="flex flex-col gap-6">
+                <div className="flex flex-col items-center gap-2 text-center">
+                  <h1 className="text-2xl font-bold">Iniciar Sesión</h1>
+                  <p className="text-balance text-sm text-muted-foreground">
+                    Ingresa tus credenciales para acceder a la plataforma
+                  </p>
+                </div>
+
+                <div className="grid gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="username">Usuario</Label>
+                    <Input
+                      id="username"
+                      type="text"
+                      placeholder="Ingresa tu usuario"
+                      className="border-none shadow-none bg-slate-50/50 focus-visible:ring-1 focus-visible:ring-[#00AEEF]"
+                      {...register("username")}
+                    />
+                    {errors.username && (
+                      <p className="text-sm text-destructive">{errors.username.message}</p>
+                    )}
+                  </div>
+
+                  <div className="grid gap-2">
+                    <div className="flex items-center">
+                      <Label htmlFor="password">Contraseña</Label>
+                      <button
+                        type="button"
+                        className="ml-auto text-sm text-[#00AEEF] hover:underline"
+                        onClick={() => setIsForgotOpen(true)}
+                      >
+                        ¿Olvidaste tu contraseña?
+                      </button>
+                    </div>
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="Ingresa tu contraseña"
+                      className="border-none shadow-none bg-slate-50/50 focus-visible:ring-1 focus-visible:ring-[#00AEEF]"
+                      {...register("password")}
+                    />
+                    {errors.password && (
+                      <p className="text-sm text-destructive">{errors.password.message}</p>
+                    )}
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="remember"
+                      checked={remember}
+                      onCheckedChange={(checked) =>
+                        setValue("remember", checked as boolean)
+                      }
+                    />
+                    <Label htmlFor="remember" className="text-sm text-gray-500">
+                      Recordar mi cuenta
+                    </Label>
+                  </div>
+
+                  <Button
+                    type="submit"
+                    className="w-full bg-[#00AEEF] hover:bg-[#00AEEF]/90 border-0"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 size-4 animate-spin" />
+                        Iniciando sesión...
+                      </>
+                    ) : (
+                      "Iniciar Sesión"
+                    )}
+                  </Button>
+                </div>
+
+                <div className="relative text-center text-xs text-muted-foreground">
+                  <span>O CONTINUAR CON</span>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4">
+                  <Button variant="outline" type="button" className="w-full">
+                    <svg className="mr-2 size-4" viewBox="0 0 24 24">
+                      <path
+                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
+                        fill="#4285F4"
+                      />
+                      <path
+                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                        fill="#34A853"
+                      />
+                      <path
+                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                        fill="#FBBC05"
+                      />
+                      <path
+                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                        fill="#EA4335"
+                      />
+                    </svg>
+                    <span className="sr-only">Iniciar con Google</span>
+                  </Button>
+                  <Button variant="outline" type="button" className="w-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="size-4">
+                      <path
+                        d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"
+                        fill="currentColor"
+                      />
+                    </svg>
+                    <span className="sr-only">Iniciar con Apple</span>
+                  </Button>
+                  <Button variant="outline" type="button" className="w-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="size-4">
+                      <path
+                        d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
+                        fill="currentColor"
+                      />
+                    </svg>
+                    <span className="sr-only">Iniciar con Meta</span>
+                  </Button>
+                </div>
+
+                <p className="text-center text-xs text-muted-foreground">
+                  Si no tienes acceso, contacta al administrador de tu institución o escribe a{" "}
+                  <a
+                    href="mailto:soporte@tecsup.edu.pe"
+                    className="font-medium text-[#00AEEF] hover:underline"
+                  >
+                    soporte@tecsup.edu.pe
+                  </a>
+                </p>
               </div>
-              {errors.username && (
-                <p className="text-sm text-destructive">{errors.username.message}</p>
-              )}
+            </form>
+
+            <div className="relative hidden bg-muted md:block">
+              <Image
+                src={tecsupLogin}
+                alt="Tecsup Inmersivo"
+                className="absolute inset-0 h-full w-full object-cover"
+              />
             </div>
-            <div className="space-y-2">
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
-                <Input
-                  type="password"
-                  placeholder="Contraseña"
-                  className="border-none bg-slate-100 pl-10"
-                  aria-invalid={!!errors.password}
-                  {...register("password")}
-                />
-              </div>
-              {errors.password && (
-                <p className="text-sm text-destructive">{errors.password.message}</p>
-              )}
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="remember"
-                  checked={remember}
-                  onCheckedChange={(checked) =>
-                    setValue("remember", checked as boolean)
-                  }
-                />
-                <Label htmlFor="remember" className="text-sm text-gray-500">
-                  Recordar mi cuenta
-                </Label>
-              </div>
-              <button
-                type="button"
-                className="text-sm text-[#00A3E0] hover:underline"
-                onClick={() => setIsForgotOpen(true)}
-              >
-                ¿Olvidaste tu contraseña?
-              </button>
-            </div>
-
-            <Button
-              type="submit"
-              className="w-full bg-[#00A3E0] text-white hover:bg-[#00A3E0]/90"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 size-4 animate-spin" />
-                  Iniciando sesión...
-                </>
-              ) : (
-                "Iniciar Sesión"
-              )}
-            </Button>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs font-medium text-gray-400">
-                <span className="bg-white px-2">O CONTINUAR CON</span>
-              </div>
-            </div>
-
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full bg-white"
-              onClick={() => toast.info("Google OAuth próximamente")}
-            >
-              <svg className="mr-2 size-4" viewBox="0 0 24 24">
-                <path
-                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
-                  fill="#4285F4"
-                />
-                <path
-                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                  fill="#34A853"
-                />
-                <path
-                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                  fill="#FBBC05"
-                />
-                <path
-                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                  fill="#EA4335"
-                />
-              </svg>
-              Iniciar sesión con Google
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-
-      <div className="mt-6 flex w-full max-w-md items-center gap-3 rounded-xl bg-slate-100 px-4 py-3">
-        <AlertCircle className="size-5 shrink-0 text-amber-500" />
-        <p className="text-xs text-gray-500">
-          Si no tienes acceso, contacta al administrador de tu institución o escribe a{" "}
-          <a
-            href="mailto:soporte@tecsup.edu.pe"
-            className="font-medium text-[#00A3E0] hover:underline"
-          >
-            soporte@tecsup.edu.pe
-          </a>
-        </p>
+          </CardContent>
+        </Card>
       </div>
 
       <Dialog open={isForgotOpen} onOpenChange={handleCloseForgot}>
-        <DialogContent className="rounded-2xl bg-white p-6 sm:max-w-md">
+        <DialogContent className="rounded-2xl bg-white p-6 sm:max-w-md border-none shadow-none ring-0">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold text-gray-900">
               {forgotStep === "email" && "Recuperar contraseña"}
@@ -277,7 +295,7 @@ export default function LoginPage() {
                 <Input
                   type="email"
                   placeholder="correo@ejemplo.com"
-                  className="border-none bg-slate-100 rounded-full pl-10"
+                  className="pl-10"
                   value={resetEmail}
                   onChange={(e) => setResetEmail(e.target.value)}
                 />
@@ -286,14 +304,14 @@ export default function LoginPage() {
                 <Button
                   type="button"
                   variant="outline"
-                  className="flex-1 rounded-full"
+                  className="flex-1"
                   onClick={handleCloseForgot}
                 >
                   Cancelar
                 </Button>
                 <Button
                   type="button"
-                  className="flex-1 bg-[#00A3E0] text-white hover:bg-[#00A3E0]/90 rounded-full"
+                  className="flex-1 bg-[#00AEEF] hover:bg-[#00AEEF]/90"
                   onClick={handleSendCode}
                 >
                   Enviar código
@@ -327,14 +345,14 @@ export default function LoginPage() {
                 <Button
                   type="button"
                   variant="outline"
-                  className="flex-1 rounded-full"
+                  className="flex-1"
                   onClick={handleCloseForgot}
                 >
                   Cancelar
                 </Button>
                 <Button
                   type="button"
-                  className="flex-1 bg-[#00A3E0] text-white hover:bg-[#00A3E0]/90 rounded-full"
+                  className="flex-1 bg-[#00AEEF] hover:bg-[#00AEEF]/90"
                   onClick={handleVerifyCode}
                 >
                   Verificar
@@ -343,7 +361,7 @@ export default function LoginPage() {
               <div className="text-center">
                 <button
                   type="button"
-                  className="text-sm text-[#00A3E0] hover:underline"
+                  className="text-sm text-[#00AEEF] hover:underline"
                   onClick={handleResendCode}
                 >
                   Reenviar código
@@ -363,7 +381,7 @@ export default function LoginPage() {
                   <Input
                     type="password"
                     placeholder="Nueva contraseña"
-                    className="border-none bg-slate-100 rounded-full pl-10"
+                    className="pl-10"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                   />
@@ -375,7 +393,7 @@ export default function LoginPage() {
                   <Input
                     type="password"
                     placeholder="Confirmar contraseña"
-                    className="border-none bg-slate-100 rounded-full pl-10"
+                    className="pl-10"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                   />
@@ -388,14 +406,14 @@ export default function LoginPage() {
                 <Button
                   type="button"
                   variant="outline"
-                  className="flex-1 rounded-full"
+                  className="flex-1"
                   onClick={handleCloseForgot}
                 >
                   Cancelar
                 </Button>
                 <Button
                   type="button"
-                  className="flex-1 bg-[#00A3E0] text-white hover:bg-[#00A3E0]/90 rounded-full"
+                  className="flex-1 bg-[#00AEEF] hover:bg-[#00AEEF]/90"
                   disabled={newPassword.length < 6 || newPassword !== confirmPassword}
                   onClick={() => {
                     toast.success("Contraseña actualizada", {
