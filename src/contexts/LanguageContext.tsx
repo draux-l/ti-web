@@ -17,6 +17,7 @@ type Translations = {
       misCursos: string
       miProgreso: string
       misGrupos: string
+      controlExperiencias: string
       calificaciones: string
       configuracion: string
       cerrarSesion: string
@@ -50,7 +51,7 @@ type Translations = {
 const translations: Translations = {
   es: {
     sidebar: {
-      inicio: "Inicio", usuarios: "Usuarios", cursos: "Cursos", asignaciones: "Asignaciones", ajustesSistema: "Ajustes Sistema", reportes: "Reportes", instituciones: "Instituciones", misCursos: "Mis Cursos", miProgreso: "Mi Progreso", misGrupos: "Mis Grupos", calificaciones: "Calificaciones", configuracion: "Configuración", cerrarSesion: "Cerrar Sesión"
+      inicio: "Inicio", usuarios: "Usuarios", cursos: "Cursos", asignaciones: "Asignaciones", ajustesSistema: "Ajustes Sistema", reportes: "Reportes", instituciones: "Instituciones", misCursos: "Mis Cursos", miProgreso: "Mi Progreso", misGrupos: "Mis Grupos", controlExperiencias: "Control Experiencias", calificaciones: "Calificaciones", configuracion: "Configuración", cerrarSesion: "Cerrar Sesión"
     },
     dashboard: {
       title: "Panel de Administración", subtitle: "Gestiona recursos y usuarios", assignBtn: "Asignar Alumno a Curso", instructors: "Instructores", instructorsSub: "Activos este periodo", students: "Alumnos", studentsSub: "Matriculados", courses: "Cursos", coursesSub: "Programas Activos", userDist: "Distribución de usuarios", userDistSub: "Distribución actual de estudiantes e instructores en el sistema LMS", coursesAvail: "Cursos Disponibles", coursesAvailSub: "Programas XR activos en la plataforma", recentAct: "Actividad reciente"
@@ -59,7 +60,7 @@ const translations: Translations = {
   },
   en: {
     sidebar: {
-      inicio: "Home", usuarios: "Users", cursos: "Courses", asignaciones: "Assignments", ajustesSistema: "System Settings", reportes: "Reports", instituciones: "Institutions", misCursos: "My Courses", miProgreso: "My Progress", misGrupos: "My Groups", calificaciones: "Grades", configuracion: "Settings", cerrarSesion: "Logout"
+      inicio: "Home", usuarios: "Users", cursos: "Courses", asignaciones: "Assignments", ajustesSistema: "System Settings", reportes: "Reports", instituciones: "Institutions", misCursos: "My Courses", miProgreso: "My Progress", misGrupos: "My Groups", controlExperiencias: "Experience Control", calificaciones: "Grades", configuracion: "Settings", cerrarSesion: "Logout"
     },
     dashboard: {
       title: "Admin Dashboard", subtitle: "Manage resources and users", assignBtn: "Assign Student to Course", instructors: "Instructors", instructorsSub: "Active this term", students: "Students", studentsSub: "Enrolled", courses: "Courses", coursesSub: "Active Programs", userDist: "User Distribution", userDistSub: "Current distribution of students and instructors in the LMS", coursesAvail: "Available Courses", coursesAvailSub: "Active XR programs on platform", recentAct: "Recent activity"
@@ -68,7 +69,7 @@ const translations: Translations = {
   },
   pt: {
     sidebar: {
-      inicio: "Início", usuarios: "Usuários", cursos: "Cursos", asignaciones: "Atribuições", ajustesSistema: "Configurações do Sistema", reportes: "Relatórios", instituciones: "Instituições", misCursos: "Meus Cursos", miProgreso: "Meu Progresso", misGrupos: "Meus Grupos", calificaciones: "Notas", configuracion: "Configurações", cerrarSesion: "Sair"
+      inicio: "Início", usuarios: "Usuários", cursos: "Cursos", asignaciones: "Atribuições", ajustesSistema: "Configurações do Sistema", reportes: "Relatórios", instituciones: "Instituições", misCursos: "Meus Cursos", miProgreso: "Meu Progresso", misGrupos: "Meus Grupos", controlExperiencias: "Controle de Experiências", calificaciones: "Notas", configuracion: "Configurações", cerrarSesion: "Sair"
     },
     dashboard: {
       title: "Painel de Administração", subtitle: "Gerenciar recursos e usuários", assignBtn: "Atribuir Aluno ao Curso", instructors: "Instrutores", instructorsSub: "Ativos este período", students: "Alunos", studentsSub: "Matriculados", courses: "Cursos", coursesSub: "Programas Ativos", userDist: "Distribuição de usuários", userDistSub: "Distribuição atual de alunos e instrutores no LMS", coursesAvail: "Cursos Disponíveis", coursesAvailSub: "Programas XR ativos na plataforma", recentAct: "Atividade recente"
@@ -77,7 +78,7 @@ const translations: Translations = {
   },
   fr: {
     sidebar: {
-      inicio: "Accueil", usuarios: "Utilisateurs", cursos: "Cours", asignaciones: "Affectations", ajustesSistema: "Paramètres Système", reportes: "Rapports", instituciones: "Institutions", misCursos: "Mes Cours", miProgreso: "Mes Progrès", misGrupos: "Mes Groupes", calificaciones: "Notes", configuracion: "Paramètres", cerrarSesion: "Déconnexion"
+      inicio: "Accueil", usuarios: "Utilisateurs", cursos: "Cours", asignaciones: "Affectations", ajustesSistema: "Paramètres Système", reportes: "Rapports", instituciones: "Institutions", misCursos: "Mes Cours", miProgreso: "Mes Progrès", misGrupos: "Mes Groupes", controlExperiencias: "Contrôle des Expériences", calificaciones: "Notes", configuracion: "Paramètres", cerrarSesion: "Déconnexion"
     },
     dashboard: {
       title: "Tableau de Bord", subtitle: "Gérer les ressources et utilisateurs", assignBtn: "Affecter un étudiant", instructors: "Instructeurs", instructorsSub: "Actifs ce trimestre", students: "Étudiants", studentsSub: "Inscrits", courses: "Cours", coursesSub: "Programmes Actifs", userDist: "Répartition des utilisateurs", userDistSub: "Répartition actuelle des étudiants et instructeurs dans le LMS", coursesAvail: "Cours Disponibles", coursesAvailSub: "Programmes XR actifs", recentAct: "Activité récente"
