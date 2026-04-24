@@ -63,7 +63,7 @@ export function AdminAssignments() {
   }
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-5xl mx-auto pb-">
+    <div className="flex flex-col gap-6 w-full max-w-5xl mx-auto">
       <div className="w-full flex justify-between px-10 pt-6"> 
         {STEPS.map((step, index) => {
           const isCompleted = step.id < currentStep
@@ -131,35 +131,6 @@ export function AdminAssignments() {
               )}
             </div>
             <div className="flex-1 z-10 overflow-y-auto px-6 pb-28">
-<<<<<<< HEAD
-              <Table>
-                <TableHeader className="sticky top-0 z-10 shadow-sm border-b">
-                  <TableRow className="border-b-2 text-xs"><TableHead className="w-[50px]"></TableHead><TableHead className="font-bold text-slate-800">Nombre</TableHead><TableHead className="font-bold text-slate-800">Correo</TableHead></TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredInstructors.map((instructor) => (
-                    <TableRow 
-                      key={instructor.id} 
-                      className={`text-[10px] hover:bg-slate-50 cursor-pointer border-b border-slate-100 ${selectedInstructor === instructor.id ? 'bg-sky-50' : ''}`} 
-                      onClick={() => setSelectedInstructor(instructor.id)}
-                    >
-                      <TableCell className="w-[50px]">
-                        <input 
-                          type="radio" 
-                          name="instructor" 
-                          value={instructor.id}
-                          checked={selectedInstructor === instructor.id}
-                          onChange={() => setSelectedInstructor(instructor.id)}
-                          className="text-[#00A3E0]"
-                        />
-                      </TableCell>
-                      <TableCell className="font-medium text-slate-600 2xl:text-sm py-2">{instructor.name}</TableCell>
-                      <TableCell className="text-slate-500 2xl:text-sm py-2">{instructor.email}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-=======
               <RadioGroup value={selectedInstructor} onValueChange={setSelectedInstructor}>
                 <Table>
                   <TableHeader className="sticky top-0 z-10 shadow-sm border-b">
@@ -186,7 +157,6 @@ export function AdminAssignments() {
                   </TableBody>
                 </Table>
               </RadioGroup>
->>>>>>> c08196e24596afca1bb7255a06d2a3db061fb200
             </div>
             <div className="absolute bottom-0 left-0 w-full z-20 flex flex-col">
               <div className="h-10 w-full bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none" />
