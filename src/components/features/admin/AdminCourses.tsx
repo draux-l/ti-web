@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { BookOpen, Plus, Pencil, Trash2 } from "lucide-react"
+import { useState, useEffect, useMemo } from "react"
+import { BookOpen, Plus, Pencil, Trash2, Search } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -16,6 +16,8 @@ import { useHeaderButton } from "@/contexts/HeaderButtonContext"
 const MOCK_COURSES = [
   { id: 1, name: "Fundamentos de Realidad Virtual", specialty: "Desarrollo", description: "Introducción a los conceptos básicos de VR y entornos inmersivos.", students: 14, status: "Activo" },
   { id: 2, name: "Desarrollo de Experiencias AR", specialty: "Diseño", description: "Creación de aplicaciones de realidad aumentada interactiva.", students: 19, status: "Activo" },
+  { id: 3, name: "Unity XR Basics", specialty: "Desarrollo", description: "Aprende los fundamentos de Unity para XR.", students: 8, status: "Inactivo" },
+  { id: 4, name: "Diseño de Experiencias Inmersivas", specialty: "Diseño", description: "Principios de diseño para experiencias VR/AR.", students: 12, status: "Activo" },
 ]
 
 export function AdminCourses() {
@@ -23,7 +25,18 @@ export function AdminCourses() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [formData, setFormData] = useState({ id: 0, name: "", specialty: "", description: "", status: "Activo" })
+  const [searchQuery, setSearchQuery] = useState("")
+  const [specialtyFilter, setSpecialtyFilter] = useState<string>("todos")
   const { setHeaderButton } = useHeaderButton()
+
+  const filteredCourses = useMemo(() => {
+    return courses.filter((course) => {
+      const matchesSearch = course.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          course.description.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesSpecialty = specialtyFilter === "todos" || course.specialty === specialtyFilter
+      return matchesSearch && matchesSpecialty
+    })
+  }, [courses, searchQuery, specialtyFilter])
 
   useEffect(() => {
     setHeaderButton({
@@ -72,12 +85,14 @@ export function AdminCourses() {
         </div>
         
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger>
-            <Button className="hidden md:flex bg-[#00A3E0] hover:bg-[#008cc0] shadow-md shadow-blue-500/20 text-white font-medium transition-all px-6">
-              <Plus className="w-4 h-4 mr-2" />
-              Añadir Curso
-            </Button>
-          </DialogTrigger>
+          <button 
+            type="button"
+            onClick={() => setIsDialogOpen(true)}
+            className="hidden md:flex items-center justify-center bg-[#00A3E0] hover:bg-[#008cc0] shadow-md shadow-blue-500/20 text-white font-medium transition-all px-6 py-2 rounded-md"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Añadir Curso
+          </button>
           <DialogContent className="sm:max-w-[425px]">
             <form onSubmit={handleAddCourse}>
               <DialogHeader>
@@ -127,10 +142,31 @@ export function AdminCourses() {
 
       <Card className="shadow-sm border-slate-200/60 mt-2">
         <CardHeader className="pb-4">
-          <CardTitle className="text-lg font-bold text-slate-800">Cursos Registrados ({courses.length})</CardTitle>
+          <CardTitle className="text-lg font-bold text-slate-800">Cursos Registrados ({filteredCourses.length})</CardTitle>
           <CardDescription>Visualiza y administra todos los cursos disponibles en la plataforma</CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="flex gap-4 mb-4">
+            <div className="relative flex-1 max-w-sm">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500" />
+              <Input 
+                placeholder="Buscar por nombre o descripción..." 
+                className="pl-9"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <Select value={specialtyFilter} onValueChange={setSpecialtyFilter}>
+              <SelectTrigger className="w-[180px]"><SelectValue placeholder="Todas las especialidades" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todas</SelectItem>
+                <SelectItem value="Desarrollo">Desarrollo</SelectItem>
+                <SelectItem value="Diseño">Diseño</SelectItem>
+                <SelectItem value="Redes">Redes</SelectItem>
+                <SelectItem value="Ciberseguridad">Ciberseguridad</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <div className="rounded-md border border-slate-200 mt-4 overflow-hidden">
             <Table>
               <TableHeader className="bg-slate-50">
@@ -145,7 +181,7 @@ export function AdminCourses() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {courses.map((course) => (
+                {filteredCourses.map((course) => (
                   <TableRow key={course.id} className="hover:bg-slate-50/50 transition-colors">
                     <TableCell className="font-medium text-slate-400">#00{course.id}</TableCell>
                     <TableCell className="font-bold text-slate-900">{course.name}</TableCell>

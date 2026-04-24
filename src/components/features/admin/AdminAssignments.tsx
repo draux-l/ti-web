@@ -136,15 +136,26 @@ export function AdminAssignments() {
                   <TableRow className="border-b-2 text-xs"><TableHead className="w-[50px]"></TableHead><TableHead className="font-bold text-slate-800">Nombre</TableHead><TableHead className="font-bold text-slate-800">Correo</TableHead></TableRow>
                 </TableHeader>
                 <TableBody>
-                  <RadioGroup value={selectedInstructor} onValueChange={setSelectedInstructor}>
-                    {filteredInstructors.map((instructor) => (
-                      <TableRow key={instructor.id} className="text-[10px] hover:bg-slate-50 cursor-pointer border-b border-slate-100" onClick={() => setSelectedInstructor(instructor.id)}>
-                        <TableCell className="w-[50px]"><RadioGroupItem value={instructor.id} className="text-[#00A3E0] border-slate-300" /></TableCell>
-                        <TableCell className="font-medium text-slate-600 2xl:text-sm py-2">{instructor.name}</TableCell>
-                        <TableCell className="text-slate-500 2xl:text-sm py-2">{instructor.email}</TableCell>
-                      </TableRow>
-                    ))}
-                  </RadioGroup>
+                  {filteredInstructors.map((instructor) => (
+                    <TableRow 
+                      key={instructor.id} 
+                      className={`text-[10px] hover:bg-slate-50 cursor-pointer border-b border-slate-100 ${selectedInstructor === instructor.id ? 'bg-sky-50' : ''}`} 
+                      onClick={() => setSelectedInstructor(instructor.id)}
+                    >
+                      <TableCell className="w-[50px]">
+                        <input 
+                          type="radio" 
+                          name="instructor" 
+                          value={instructor.id}
+                          checked={selectedInstructor === instructor.id}
+                          onChange={() => setSelectedInstructor(instructor.id)}
+                          className="text-[#00A3E0]"
+                        />
+                      </TableCell>
+                      <TableCell className="font-medium text-slate-600 2xl:text-sm py-2">{instructor.name}</TableCell>
+                      <TableCell className="text-slate-500 2xl:text-sm py-2">{instructor.email}</TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </div>

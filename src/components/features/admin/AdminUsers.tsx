@@ -1,7 +1,8 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Users, UserPlus, Pencil, Trash2 } from "lucide-react"
+import * as React from "react"
+import { useState, useEffect, useMemo } from "react"
+import { Users, UserPlus, Pencil, Trash2, Search } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -35,7 +36,29 @@ export function AdminUsers() {
   const [isAddOpen, setIsAddOpen] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [formData, setFormData] = useState({ id: 0, nombre: "", apellidos: "", dni: "", email: "", rol: "alumno", status: "Activo" })
+  const [searchQuery, setSearchQuery] = useState("")
+  const [statusFilter, setStatusFilter] = useState<string>("todos")
   const { setHeaderButton } = useHeaderButton()
+
+  const filteredAlumnos = useMemo(() => {
+    return alumnos.filter((user) => {
+      const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          user.dni.includes(searchQuery)
+      const matchesStatus = statusFilter === "todos" || user.status === statusFilter
+      return matchesSearch && matchesStatus
+    })
+  }, [alumnos, searchQuery, statusFilter])
+
+  const filteredInstructores = useMemo(() => {
+    return instructores.filter((user) => {
+      const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          user.dni.includes(searchQuery)
+      const matchesStatus = statusFilter === "todos" || user.status === statusFilter
+      return matchesSearch && matchesStatus
+    })
+  }, [instructores, searchQuery, statusFilter])
 
   useEffect(() => {
     setHeaderButton({
@@ -121,9 +144,13 @@ export function AdminUsers() {
           <p className="text-sm text-slate-500 mt-1">Administra estudiantes e instructores de la plataforma</p>
         </div>
         <Dialog open={isAddOpen} onOpenChange={(val) => { setIsAddOpen(val); if (!val) resetForm(); }}>
-          <DialogTrigger>
-            <Button className="hidden md:flex bg-[#00A3E0] hover:bg-[#008cc0] text-white"><UserPlus className="w-4 h-4 mr-2" />Agregar Usuario</Button>
-          </DialogTrigger>
+          <button 
+            type="button"
+            onClick={() => setIsAddOpen(true)}
+            className="hidden md:flex items-center justify-center bg-[#00A3E0] hover:bg-[#008cc0] text-white font-medium px-4 py-2 rounded-md"
+          >
+            <UserPlus className="w-4 h-4 mr-2" />Agregar Usuario
+          </button>
           <DialogContent className="sm:max-w-[500px]">
             <form onSubmit={handleAddSubmit}>
               <DialogHeader><DialogTitle>Agregar Nuevo Usuario</DialogTitle></DialogHeader>
@@ -150,23 +177,70 @@ export function AdminUsers() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
-          <TabsTrigger value="alumnos" className="gap-2"><Users className="w-4 h-4" />Alumnos ({alumnos.length})</TabsTrigger>
-          <TabsTrigger value="instructores" className="gap-2"><Users className="w-4 h-4" />Instructores ({instructores.length})</TabsTrigger>
+          <TabsTrigger value="alumnos" className="gap-2"><Users className="w-4 h-4" />Alumnos ({filteredAlumnos.length})</TabsTrigger>
+          <TabsTrigger value="instructores" className="gap-2"><Users className="w-4 h-4" />Instructores ({filteredInstructores.length})</TabsTrigger>
         </TabsList>
         <TabsContent value="alumnos" className="mt-4">
           <Card>
-            <CardHeader><CardTitle>Lista de Alumnos</CardTitle><CardDescription>Alumnos registrados en la plataforma</CardDescription></CardHeader>
-            <CardContent>{renderTable(alumnos, "alumno")}</CardContent>
+            <CardHeader>
+              <CardTitle>Lista de Alumnos</CardTitle>
+              <CardDescription>Alumnos registrados en la plataforma</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex gap-4 mb-4">
+                <div className="relative flex-1 max-w-sm">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500" />
+                  <Input 
+                    placeholder="Buscar por nombre, email o DNI..." 
+                    className="pl-9"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-[150px]"><SelectValue placeholder="Todos" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todos">Todos</SelectItem>
+                    <SelectItem value="Activo">Activo</SelectItem>
+                    <SelectItem value="Inactivo">Inactivo</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {renderTable(filteredAlumnos, "alumno")}
+            </CardContent>
           </Card>
         </TabsContent>
         <TabsContent value="instructores" className="mt-4">
           <Card>
-            <CardHeader><CardTitle>Lista de Instructores</CardTitle><CardDescription>Instructores registrados en la plataforma</CardDescription></CardHeader>
-            <CardContent>{renderTable(instructores, "instructor")}</CardContent>
+            <CardHeader>
+              <CardTitle>Lista de Instructores</CardTitle>
+              <CardDescription>Instructores registrados en la plataforma</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex gap-4 mb-4">
+                <div className="relative flex-1 max-w-sm">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500" />
+                  <Input 
+                    placeholder="Buscar por nombre, email o DNI..." 
+                    className="pl-9"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-[150px]"><SelectValue placeholder="Todos" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todos">Todos</SelectItem>
+                    <SelectItem value="Activo">Activo</SelectItem>
+                    <SelectItem value="Inactivo">Inactivo</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {renderTable(filteredInstructores, "instructor")}
+            </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
-
       <Dialog open={isEditOpen} onOpenChange={(val) => { setIsEditOpen(val); if (!val) resetForm(); }}>
         <DialogContent className="sm:max-w-[500px]">
           <form onSubmit={handleEditSubmit}>

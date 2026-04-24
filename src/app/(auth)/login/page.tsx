@@ -126,7 +126,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-svh flex-col items-center justify-center bg-muted p-6 md:p-10">
+    <div suppressHydrationWarning className="flex min-h-svh flex-col items-center justify-center bg-muted p-6 md:p-10">
       <div className="w-full max-w-md md:max-w-4xl">
         <Card className="overflow-hidden p-0 border-none shadow-none ring-0">
           <CardContent className="grid p-0 md:grid-cols-2">
