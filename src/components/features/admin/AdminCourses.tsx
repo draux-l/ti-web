@@ -200,7 +200,7 @@ export function AdminCourses() {
                         <Button onClick={() => openEditModal(course)} variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-[#00A3E0] hover:bg-blue-50">
                           <Pencil className="h-4 w-4" />
                         </Button>
-                        <Button onClick={() => handleDeleteCourse(course.id)} variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-red-600 hover:bg-red-50">
+                        <Button onClick={() => handleDeleteCourse(course.id)} variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-[#00AEEF] hover:bg-blue-50">
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>

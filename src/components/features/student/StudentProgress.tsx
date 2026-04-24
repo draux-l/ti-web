@@ -12,7 +12,10 @@ import {
   LineChart,
   Line,
 } from "recharts"
-import { Trophy, Target, TrendingUp, Calendar, Filter, X } from "lucide-react"
+import { Trophy, Target, TrendingUp, Calendar, Filter, X, Search } from "lucide-react"
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
 
 interface GroupExperience {
   id: string
@@ -317,129 +320,88 @@ export function StudentProgress() {
       </div>
 
       <div className="rounded-2xl border border-gray-200 bg-white p-6">
-        <h2 className="mb-4 text-lg font-semibold text-gray-900">
-          Historial de Calificaciones
-        </h2>
-
-        <div className="mb-4 space-y-3">
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2">
-              <Filter className="size-4 text-gray-400" />
-              <span className="text-sm font-medium text-gray-600">Filtros:</span>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-gray-900">
+            Historial de Calificaciones
+          </h2>
+          <div className="flex gap-4">
+            <div className="relative flex-1 max-w-sm">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500" />
+              <Input
+                placeholder="Buscar..."
+                className="pl-9"
+              />
             </div>
-            
             <select
               value={filters.course}
               onChange={(e) => setFilters({ ...filters, course: e.target.value })}
-              className="rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#00A3E0]/50"
+              className="h-10 rounded-full border border-gray-200 bg-slate-50 px-4 text-sm focus:border-[#00AEEF] focus:outline-none"
             >
               <option value="">Todos los cursos</option>
               {mockCourses.map((course) => (
                 <option key={course.id} value={course.id}>{course.name}</option>
               ))}
             </select>
-
-            <select
-              value={filters.module}
-              onChange={(e) => setFilters({ ...filters, module: e.target.value })}
-              className="rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#00A3E0]/50"
-            >
-              <option value="">Todos los módulos</option>
-              {mockExperiences.map((exp) => (
-                <option key={exp.id} value={exp.id}>{exp.title}</option>
-              ))}
-            </select>
-
             <select
               value={filters.status}
               onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-              className="rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#00A3E0]/50"
+              className="h-10 rounded-full border border-gray-200 bg-slate-50 px-4 text-sm focus:border-[#00AEEF] focus:outline-none"
             >
               <option value="">Todos los estados</option>
               <option value="completed">Aprobado</option>
               <option value="failed">Mejorable</option>
               <option value="in_progress">En Progreso</option>
             </select>
-
-            <input
-              type="date"
-              value={filters.dateFrom}
-              onChange={(e) => setFilters({ ...filters, dateFrom: e.target.value })}
-              placeholder="Desde"
-              className="rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#00A3E0]/50"
-            />
-
-            <input
-              type="date"
-              value={filters.dateTo}
-              onChange={(e) => setFilters({ ...filters, dateTo: e.target.value })}
-              placeholder="Hasta"
-              className="rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#00A3E0]/50"
-            />
-
-            {hasActiveFilters && (
-              <button
-                onClick={clearFilters}
-                className="flex items-center gap-1 rounded-lg bg-gray-100 px-3 py-2 text-sm text-gray-600 hover:bg-gray-200"
-              >
-                <X className="size-4" />
-                Limpiar
-              </button>
-            )}
           </div>
-
-          <p className="text-sm text-gray-500">
-            Mostrando {filteredData.filter(e => e.status !== "pending").length} resultados
-          </p>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-200 text-left">
-                <th className="pb-3 text-sm font-medium text-gray-500">Fecha</th>
-                <th className="pb-3 text-sm font-medium text-gray-500">Módulo</th>
-                <th className="pb-3 text-sm font-medium text-gray-500">Curso</th>
-                <th className="pb-3 text-sm font-medium text-gray-500">Tiempo</th>
-                <th className="pb-3 text-sm font-medium text-gray-500">Nota</th>
-                <th className="pb-3 text-sm font-medium text-gray-500">Estado</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
+        <div className="rounded-md border border-slate-200 mt-4 overflow-hidden">
+          <Table>
+            <TableHeader className="bg-slate-50">
+              <TableRow>
+                <TableHead className="font-semibold text-slate-700">Fecha</TableHead>
+                <TableHead className="font-semibold text-slate-700">Módulo</TableHead>
+                <TableHead className="font-semibold text-slate-700">Curso</TableHead>
+                <TableHead className="font-semibold text-slate-700">Tiempo</TableHead>
+                <TableHead className="font-semibold text-slate-700">Nota</TableHead>
+                <TableHead className="font-semibold text-slate-700">Estado</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {filteredData
                 .filter(e => e.status !== "pending")
                 .sort((a, b) => new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime())
                 .map((exp) => {
                   const badge = getStatusBadge(exp.status)
                   return (
-                    <tr key={exp.id} className="hover:bg-gray-50">
-                      <td className="py-3 text-sm text-gray-900">
+                    <TableRow key={exp.id} className="hover:bg-slate-50/50 transition-colors">
+                      <TableCell className="text-sm text-gray-900">
                         {formatDate(exp.completed_at)}
-                      </td>
-                      <td className="py-3 text-sm text-gray-900">
+                      </TableCell>
+                      <TableCell className="text-sm text-gray-900">
                         {getExperienceTitle(exp.experience_id)}
-                      </td>
-                      <td className="py-3 text-sm text-gray-500">
+                      </TableCell>
+                      <TableCell className="text-sm text-gray-500">
                         {getCourseName(exp.experience_id)}
-                      </td>
-                      <td className="py-3 text-sm text-gray-500">
+                      </TableCell>
+                      <TableCell className="text-sm text-gray-500">
                         {formatTime(exp.time_spent)}
-                      </td>
-                      <td className="py-3">
-                        <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${getGradeColor(exp.final_score)}`}>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={getGradeColor(exp.final_score)}>
                           {exp.final_score}/20
-                        </span>
-                      </td>
-                      <td className="py-3">
-                        <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${badge.className}`}>
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={badge.className}>
                           {badge.label}
-                        </span>
-                      </td>
-                    </tr>
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
                   )
                 })}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       </div>
     </div>
