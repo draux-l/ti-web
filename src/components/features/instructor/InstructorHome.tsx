@@ -21,9 +21,9 @@ export function InstructorHome() {
         </div>
         <button
           onClick={() => window.open("/dashboard/student", "_blank")}
-          className="hidden md:flex items-center gap-2 rounded-full bg-[#00AEEF] px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-[#00AEEF]/90 hover:shadow-lg"
+          className="hidden md:flex items-center justify-center bg-[#00AEEF] hover:bg-[#33C4F4] text-white font-medium px-6 py-2.5 rounded-full hover:scale-105 hover:shadow-lg transition-all duration-200"
         >
-          <Eye className="size-5" />
+          <Eye className="w-4 h-4 mr-2" />
           Visualizar vista de alumno
         </button>
       </div>
@@ -31,7 +31,7 @@ export function InstructorHome() {
       <section className="grid gap-4 md:grid-cols-3">
         <button
           onClick={() => window.open("/dashboard/instructor/groups", "_blank")}
-          className="flex items-center justify-between gap-4 rounded-3xl bg-[#00AEEF] p-10 text-white transition-transform hover:scale-[1.02]"
+          className="flex items-center justify-between gap-4 rounded-3xl bg-[#00AEEF] p-10 text-white transition-all duration-200 hover:bg-[#33C4F4] hover:scale-105 hover:shadow-lg"
         >
           <Users className="size-14" />
           <div className="text-left">
@@ -42,7 +42,7 @@ export function InstructorHome() {
 
         <button
           onClick={() => window.open("/dashboard/instructor/grades", "_blank")}
-          className="flex items-center justify-between gap-4 rounded-3xl bg-[#FFB800] p-10 text-gray-900 transition-transform hover:scale-[1.02]"
+          className="flex items-center justify-between gap-4 rounded-3xl bg-[#FFB800] p-10 text-gray-900 transition-all duration-200 hover:scale-105 hover:shadow-lg"
         >
           <TrendingUp className="size-14" />
           <div className="text-left">
@@ -53,7 +53,7 @@ export function InstructorHome() {
 
         <button
           onClick={() => window.open("/dashboard/instructor/experiences", "_blank")}
-          className="flex items-center justify-between gap-4 rounded-3xl bg-white p-10 text-gray-700 border border-gray-200 transition-transform hover:scale-[1.02]"
+          className="flex items-center justify-between gap-4 rounded-3xl bg-white p-10 text-gray-700 border border-gray-200 transition-all duration-200 hover:scale-105 hover:shadow-lg"
         >
           <Clock3 className="size-14" />
           <div className="text-left">
@@ -68,7 +68,7 @@ export function InstructorHome() {
           <div key={item.title} className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">{item.title}</h3>
             <p className="text-sm text-gray-500 mb-4">{item.description}</p>
-            <Button variant="outline" className="rounded-full border-[#00AEEF] text-[#00AEEF] hover:bg-blue-50 hover:text-[#0098d1]">
+            <Button variant="outline" className="rounded-full border-[#00AEEF] text-[#00AEEF] hover:bg-blue-50 hover:text-[#0098d1] hover:scale-105 transition-all duration-200">
               <Link href={item.href} className="flex items-center">Ir al módulo <ArrowRight className="ml-2 size-4" /></Link>
             </Button>
           </div>

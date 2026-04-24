@@ -33,7 +33,7 @@ function CourseCard({ id, name, icon: Icon, iconColor, bgColor, progress, comple
           <span>{completedModules}/{totalModules} módulos</span>
           <span>{progress === 100 ? "Completado" : "En progreso"}</span>
         </div>
-        <button onClick={() => onContinue(id)} className="w-full rounded-full bg-[#00A3E0] py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#00A3E0]/90">Continuar</button>
+        <button onClick={() => onContinue(id)} className="w-full rounded-full bg-[#00AEEF] hover:bg-[#33C4F4] text-white font-medium py-2 text-sm transition-all duration-200 hover:scale-105 hover:shadow-lg">Continuar</button>
       </div>
     </div>
   )
@@ -89,7 +89,7 @@ export function StudentCourses() {
         <>
           <div className="flex items-center justify-between">
             <div><h1 className="text-2xl font-bold text-[#1A1A2E]">Mis Cursos</h1><p className="text-sm text-gray-500 mt-1">Gestiona tu aprendizaje</p></div>
-            <button onClick={() => { setAutoTriggerXR(false); setIsXRAccessOpen(true) }} className="hidden md:flex items-center gap-2 rounded-full bg-[#00AEEF] px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-[#00AEEF]/90 hover:shadow-lg"><Monitor className="size-5" />Código de Acceso XR</button>
+            <button onClick={() => { setAutoTriggerXR(false); setIsXRAccessOpen(true) }} className="hidden md:flex items-center justify-center bg-[#00AEEF] hover:bg-[#33C4F4] text-white font-medium px-6 py-2.5 rounded-full hover:scale-105 hover:shadow-lg transition-all duration-200"><Monitor className="w-4 h-4 mr-2" />Código de Acceso XR</button>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{courses.map(course => <CourseCard key={course.id} {...course} onContinue={handleContinue} />)}</div>
         </>

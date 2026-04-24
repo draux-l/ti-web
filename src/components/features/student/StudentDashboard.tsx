@@ -60,9 +60,9 @@ export function StudentDashboard({ onNavigate, onSelectCourse, onOpenXRCode }: S
         </div>
         <button
           onClick={onOpenXRCode}
-          className="hidden md:flex items-center gap-2 rounded-full bg-[#00AEEF] px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-[#00AEEF]/90 hover:shadow-lg"
+          className="hidden md:flex items-center justify-center bg-[#00AEEF] hover:bg-[#33C4F4] text-white font-medium px-6 py-2.5 rounded-full hover:scale-105 hover:shadow-lg transition-all duration-200"
         >
-          <Monitor className="size-5" />
+          <Monitor className="w-4 h-4 mr-2" />
           Código de Acceso XR
         </button>
       </div>
@@ -70,7 +70,7 @@ export function StudentDashboard({ onNavigate, onSelectCourse, onOpenXRCode }: S
       <div className="grid gap-4 md:grid-cols-3">
         <button
           onClick={() => router.push("/dashboard/student/courses")}
-          className="flex items-center justify-between gap-4 rounded-3xl bg-[#00A3E0] p-10 text-white transition-transform hover:scale-[1.02]"
+          className="flex items-center justify-between gap-4 rounded-3xl bg-[#00AEEF] p-10 text-white transition-all duration-200 hover:bg-[#33C4F4] hover:scale-105 hover:shadow-lg"
         >
           <BookOpen className="size-14" />
           <div className="text-left">
@@ -81,7 +81,7 @@ export function StudentDashboard({ onNavigate, onSelectCourse, onOpenXRCode }: S
 
         <button
           onClick={() => router.push("/dashboard/student/progress")}
-          className="flex items-center justify-between gap-4 rounded-3xl bg-[#FFB800] p-10 text-gray-900 transition-transform hover:scale-[1.02]"
+          className="flex items-center justify-between gap-4 rounded-3xl bg-[#FFB800] p-10 text-gray-900 transition-all duration-200 hover:scale-105 hover:shadow-lg"
         >
           <TrendingUp className="size-14" />
           <div className="text-left">
@@ -92,7 +92,7 @@ export function StudentDashboard({ onNavigate, onSelectCourse, onOpenXRCode }: S
 
         <button
           onClick={() => router.push("/dashboard/student/courses")}
-          className="flex items-center justify-between gap-4 rounded-3xl bg-gray-100 p-10 text-gray-700 transition-transform hover:scale-[1.02]"
+          className="flex items-center justify-between gap-4 rounded-3xl bg-gray-100 p-10 text-gray-700 transition-all duration-200 hover:scale-105 hover:shadow-lg"
         >
           <Clock className="size-14" />
           <div className="text-left">
@@ -142,7 +142,7 @@ export function StudentDashboard({ onNavigate, onSelectCourse, onOpenXRCode }: S
 
               <button
                 onClick={() => router.push(`/dashboard/student/courses?view=courseDetail&course=${course.id}`)}
-                className="w-full rounded-full bg-[#00A3E0] py-2 text-sm font-medium text-white transition-colors hover:bg-[#00A3E0]/90"
+                className="w-full rounded-full bg-[#00AEEF] hover:bg-[#33C4F4] text-white font-medium py-2 text-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
               >
                 Continuar
               </button>

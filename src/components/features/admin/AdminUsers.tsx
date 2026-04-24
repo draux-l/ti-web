@@ -147,7 +147,7 @@ export function AdminUsers() {
           <button 
             type="button"
             onClick={() => setIsAddOpen(true)}
-            className="hidden md:flex items-center justify-center bg-[#00A3E0] hover:bg-[#008cc0] text-white font-medium px-4 py-2 rounded-md"
+            className="hidden md:flex items-center justify-center bg-[#00AEEF] hover:bg-[#33C4F4] text-white font-medium px-6 py-2.5 rounded-full hover:scale-105 hover:shadow-lg transition-all duration-200"
           >
             <UserPlus className="w-4 h-4 mr-2" />Agregar Usuario
           </button>
@@ -168,7 +168,7 @@ export function AdminUsers() {
               </div>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setIsAddOpen(false)}>Cancelar</Button>
-                <Button type="submit" className="bg-[#00A3E0] hover:bg-[#008cc0] text-white">Guardar</Button>
+                <Button type="submit" className="bg-[#00AEEF] hover:bg-[#33C4F4] text-white hover:scale-105 hover:shadow-lg transition-all duration-200">Guardar</Button>
               </DialogFooter>
             </form>
           </DialogContent>
@@ -256,7 +256,7 @@ export function AdminUsers() {
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setIsEditOpen(false)}>Cancelar</Button>
-              <Button type="submit" className="bg-[#00A3E0] hover:bg-[#008cc0] text-white">Guardar Cambios</Button>
+              <Button type="submit" className="bg-[#00AEEF] hover:bg-[#33C4F4] text-white hover:scale-105 hover:shadow-lg transition-all duration-200">Guardar Cambios</Button>
             </DialogFooter>
           </form>
         </DialogContent>

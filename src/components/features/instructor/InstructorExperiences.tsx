@@ -70,7 +70,7 @@ export function InstructorExperiences() {
           </select>
           <div className="flex gap-2">
             <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className="h-10 rounded-full bg-slate-50" />
-            <Button onClick={assignExperience} className="h-10 rounded-full bg-[#00AEEF] px-4 text-white hover:bg-[#0098d1]"><PlusCircle className="size-4" />Asignar</Button>
+            <Button onClick={assignExperience} className="h-10 rounded-full bg-[#00AEEF] px-4 text-white hover:bg-[#33C4F4] hover:scale-105 hover:shadow-lg transition-all duration-200"><PlusCircle className="size-4" />Asignar</Button>
           </div>
         </CardContent>
       </Card>
@@ -95,14 +95,14 @@ export function InstructorExperiences() {
                   <div className="rounded-2xl border border-slate-100 bg-slate-50 p-3">
                     <p className="mb-2 text-xs font-semibold text-gray-500 uppercase">Intentos máximos</p>
                     <div className="flex items-center justify-between">
-                      <Button variant="ghost" className="h-8 rounded-full text-gray-600 hover:bg-white" onClick={() => updateAttempts(item.id, -1)}><MinusCircle className="size-4" /></Button>
+                      <Button variant="ghost" className="h-8 rounded-full text-gray-600 hover:bg-white hover:scale-105 transition-all duration-200" onClick={() => updateAttempts(item.id, -1)}><MinusCircle className="size-4" /></Button>
                       <span className="text-xl font-bold text-[#1A1A2E]">{item.attempts}</span>
-                      <Button variant="ghost" className="h-8 rounded-full text-gray-600 hover:bg-white" onClick={() => updateAttempts(item.id, 1)}><PlusCircle className="size-4" /></Button>
+                      <Button variant="ghost" className="h-8 rounded-full text-gray-600 hover:bg-white hover:scale-105 transition-all duration-200" onClick={() => updateAttempts(item.id, 1)}><PlusCircle className="size-4" /></Button>
                     </div>
                   </div>
                   <div className="rounded-2xl border border-slate-100 bg-slate-50 p-3">
                     <p className="mb-2 text-xs font-semibold text-gray-500 uppercase">Rehabilitar acceso</p>
-                    <Button variant="outline" onClick={() => toggleEnabled(item.id)} className="h-9 w-full rounded-full border-[#00AEEF] text-[#00AEEF] hover:bg-blue-50 hover:text-[#0098d1]"><RotateCcw className="size-4" />{item.enabled ? "Deshabilitar" : "Rehabilitar"}</Button>
+                    <Button variant="outline" onClick={() => toggleEnabled(item.id)} className="h-9 w-full rounded-full border-[#00AEEF] text-[#00AEEF] hover:bg-blue-50 hover:text-[#0098d1] hover:scale-105 transition-all duration-200"><RotateCcw className="size-4" />{item.enabled ? "Deshabilitar" : "Rehabilitar"}</Button>
                   </div>
                 </div>
               </CardContent>

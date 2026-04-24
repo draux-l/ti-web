@@ -69,15 +69,15 @@ export function AdminDashboard() {
           </p>
         </div>
         <Link href="/dashboard/admin/assignments">
-          <Button className="bg-[#00A3E0] hover:bg-[#008cc0] shadow-md shadow-blue-500/20 text-white font-medium transition-all px-6 hidden md:flex">
+          <button className="hidden md:flex items-center justify-center bg-[#00AEEF] hover:bg-[#33C4F4] text-white font-medium px-6 py-2.5 rounded-full hover:scale-105 hover:shadow-lg transition-all duration-200">
             <Users className="w-4 h-4 mr-2" />
             {t("dashboard", "assignBtn")}
-          </Button>
+          </button>
         </Link>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-full">
-        <button className="flex items-center justify-between gap-4 rounded-3xl bg-white p-10 text-gray-700 border border-gray-200 transition-transform hover:scale-[1.02]">
+        <button className="flex items-center justify-between gap-4 rounded-3xl bg-white p-10 text-gray-700 border border-gray-200 transition-all duration-200 hover:scale-105 hover:shadow-lg">
           <div className="text-left">
             <p className="text-base text-gray-500 mb-1">{t("dashboard", "instructors")}</p>
             <p className="text-4xl font-bold">3</p>
@@ -85,7 +85,7 @@ export function AdminDashboard() {
           <Users className="size-14" />
         </button>
 
-        <button className="flex items-center justify-between gap-4 rounded-3xl bg-white p-10 text-gray-700 border border-gray-200 transition-transform hover:scale-[1.02]">
+        <button className="flex items-center justify-between gap-4 rounded-3xl bg-white p-10 text-gray-700 border border-gray-200 transition-all duration-200 hover:scale-105 hover:shadow-lg">
           <div className="text-left">
             <p className="text-base text-gray-500 mb-1">{t("dashboard", "students")}</p>
             <p className="text-4xl font-bold">5</p>
@@ -93,7 +93,7 @@ export function AdminDashboard() {
           <Users className="size-14" />
         </button>
 
-        <button className="flex items-center justify-between gap-4 rounded-3xl bg-white p-10 text-gray-700 border border-gray-200 transition-transform hover:scale-[1.02]">
+        <button className="flex items-center justify-between gap-4 rounded-3xl bg-white p-10 text-gray-700 border border-gray-200 transition-all duration-200 hover:scale-105 hover:shadow-lg">
           <div className="text-left">
             <p className="text-base text-gray-500 mb-1">{t("dashboard", "courses")}</p>
             <p className="text-4xl font-bold">2</p>

@@ -54,7 +54,7 @@ export function InstructorGroups() {
         <CardHeader><CardTitle className="text-lg">Crear Grupo</CardTitle></CardHeader>
         <CardContent className="flex flex-col gap-3 sm:flex-row">
           <Input value={newGroupName} onChange={(e) => setNewGroupName(e.target.value)} placeholder="Ej. Grupo D - Metalurgia" className="h-10 rounded-full bg-slate-50" />
-          <Button onClick={createGroup} className="h-10 rounded-full bg-[#00AEEF] px-5 text-white hover:bg-[#0098d1]"><Plus className="size-4" />Crear Grupo</Button>
+          <Button onClick={createGroup} className="h-10 rounded-full bg-[#00AEEF] px-5 text-white hover:bg-[#33C4F4] hover:scale-105 hover:shadow-lg transition-all duration-200"><Plus className="size-4" />Crear Grupo</Button>
         </CardContent>
       </Card>
 
@@ -66,7 +66,7 @@ export function InstructorGroups() {
           </select>
           <div className="flex flex-col gap-3 sm:flex-row">
             <Input value={studentName} onChange={(e) => setStudentName(e.target.value)} placeholder="Nombre del estudiante" className="h-10 rounded-full bg-slate-50" />
-            <Button onClick={addStudent} className="h-10 rounded-full bg-[#00AEEF] px-5 text-white hover:bg-[#0098d1]"><UserPlus2 className="size-4" />Asignar</Button>
+            <Button onClick={addStudent} className="h-10 rounded-full bg-[#00AEEF] px-5 text-white hover:bg-[#33C4F4] hover:scale-105 hover:shadow-lg transition-all duration-200"><UserPlus2 className="size-4" />Asignar</Button>
           </div>
         </CardContent>
       </Card>
@@ -83,7 +83,7 @@ export function InstructorGroups() {
               {group.students.map(student => (
                 <div key={`${group.id}-${student}`} className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 px-3 py-2">
                   <span className="text-sm text-gray-700">{student}</span>
-                  <Button variant="ghost" className="h-8 rounded-full text-red-500 hover:bg-red-50 hover:text-red-600" onClick={() => removeStudent(group.id, student)}><UserMinus2 className="size-4" />Quitar</Button>
+                  <Button variant="ghost" className="h-8 rounded-full text-red-500 hover:bg-red-50 hover:text-red-600 hover:scale-105 transition-all duration-200" onClick={() => removeStudent(group.id, student)}><UserMinus2 className="size-4" />Quitar</Button>
                 </div>
               ))}
             </CardContent>

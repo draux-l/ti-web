@@ -196,8 +196,8 @@ export function AdminAssignments() {
             <div className="absolute bottom-0 left-0 w-full z-20 flex flex-col">
               <div className="h-10 w-full bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none" />
               <div className="bg-white px-8 pt-5 flex justify-between">
-                <Button onClick={() => setCurrentStep(1)} variant="outline" className="text-slate-600 px-10 py-5 rounded-md text-base">Atrás</Button>
-                <Button onClick={() => setCurrentStep(3)} disabled={selectedStudents.length === 0} className="bg-[#00A3E0] hover:bg-[#008cc0] text-white px-10 py-5 rounded-md text-base">Continuar<ChevronRight className="w-5 h-5 ml-1" /></Button>
+                <Button onClick={() => setCurrentStep(1)} variant="outline" className="text-slate-600 px-10 py-5 rounded-full text-base hover:bg-slate-100 hover:scale-105 transition-all duration-200">Atrás</Button>
+                <Button onClick={() => setCurrentStep(3)} disabled={selectedStudents.length === 0} className="bg-[#00AEEF] hover:bg-[#33C4F4] text-white px-10 py-5 rounded-full text-base hover:scale-105 hover:shadow-lg transition-all duration-200">Continuar<ChevronRight className="w-5 h-5 ml-1" /></Button>
               </div>
             </div>
           </div>
@@ -215,8 +215,8 @@ export function AdminAssignments() {
             <div className="absolute bottom-0 left-0 w-full z-20 flex flex-col">
               <div className="h-20 w-full bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none" />
               <div className="bg-white px-8 pt-5 flex justify-between">
-                <Button onClick={() => setCurrentStep(2)} variant="outline" className="text-slate-600 px-10 py-5 rounded-md text-base">Atrás</Button>
-                <Button onClick={() => { alert("Asignación guardada con éxito"); setCurrentStep(1); }} className="bg-emerald-500 hover:bg-emerald-600 text-white px-10 py-5 rounded-md text-base"><Check className="w-5 h-5 mr-2" />Finalizar Asignación</Button>
+                <Button onClick={() => setCurrentStep(2)} variant="outline" className="text-slate-600 px-10 py-5 rounded-full text-base hover:bg-slate-100 hover:scale-105 transition-all duration-200">Atrás</Button>
+                <Button onClick={() => { alert("Asignación guardada con éxito"); setCurrentStep(1); }} className="bg-[#00AEEF] hover:bg-[#33C4F4] text-white px-10 py-5 rounded-full text-base hover:scale-105 hover:shadow-lg transition-all duration-200"><Check className="w-5 h-5 mr-2" />Finalizar Asignación</Button>
               </div>
             </div>
           </div>

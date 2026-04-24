@@ -88,7 +88,7 @@ export function AdminCourses() {
           <button 
             type="button"
             onClick={() => setIsDialogOpen(true)}
-            className="hidden md:flex items-center justify-center bg-[#00A3E0] hover:bg-[#008cc0] shadow-md shadow-blue-500/20 text-white font-medium transition-all px-6 py-2 rounded-md"
+            className="hidden md:flex items-center justify-center bg-[#00AEEF] hover:bg-[#33C4F4] text-white font-medium transition-all px-6 py-2.5 rounded-full hover:scale-105 hover:shadow-lg transition-all duration-200"
           >
             <Plus className="w-4 h-4 mr-2" />
             Añadir Curso
@@ -133,7 +133,7 @@ export function AdminCourses() {
               </div>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Cancelar</Button>
-                <Button type="submit" className="bg-[#00A3E0] hover:bg-[#008cc0] text-white">Guardar</Button>
+                <Button type="submit" className="bg-[#00AEEF] hover:bg-[#33C4F4] text-white hover:scale-105 hover:shadow-lg transition-all duration-200">Guardar</Button>
               </DialogFooter>
             </form>
           </DialogContent>
@@ -254,7 +254,7 @@ export function AdminCourses() {
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancelar</Button>
-              <Button type="submit" className="bg-[#00A3E0] hover:bg-[#008cc0] text-white">Guardar Cambios</Button>
+              <Button type="submit" className="bg-[#00AEEF] hover:bg-[#33C4F4] text-white hover:scale-105 hover:shadow-lg transition-all duration-200">Guardar Cambios</Button>
             </DialogFooter>
           </form>
         </DialogContent>
