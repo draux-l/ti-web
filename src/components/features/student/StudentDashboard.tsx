@@ -70,34 +70,34 @@ export function StudentDashboard({ onNavigate, onSelectCourse, onOpenXRCode }: S
       <div className="grid gap-4 md:grid-cols-3">
         <button
           onClick={() => router.push("/dashboard/student/courses")}
-          className="flex items-center justify-between gap-4 rounded-2xl bg-[#00A3E0] p-6 text-white transition-transform hover:scale-[1.02]"
+          className="flex items-center justify-between gap-4 rounded-3xl bg-[#00A3E0] p-10 text-white transition-transform hover:scale-[1.02]"
         >
-          <BookOpen className="size-10" />
+          <BookOpen className="size-14" />
           <div className="text-left">
-            <p className="text-2xl font-bold">3</p>
-            <p className="text-sm opacity-90">Cursos activos</p>
+            <p className="text-4xl font-bold">3</p>
+            <p className="text-base opacity-90">Cursos activos</p>
           </div>
         </button>
 
         <button
           onClick={() => router.push("/dashboard/student/progress")}
-          className="flex items-center justify-between gap-4 rounded-2xl bg-[#FFB800] p-6 text-gray-900 transition-transform hover:scale-[1.02]"
+          className="flex items-center justify-between gap-4 rounded-3xl bg-[#FFB800] p-10 text-gray-900 transition-transform hover:scale-[1.02]"
         >
-          <TrendingUp className="size-10" />
+          <TrendingUp className="size-14" />
           <div className="text-left">
-            <p className="text-2xl font-bold">65%</p>
-            <p className="text-sm opacity-80">Progreso general</p>
+            <p className="text-4xl font-bold">65%</p>
+            <p className="text-base opacity-80">Progreso general</p>
           </div>
         </button>
 
         <button
           onClick={() => router.push("/dashboard/student/courses")}
-          className="flex items-center justify-between gap-4 rounded-2xl bg-gray-100 p-6 text-gray-700 transition-transform hover:scale-[1.02]"
+          className="flex items-center justify-between gap-4 rounded-3xl bg-gray-100 p-10 text-gray-700 transition-transform hover:scale-[1.02]"
         >
-          <Clock className="size-10" />
+          <Clock className="size-14" />
           <div className="text-left">
-            <p className="text-2xl font-bold">12h</p>
-            <p className="text-sm text-gray-500">Tiempo total</p>
+            <p className="text-4xl font-bold">12h</p>
+            <p className="text-base text-gray-500">Tiempo total</p>
           </div>
         </button>
       </div>

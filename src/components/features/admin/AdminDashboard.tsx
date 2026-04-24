@@ -77,38 +77,29 @@ export function AdminDashboard() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-full">
-        <Card className="shadow-sm border-slate-200/60 overflow-hidden relative group">
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-semibold text-slate-600">{t("dashboard", "instructors")}</CardTitle>
-            <Users className="w-4 h-4 text-slate-300" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-slate-900">3</div>
-            <p className="text-xs text-slate-500 font-medium mt-1">{t("dashboard", "instructorsSub")}</p>
-          </CardContent>
-        </Card>
+        <button className="flex items-center justify-between gap-4 rounded-3xl bg-white p-10 text-gray-700 border border-gray-200 transition-transform hover:scale-[1.02]">
+          <div className="text-left">
+            <p className="text-base text-gray-500 mb-1">{t("dashboard", "instructors")}</p>
+            <p className="text-4xl font-bold">3</p>
+          </div>
+          <Users className="size-14" />
+        </button>
 
-        <Card className="shadow-sm border-slate-200/60 overflow-hidden relative group">
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-semibold text-slate-600">{t("dashboard", "students")}</CardTitle>
-            <Users className="w-4 h-4 text-slate-300" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-slate-900">5</div>
-            <p className="text-xs text-slate-500 font-medium mt-1">{t("dashboard", "studentsSub")}</p>
-          </CardContent>
-        </Card>
+        <button className="flex items-center justify-between gap-4 rounded-3xl bg-white p-10 text-gray-700 border border-gray-200 transition-transform hover:scale-[1.02]">
+          <div className="text-left">
+            <p className="text-base text-gray-500 mb-1">{t("dashboard", "students")}</p>
+            <p className="text-4xl font-bold">5</p>
+          </div>
+          <Users className="size-14" />
+        </button>
 
-        <Card className="shadow-sm border-slate-200/60 overflow-hidden relative group">
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-semibold text-slate-600">{t("dashboard", "courses")}</CardTitle>
-            <BookOpen className="w-4 h-4 text-slate-300" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-slate-900">2</div>
-            <p className="text-xs text-slate-500 font-medium mt-1">{t("dashboard", "coursesSub")}</p>
-          </CardContent>
-        </Card>
+        <button className="flex items-center justify-between gap-4 rounded-3xl bg-white p-10 text-gray-700 border border-gray-200 transition-transform hover:scale-[1.02]">
+          <div className="text-left">
+            <p className="text-base text-gray-500 mb-1">{t("dashboard", "courses")}</p>
+            <p className="text-4xl font-bold">2</p>
+          </div>
+          <BookOpen className="size-14" />
+        </button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
