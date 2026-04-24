@@ -16,6 +16,7 @@ import {
   ChevronLeft,
   LogOut,
   Lock,
+  Layout,
 } from "lucide-react"
 
 import {
