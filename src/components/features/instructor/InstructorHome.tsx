@@ -29,38 +29,29 @@ export function InstructorHome() {
       </div>
 
       <section className="grid gap-4 md:grid-cols-3">
-        <button
-          onClick={() => window.open("/dashboard/instructor/groups", "_blank")}
-          className="flex items-center justify-between gap-4 rounded-3xl bg-[#00AEEF] p-10 text-white transition-all duration-200 hover:bg-[#33C4F4] hover:scale-105 hover:shadow-lg"
-        >
+        <div className="flex items-center justify-between gap-4 rounded-3xl bg-[#00AEEF] p-10 text-white transition-all duration-200 hover:bg-[#33C4F4] hover:scale-105 hover:shadow-lg cursor-default">
           <Users className="size-14" />
           <div className="text-left">
             <p className="text-4xl font-bold">8</p>
             <p className="text-base opacity-90">Grupos Activos</p>
           </div>
-        </button>
+        </div>
 
-        <button
-          onClick={() => window.open("/dashboard/instructor/grades", "_blank")}
-          className="flex items-center justify-between gap-4 rounded-3xl bg-[#FFB800] p-10 text-gray-900 transition-all duration-200 hover:scale-105 hover:shadow-lg"
-        >
+        <div className="flex items-center justify-between gap-4 rounded-3xl bg-[#FFB800] p-10 text-gray-900 transition-all duration-200 hover:scale-105 hover:shadow-lg cursor-default">
           <TrendingUp className="size-14" />
           <div className="text-left">
             <p className="text-4xl font-bold">74%</p>
             <p className="text-base opacity-80">Progreso Promedio</p>
           </div>
-        </button>
+        </div>
 
-        <button
-          onClick={() => window.open("/dashboard/instructor/experiences", "_blank")}
-          className="flex items-center justify-between gap-4 rounded-3xl bg-white p-10 text-gray-700 border border-gray-200 transition-all duration-200 hover:scale-105 hover:shadow-lg"
-        >
+        <div className="flex items-center justify-between gap-4 rounded-3xl bg-white p-10 text-gray-700 border border-gray-200 transition-all duration-200 hover:scale-105 hover:shadow-lg cursor-default">
           <Clock3 className="size-14" />
           <div className="text-left">
             <p className="text-4xl font-bold">15</p>
             <p className="text-base text-gray-500">Experiencias por Vencer</p>
           </div>
-        </button>
+        </div>
       </section>
 
       <section className="grid gap-4 lg:grid-cols-3">
