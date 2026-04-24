@@ -140,8 +140,8 @@ export function AdminUsers() {
     <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Gestión de Usuarios</h1>
-          <p className="text-sm text-slate-500 mt-1">Administra estudiantes e instructores de la plataforma</p>
+          <h1 className="text-2xl font-bold text-[#1A1A2E]">Gestión de Usuarios</h1>
+          <p className="text-sm text-gray-500 mt-1">Administra estudiantes e instructores de la plataforma</p>
         </div>
         <Dialog open={isAddOpen} onOpenChange={(val) => { setIsAddOpen(val); if (!val) resetForm(); }}>
           <button 

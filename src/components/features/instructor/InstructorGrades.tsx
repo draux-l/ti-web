@@ -37,8 +37,8 @@ export function InstructorGrades() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-[#1A1A2E] md:text-3xl">Calificaciones y Progreso</h1>
-        <p className="mt-1 text-sm text-gray-500">Visualiza la evolución del grupo y actualiza puntuaciones en tiempo real.</p>
+        <h1 className="text-2xl font-bold text-[#1A1A2E]">Calificaciones y Progreso</h1>
+        <p className="text-sm text-gray-500 mt-1">Visualiza la evolución del grupo y actualiza puntuaciones en tiempo real.</p>
       </div>
 
       <section className="grid gap-4 xl:grid-cols-3">

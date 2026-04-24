@@ -61,10 +61,10 @@ export function AdminDashboard() {
     <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700">
+          <h1 className="text-2xl font-bold text-[#1A1A2E]">
             {t("dashboard", "title")}
           </h1>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-sm text-gray-500 mt-1">
             {t("dashboard", "subtitle")}
           </p>
         </div>

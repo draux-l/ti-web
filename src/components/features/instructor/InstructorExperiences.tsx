@@ -55,8 +55,8 @@ export function InstructorExperiences() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-[#1A1A2E] md:text-3xl">Control de Experiencias</h1>
-        <p className="mt-1 text-sm text-gray-500">Asigna actividades XR, reprograma fechas y controla intentos por grupo.</p>
+        <h1 className="text-2xl font-bold text-[#1A1A2E]">Control de Experiencias</h1>
+        <p className="text-sm text-gray-500 mt-1">Asigna actividades XR, reprograma fechas y controla intentos por grupo.</p>
       </div>
 
       <Card className="rounded-3xl bg-white shadow-sm">

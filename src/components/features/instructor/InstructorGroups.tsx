@@ -46,8 +46,8 @@ export function InstructorGroups() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-[#1A1A2E] md:text-3xl">Gestión de Grupos</h1>
-        <p className="mt-1 text-sm text-gray-500">Crea grupos y administra alumnos asignados para las experiencias XR.</p>
+        <h1 className="text-2xl font-bold text-[#1A1A2E]">Gestión de Grupos</h1>
+        <p className="text-sm text-gray-500 mt-1">Crea grupos y administra alumnos asignados para las experiencias XR.</p>
       </div>
 
       <Card className="rounded-3xl bg-white shadow-sm">

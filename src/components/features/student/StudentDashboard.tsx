@@ -55,8 +55,8 @@ export function StudentDashboard({ onNavigate, onSelectCourse, onOpenXRCode }: S
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Bienvenido de vuelta, Ander</h1>
-          <p className="mt-1 text-gray-500"> Continúa donde lo dejaste</p>
+          <h1 className="text-2xl font-bold text-[#1A1A2E]">Bienvenido de vuelta, Ander</h1>
+          <p className="text-sm text-gray-500 mt-1">Continúa donde lo dejaste</p>
         </div>
         <button
           onClick={onOpenXRCode}

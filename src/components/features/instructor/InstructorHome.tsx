@@ -23,8 +23,8 @@ export function InstructorHome() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#1A1A2E] md:text-3xl">Bienvenido de vuelta, Instructor</h1>
-          <p className="text-sm text-gray-500 md:text-base">Supervisa el avance de tus grupos y gestiona experiencias de aprendizaje XR.</p>
+          <h1 className="text-2xl font-bold text-[#1A1A2E]">Bienvenido de vuelta, Instructor</h1>
+          <p className="text-sm text-gray-500">Supervisa el avance de tus grupos y gestiona experiencias de aprendizaje XR.</p>
         </div>
         <button
           onClick={() => window.open("/dashboard/student", "_blank")}
