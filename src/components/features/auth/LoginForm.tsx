@@ -83,10 +83,13 @@ export function LoginForm() {
   }
 
   return (
-    <div suppressHydrationWarning className="flex min-h-svh flex-col items-center justify-center bg-muted p-6 md:p-10">
+    <div suppressHydrationWarning className="flex min-h-svh bg-[#E9EEF2] flex-col items-center justify-center bg-muted p-6 md:p-10">
       <div className="w-full max-w-md md:max-w-4xl">
-        <Card className="overflow-hidden p-0 border-none shadow-none ring-0">
-          <CardContent className="grid p-0 md:grid-cols-2">
+        <Card className="overflow-hidden p-[1px] bg-gradient-to-b from-white/50 via-[#D3DFE3]/4 backdrop-blur-xl backdrop-saturate-150 shadow-xl rounded-3xl ring-0">
+          <CardContent className="grid p-0 rounded-[31px]
+    bg-white/10
+    backdrop-blur-xl
+    md:grid-cols-2">
             <form onSubmit={handleSubmit(onSubmit)} className="p-6 md:p-8">
               <div className="flex flex-col gap-6">
                 <div className="flex flex-col items-center gap-2 text-center">
@@ -149,7 +152,7 @@ export function LoginForm() {
 
                   <Button
                     type="submit"
-                    className="w-full bg-[#00AEEF] hover:bg-[#33C4F4] text-white font-medium py-2 rounded-full transition-all duration-200 hover:scale-105 hover:shadow-lg"
+                    className="w-full bg-[#00AEEF]/70 backdrop-blur-xl border-none backdrop-saturate-150 shadow-xl rounded-3xl hover:bg-[#33C4F4] text-white font-medium py-2 rounded-full transition-all duration-200 hover:scale-105 hover:shadow-lg"
                     disabled={isLoading}
                   >
                     {isLoading ? (
