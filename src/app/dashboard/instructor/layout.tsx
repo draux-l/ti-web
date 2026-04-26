@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Home, Users, Layout, TrendingUp, Settings, Menu, X, Eye } from "lucide-react"
+import { Home, Users, Layout, TrendingUp, Settings, Menu, X, Eye, BookOpen } from "lucide-react"
 
 import { Sidebar } from "@/components/Sidebar"
 import { Button } from "@/components/ui/button"
@@ -27,6 +27,7 @@ export default function InstructorLayout({
 
   const mobileMenuItems = [
     { label: "Inicio", href: "/dashboard/instructor", icon: Home },
+    { label: "Mis Cursos", href: "/dashboard/instructor/courses", icon: BookOpen },
     { label: "Gestión de Grupos", href: "/dashboard/instructor/groups", icon: Users },
     { label: "Control de Experiencias", href: "/dashboard/instructor/experiences", icon: Layout },
     { label: "Calificaciones y Progreso", href: "/dashboard/instructor/grades", icon: TrendingUp },

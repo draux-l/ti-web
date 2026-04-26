@@ -53,6 +53,7 @@ export function Sidebar({ role, userName, onLogout, onChangePassword, onSettings
     ],
     instructor: [
       { label: t("sidebar", "inicio"), href: "/dashboard/instructor", icon: Home },
+      { label: t("sidebar", "misCursos"), href: "/dashboard/instructor/courses", icon: BookOpen },
       { label: t("sidebar", "misGrupos"), href: "/dashboard/instructor/groups", icon: Users },
       { label: t("sidebar", "controlExperiencias"), href: "/dashboard/instructor/experiences", icon: Layout },
       { label: t("sidebar", "calificaciones"), href: "/dashboard/instructor/grades", icon: BarChart3 },
