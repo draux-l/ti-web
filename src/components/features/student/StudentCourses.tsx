@@ -87,7 +87,7 @@ export function StudentCourses() {
         <StudentCourseDetail courseId={selectedCourse || "1"} onBack={handleBackToCourses} onOpenXRCode={() => handleOpenXRCode(true)} />
       ) : (
         <>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-6">
             <div><h1 className="text-2xl font-bold text-[#1A1A2E]">Mis Cursos</h1><p className="text-sm text-gray-500 mt-1">Gestiona tu aprendizaje</p></div>
             <button onClick={() => { setAutoTriggerXR(false); setIsXRAccessOpen(true) }} className="hidden md:flex items-center justify-center bg-[#00AEEF] hover:bg-[#33C4F4] text-white font-medium px-6 py-2.5 rounded-full hover:scale-105 hover:shadow-lg transition-all duration-200"><Monitor className="w-4 h-4 mr-2" />Código de Acceso XR</button>
           </div>
