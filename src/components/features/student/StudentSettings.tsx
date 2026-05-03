@@ -19,6 +19,8 @@ import {
   Key,
 } from "lucide-react"
 
+import { toast } from "sonner"
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -139,7 +141,7 @@ export function StudentSettings() {
 
   const handleGenerateXRAccessCode = () => {
     const code = Math.random().toString(36).substring(2, 8).toUpperCase()
-    alert(`Código de acceso XR generado: ${code}`)
+    toast.success(`Código de acceso XR generado: ${code}`)
   }
 
   return (

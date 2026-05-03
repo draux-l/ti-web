@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react"
 import { CalendarDays, PlusCircle, MinusCircle, RotateCcw, Trash2, Search } from "lucide-react"
+import { toast } from "sonner"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -130,6 +131,7 @@ export function InstructorExperiences() {
   const [filterCourseId, setFilterCourseId] = useState("todos")
   const [filterDate, setFilterDate] = useState("todos")
   const [filterStatus, setFilterStatus] = useState("todos")
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const experiencesOfCourse = useMemo(() => {
     return selectedCourseId ? courseExperiences[selectedCourseId] || [] : []
@@ -192,14 +194,17 @@ export function InstructorExperiences() {
     setSelectedGroupId("")
     setDueDate("")
     setDueTime("")
+    setIsSubmitting(false)
   }
 
   const handleAssign = () => {
+    if (isSubmitting) return
+    setIsSubmitting(true)
     const course = courses.find((c) => c.id === selectedCourseId)
     const experience = experiencesOfCourse.find((e) => e.id === selectedExperienceId)
     const group = groups.find((g) => g.id === selectedGroupId)
 
-    if (!course || !experience || !group || !dueDate || !dueTime) return
+    if (!course || !experience || !group || !dueDate || !dueTime) { setIsSubmitting(false); return }
 
     const newAssignment: Assignment = {
       id: `a-${Date.now()}`,
@@ -242,9 +247,20 @@ export function InstructorExperiences() {
   }
 
   const deleteAssignment = (id: string) => {
-    if (window.confirm("¿Estás seguro de eliminar esta asignación?")) {
-      setAssignments((prev) => prev.filter((item) => item.id !== id))
-    }
+    if (isSubmitting) return
+    setIsSubmitting(true)
+    toast.warning("¿Eliminar esta asignación?", {
+      description: "La asignación será eliminada permanentemente",
+      action: {
+        label: "Eliminar",
+        onClick: () => {
+          setAssignments((prev) => prev.filter((item) => item.id !== id))
+          toast.success("Asignación eliminada")
+        }
+      },
+      cancel: { label: "Cancelar", onClick: () => {} },
+      onDismiss: () => setIsSubmitting(false)
+    })
   }
 
   return (
@@ -531,7 +547,7 @@ export function InstructorExperiences() {
             <Button
               type="button"
               onClick={handleAssign}
-              disabled={!selectedCourseId || !selectedExperienceId || !selectedGroupId || !dueDate || !dueTime}
+              disabled={!selectedCourseId || !selectedExperienceId || !selectedGroupId || !dueDate || !dueTime || isSubmitting}
               className="rounded-full bg-[#00AEEF] hover:bg-[#33C4F4] text-white transition-all duration-200 hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:hover:scale-100"
             >
               Asignar Experiencia

@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react"
 import { Plus, UserMinus2, Users, Pencil, Search, Trash2 } from "lucide-react"
+import { toast } from "sonner"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -62,6 +63,7 @@ export function InstructorGroups() {
 
   const [groupSearch, setGroupSearch] = useState("")
   const [groupSpecialtyFilter, setGroupSpecialtyFilter] = useState("Todas")
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const filteredGroups = useMemo(() => {
     return groups.filter((group) => {
@@ -113,10 +115,12 @@ export function InstructorGroups() {
     setModalGroupName("")
     setSelectedStudentIds([])
     setNameError(false)
+    setIsSubmitting(false)
   }
 
   const handleSaveGroup = () => {
-    if (!modalGroupName.trim()) return
+    if (!modalGroupName.trim() || isSubmitting) return
+    setIsSubmitting(true)
 
     if (editingGroup) {
       setGroups(
@@ -147,21 +151,43 @@ export function InstructorGroups() {
   }
 
   const removeStudent = (groupId: string, studentId: string) => {
-    if (window.confirm("¿Estás seguro de quitar este estudiante del grupo?")) {
-      setGroups((prev) =>
-        prev.map((g) =>
-          g.id === groupId
-            ? { ...g, studentIds: g.studentIds.filter((id) => id !== studentId) }
-            : g
-        )
-      )
-    }
+    if (isSubmitting) return
+    setIsSubmitting(true)
+    toast.warning("¿Quitar este estudiante?", {
+      description: "El estudiante será removido del grupo",
+      action: {
+        label: "Quitar",
+        onClick: () => {
+          setGroups((prev) =>
+            prev.map((g) =>
+              g.id === groupId
+                ? { ...g, studentIds: g.studentIds.filter((id) => id !== studentId) }
+                : g
+            )
+          )
+          toast.success("Estudiante removido del grupo")
+        }
+      },
+      cancel: { label: "Cancelar", onClick: () => {} },
+      onDismiss: () => setIsSubmitting(false)
+    })
   }
 
   const deleteGroup = (groupId: string) => {
-    if (window.confirm("¿Estás seguro de eliminar este grupo?")) {
-      setGroups((prev) => prev.filter((g) => g.id !== groupId))
-    }
+    if (isSubmitting) return
+    setIsSubmitting(true)
+    toast.warning("¿Eliminar este grupo?", {
+      description: "El grupo y sus datos serán eliminados permanentemente",
+      action: {
+        label: "Eliminar",
+        onClick: () => {
+          setGroups((prev) => prev.filter((g) => g.id !== groupId))
+          toast.success("Grupo eliminado")
+        }
+      },
+      cancel: { label: "Cancelar", onClick: () => {} },
+      onDismiss: () => setIsSubmitting(false)
+    })
   }
 
   const getSpecialtyBadgeColor = (specialty: string) => {

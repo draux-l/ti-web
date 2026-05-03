@@ -3,13 +3,14 @@
 import * as React from "react"
 import { useState, useEffect, useMemo } from "react"
 import { Users, UserPlus, Pencil, Trash2, Search } from "lucide-react"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -36,9 +37,23 @@ export function AdminUsers() {
   const [isAddOpen, setIsAddOpen] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [formData, setFormData] = useState({ id: 0, nombre: "", apellidos: "", dni: "", email: "", rol: "alumno", status: "Activo" })
+  const [touched, setTouched] = useState({ nombre: false, apellidos: false, dni: false, email: false })
+  const [errors, setErrors] = useState({ nombre: false, apellidos: false, dni: false, email: false })
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState<string>("todos")
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const { setHeaderButton } = useHeaderButton()
+
+  const validateForm = () => {
+    const newErrors = {
+      nombre: !formData.nombre.trim(),
+      apellidos: !formData.apellidos.trim(),
+      dni: !formData.dni.trim(),
+      email: !formData.email.trim(),
+    }
+    setErrors(newErrors)
+    return !Object.values(newErrors).some(Boolean)
+  }
 
   const filteredAlumnos = useMemo(() => {
     return alumnos.filter((user) => {
@@ -69,31 +84,76 @@ export function AdminUsers() {
     return () => setHeaderButton(null)
   }, [setHeaderButton])
 
-  const resetForm = () => setFormData({ id: 0, nombre: "", apellidos: "", dni: "", email: "", rol: "alumno", status: "Activo" })
+  const resetForm = () => {
+    setFormData({ id: 0, nombre: "", apellidos: "", dni: "", email: "", rol: "alumno", status: "Activo" })
+    setTouched({ nombre: false, apellidos: false, dni: false, email: false })
+    setErrors({ nombre: false, apellidos: false, dni: false, email: false })
+    setIsSubmitting(false)
+  }
 
   const handleAddSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    const fullName = `${formData.nombre} ${formData.apellidos}`.trim()
-    const newUser = { id: Date.now(), name: fullName, dni: formData.dni, email: formData.email, status: formData.status }
-    if (formData.rol === "alumno") setAlumnos([...alumnos, newUser])
-    else setInstructores([...instructores, newUser])
-    setIsAddOpen(false)
-    resetForm()
+    if (isSubmitting) return
+    setIsSubmitting(true)
+    setTouched({ nombre: true, apellidos: true, dni: true, email: true })
+    if (!validateForm()) { setIsSubmitting(false); return }
+    toast.warning("¿Crear este usuario?", {
+      description: "El usuario se agregará al sistema",
+      action: {
+        label: "Crear",
+        onClick: () => {
+          const fullName = `${formData.nombre} ${formData.apellidos}`.trim()
+          const newUser = { id: Date.now(), name: fullName, dni: formData.dni, email: formData.email, status: formData.status }
+          if (formData.rol === "alumno") setAlumnos([...alumnos, newUser])
+          else setInstructores([...instructores, newUser])
+          setIsAddOpen(false)
+          resetForm()
+          toast.success("Usuario creado correctamente")
+        }
+      },
+      cancel: { label: "Cancelar", onClick: () => {} },
+      onDismiss: () => setIsSubmitting(false)
+    })
   }
 
   const handleEditSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    const fullName = `${formData.nombre} ${formData.apellidos}`.trim()
-    const updatedUser = { id: formData.id, name: fullName, dni: formData.dni, email: formData.email, status: formData.status }
-    if (formData.rol === "alumno") setAlumnos(alumnos.map(a => a.id === formData.id ? updatedUser : a))
-    else setInstructores(instructores.map(i => i.id === formData.id ? updatedUser : i))
-    setIsEditOpen(false)
-    resetForm()
+    if (isSubmitting) return
+    setIsSubmitting(true)
+    setTouched({ nombre: true, apellidos: true, dni: true, email: true })
+    if (!validateForm()) { setIsSubmitting(false); return }
+    toast.warning("¿Guardar cambios?", {
+      description: "Se actualizarán los datos del usuario",
+      action: {
+        label: "Guardar",
+        onClick: () => {
+          const fullName = `${formData.nombre} ${formData.apellidos}`.trim()
+          const updatedUser = { id: formData.id, name: fullName, dni: formData.dni, email: formData.email, status: formData.status }
+          if (formData.rol === "alumno") setAlumnos(alumnos.map(a => a.id === formData.id ? updatedUser : a))
+          else setInstructores(instructores.map(i => i.id === formData.id ? updatedUser : i))
+          setIsEditOpen(false)
+          resetForm()
+          toast.success("Usuario actualizado correctamente")
+        }
+      },
+      cancel: { label: "Cancelar", onClick: () => {} },
+      onDismiss: () => setIsSubmitting(false)
+    })
   }
 
   const handleDelete = (id: number, rol: string) => {
-    if (rol === "alumno") setAlumnos(alumnos.filter(a => a.id !== id))
-    else setInstructores(instructores.filter(i => i.id !== id))
+    toast.warning("¿Eliminar este usuario?", {
+      description: "El usuario será eliminado permanentemente",
+      action: {
+        label: "Eliminar",
+        onClick: () => {
+          if (rol === "alumno") setAlumnos(alumnos.filter(a => a.id !== id))
+          else setInstructores(instructores.filter(i => i.id !== id))
+          toast.success("Usuario eliminado")
+        }
+      },
+      cancel: { label: "Cancelar", onClick: () => {} }
+    })
   }
 
   const openEdit = (user: { id: number; name: string; dni: string; email: string; status: string }, rol: string) => {
@@ -156,11 +216,27 @@ export function AdminUsers() {
               <DialogHeader><DialogTitle>Agregar Nuevo Usuario</DialogTitle></DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="grid gap-2"><Label htmlFor="nombre">Nombre</Label><Input id="nombre" required value={formData.nombre} onChange={e => setFormData({...formData, nombre: e.target.value})} /></div>
-                  <div className="grid gap-2"><Label htmlFor="apellidos">Apellidos</Label><Input id="apellidos" required value={formData.apellidos} onChange={e => setFormData({...formData, apellidos: e.target.value})} /></div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="nombre" className={errors.nombre && touched.nombre ? "text-red-500" : ""}>Nombre</Label>
+                    <Input id="nombre" required value={formData.nombre} onChange={e => { setFormData({...formData, nombre: e.target.value}); setTouched({...touched, nombre: true}); }} onBlur={() => setTouched({...touched, nombre: true})} className={errors.nombre && touched.nombre ? "border-red-500 focus:border-red-500" : ""} />
+                    {errors.nombre && touched.nombre && <p className="text-xs text-red-500 mt-1">Este campo es requerido</p>}
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="apellidos" className={errors.apellidos && touched.apellidos ? "text-red-500" : ""}>Apellidos</Label>
+                    <Input id="apellidos" required value={formData.apellidos} onChange={e => { setFormData({...formData, apellidos: e.target.value}); setTouched({...touched, apellidos: true}); }} onBlur={() => setTouched({...touched, apellidos: true})} className={errors.apellidos && touched.apellidos ? "border-red-500 focus:border-red-500" : ""} />
+                    {errors.apellidos && touched.apellidos && <p className="text-xs text-red-500 mt-1">Este campo es requerido</p>}
+                  </div>
                 </div>
-                <div className="grid gap-2"><Label htmlFor="dni">DNI</Label><Input id="dni" required value={formData.dni} onChange={e => setFormData({...formData, dni: e.target.value})} /></div>
-                <div className="grid gap-2"><Label htmlFor="email">Email</Label><Input id="email" type="email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} /></div>
+                <div className="grid gap-2">
+                  <Label htmlFor="dni" className={errors.dni && touched.dni ? "text-red-500" : ""}>DNI</Label>
+                  <Input id="dni" required value={formData.dni} onChange={e => { setFormData({...formData, dni: e.target.value}); setTouched({...touched, dni: true}); }} onBlur={() => setTouched({...touched, dni: true})} className={errors.dni && touched.dni ? "border-red-500 focus:border-red-500" : ""} />
+                  {errors.dni && touched.dni && <p className="text-xs text-red-500 mt-1">Este campo es requerido</p>}
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="email" className={errors.email && touched.email ? "text-red-500" : ""}>Email</Label>
+                  <Input id="email" type="email" required value={formData.email} onChange={e => { setFormData({...formData, email: e.target.value}); setTouched({...touched, email: true}); }} onBlur={() => setTouched({...touched, email: true})} className={errors.email && touched.email ? "border-red-500 focus:border-red-500" : ""} />
+                  {errors.email && touched.email && <p className="text-xs text-red-500 mt-1">Este campo es requerido</p>}
+                </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-2"><Label>Rol</Label><Select value={formData.rol} onValueChange={(v) => setFormData({...formData, rol: v})}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="alumno">Alumno</SelectItem><SelectItem value="instructor">Instructor</SelectItem></SelectContent></Select></div>
                   <div className="grid gap-2"><Label>Estado</Label><Select value={formData.status} onValueChange={(v) => setFormData({...formData, status: v})}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="Activo">Activo</SelectItem><SelectItem value="Inactivo">Inactivo</SelectItem></SelectContent></Select></div>
@@ -168,7 +244,7 @@ export function AdminUsers() {
               </div>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setIsAddOpen(false)}>Cancelar</Button>
-                <Button type="submit" className="bg-[#00AEEF] hover:bg-[#33C4F4] text-white hover:scale-105 hover:shadow-lg transition-all duration-200">Guardar</Button>
+                <Button type="submit" disabled={isSubmitting} className="bg-[#00AEEF] hover:bg-[#33C4F4] text-white hover:scale-105 hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">Guardar</Button>
               </DialogFooter>
             </form>
           </DialogContent>
@@ -247,16 +323,32 @@ export function AdminUsers() {
             <DialogHeader><DialogTitle>Editar Usuario</DialogTitle></DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2"><Label htmlFor="edit-nombre">Nombre</Label><Input id="edit-nombre" required value={formData.nombre} onChange={e => setFormData({...formData, nombre: e.target.value})} /></div>
-                <div className="grid gap-2"><Label htmlFor="edit-apellidos">Apellidos</Label><Input id="edit-apellidos" required value={formData.apellidos} onChange={e => setFormData({...formData, apellidos: e.target.value})} /></div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-nombre" className={errors.nombre && touched.nombre ? "text-red-500" : ""}>Nombre</Label>
+                  <Input id="edit-nombre" required value={formData.nombre} onChange={e => { setFormData({...formData, nombre: e.target.value}); setTouched({...touched, nombre: true}); }} onBlur={() => setTouched({...touched, nombre: true})} className={errors.nombre && touched.nombre ? "border-red-500 focus:border-red-500" : ""} />
+                  {errors.nombre && touched.nombre && <p className="text-xs text-red-500 mt-1">Este campo es requerido</p>}
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-apellidos" className={errors.apellidos && touched.apellidos ? "text-red-500" : ""}>Apellidos</Label>
+                  <Input id="edit-apellidos" required value={formData.apellidos} onChange={e => { setFormData({...formData, apellidos: e.target.value}); setTouched({...touched, apellidos: true}); }} onBlur={() => setTouched({...touched, apellidos: true})} className={errors.apellidos && touched.apellidos ? "border-red-500 focus:border-red-500" : ""} />
+                  {errors.apellidos && touched.apellidos && <p className="text-xs text-red-500 mt-1">Este campo es requerido</p>}
+                </div>
               </div>
-              <div className="grid gap-2"><Label htmlFor="edit-dni">DNI</Label><Input id="edit-dni" required value={formData.dni} onChange={e => setFormData({...formData, dni: e.target.value})} /></div>
-              <div className="grid gap-2"><Label htmlFor="edit-email">Email</Label><Input id="edit-email" type="email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} /></div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-dni" className={errors.dni && touched.dni ? "text-red-500" : ""}>DNI</Label>
+                <Input id="edit-dni" required value={formData.dni} onChange={e => { setFormData({...formData, dni: e.target.value}); setTouched({...touched, dni: true}); }} onBlur={() => setTouched({...touched, dni: true})} className={errors.dni && touched.dni ? "border-red-500 focus:border-red-500" : ""} />
+                {errors.dni && touched.dni && <p className="text-xs text-red-500 mt-1">Este campo es requerido</p>}
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-email" className={errors.email && touched.email ? "text-red-500" : ""}>Email</Label>
+                <Input id="edit-email" type="email" required value={formData.email} onChange={e => { setFormData({...formData, email: e.target.value}); setTouched({...touched, email: true}); }} onBlur={() => setTouched({...touched, email: true})} className={errors.email && touched.email ? "border-red-500 focus:border-red-500" : ""} />
+                {errors.email && touched.email && <p className="text-xs text-red-500 mt-1">Este campo es requerido</p>}
+              </div>
               <div className="grid gap-2"><Label>Estado</Label><Select value={formData.status} onValueChange={(v) => setFormData({...formData, status: v})}><SelectTrigger><SelectValue placeholder="Selecciona un estado" /></SelectTrigger><SelectContent><SelectItem value="Activo">Activo</SelectItem><SelectItem value="Inactivo">Inactivo</SelectItem><SelectItem value="Mantenimiento">Mantenimiento</SelectItem></SelectContent></Select></div>
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setIsEditOpen(false)}>Cancelar</Button>
-              <Button type="submit" className="bg-[#00AEEF] hover:bg-[#33C4F4] text-white hover:scale-105 hover:shadow-lg transition-all duration-200">Guardar Cambios</Button>
+              <Button type="submit" disabled={isSubmitting} className="bg-[#00AEEF] hover:bg-[#33C4F4] text-white hover:scale-105 hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">Guardar Cambios</Button>
             </DialogFooter>
           </form>
         </DialogContent>

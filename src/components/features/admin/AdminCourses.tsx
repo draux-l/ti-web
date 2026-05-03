@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react"
 import { Plus, Pencil, Trash2, Search, X, FileArchive, Clock } from "lucide-react"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -60,6 +61,7 @@ export function AdminCourses() {
   const [experienceForm, setExperienceForm] = useState({ title: "", duration: "", description: "" })
   const [searchQuery, setSearchQuery] = useState("")
   const [specialtyFilter, setSpecialtyFilter] = useState<string>("todos")
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const { setHeaderButton } = useHeaderButton()
 
   const filteredCourses = useMemo(() => {
@@ -82,16 +84,42 @@ export function AdminCourses() {
 
   const handleAddCourse = (e: React.FormEvent) => {
     e.preventDefault()
-    setCourses([...courses, { ...formData, id: courses.length + 1, students: 0, experiences: [] }])
-    setIsDialogOpen(false)
-    setFormData({ id: 0, name: "", specialty: "", description: "", status: "Activo" })
+    if (isSubmitting) return
+    setIsSubmitting(true)
+    toast.warning("¿Crear este curso?", {
+      description: "El curso se agregará a la lista",
+      action: {
+        label: "Crear",
+        onClick: () => {
+          setCourses([...courses, { ...formData, id: courses.length + 1, students: 0, experiences: [] }])
+          setIsDialogOpen(false)
+          setFormData({ id: 0, name: "", specialty: "", description: "", status: "Activo" })
+          toast.success("Curso creado correctamente")
+        }
+      },
+      cancel: { label: "Cancelar", onClick: () => {} },
+      onDismiss: () => setIsSubmitting(false)
+    })
   }
 
   const handleEditCourse = (e: React.FormEvent) => {
     e.preventDefault()
-    setCourses(courses.map(c => c.id === formData.id ? { ...c, name: formData.name, specialty: formData.specialty, description: formData.description, status: formData.status } : c))
-    setIsEditDialogOpen(false)
-    setFormData({ id: 0, name: "", specialty: "", description: "", status: "Activo" })
+    if (isSubmitting) return
+    setIsSubmitting(true)
+    toast.warning("¿Guardar cambios?", {
+      description: "Se actualizarán los datos del curso",
+      action: {
+        label: "Guardar",
+        onClick: () => {
+          setCourses(courses.map(c => c.id === formData.id ? { ...c, name: formData.name, specialty: formData.specialty, description: formData.description, status: formData.status } : c))
+          setIsEditDialogOpen(false)
+          setFormData({ id: 0, name: "", specialty: "", description: "", status: "Activo" })
+          toast.success("Curso actualizado correctamente")
+        }
+      },
+      cancel: { label: "Cancelar", onClick: () => {} },
+      onDismiss: () => setIsSubmitting(false)
+    })
   }
 
   const openEditModal = (course: Course) => {
@@ -100,9 +128,20 @@ export function AdminCourses() {
   }
 
   const handleDeleteCourse = (id: number) => {
-    if (window.confirm("¿Seguro que deseas eliminar este curso?")) {
-      setCourses(courses.filter(c => c.id !== id))
-    }
+    toast.warning("¿Eliminar este curso?", {
+      description: "Esta acción no se puede deshacer",
+      action: {
+        label: "Eliminar",
+        onClick: () => {
+          setCourses(courses.filter(c => c.id !== id))
+          toast.success("Curso eliminado correctamente")
+        }
+      },
+      cancel: {
+        label: "Cancelar",
+        onClick: () => {}
+      }
+    })
   }
 
   const openExperiencesDrawer = (course: Course) => {
@@ -112,7 +151,8 @@ export function AdminCourses() {
 
   const handleAddExperience = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!selectedCourse) return
+    if (isSubmitting || !selectedCourse) return
+    setIsSubmitting(true)
     const newExp: Experience = {
       id: `e${Date.now()}`,
       title: experienceForm.title,
@@ -120,18 +160,40 @@ export function AdminCourses() {
       description: experienceForm.description,
       zipUploaded: false,
     }
-    setCourses(courses.map(c => c.id === selectedCourse.id ? { ...c, experiences: [...c.experiences, newExp] } : c))
-    setSelectedCourse({ ...selectedCourse, experiences: [...selectedCourse.experiences, newExp] })
-    setExperienceForm({ title: "", duration: "", description: "" })
+    toast.warning("¿Agregar esta experiencia?", {
+      description: "La experiencia se agregará al curso",
+      action: {
+        label: "Agregar",
+        onClick: () => {
+          setCourses(courses.map(c => c.id === selectedCourse.id ? { ...c, experiences: [...c.experiences, newExp] } : c))
+          setSelectedCourse({ ...selectedCourse, experiences: [...selectedCourse.experiences, newExp] })
+          setExperienceForm({ title: "", duration: "", description: "" })
+          toast.success("Experiencia agregada correctamente")
+        }
+      },
+      cancel: { label: "Cancelar", onClick: () => {} },
+      onDismiss: () => setIsSubmitting(false)
+    })
   }
 
   const handleDeleteExperience = (expId: string) => {
     if (!selectedCourse) return
-    if (window.confirm("¿Eliminar esta experiencia?")) {
-      const updated = selectedCourse.experiences.filter(e => e.id !== expId)
-      setCourses(courses.map(c => c.id === selectedCourse.id ? { ...c, experiences: updated } : c))
-      setSelectedCourse({ ...selectedCourse, experiences: updated })
-    }
+    toast.warning("¿Eliminar esta experiencia?", {
+      description: "Esta acción no se puede deshacer",
+      action: {
+        label: "Eliminar",
+        onClick: () => {
+          const updated = selectedCourse.experiences.filter(e => e.id !== expId)
+          setCourses(courses.map(c => c.id === selectedCourse.id ? { ...c, experiences: updated } : c))
+          setSelectedCourse({ ...selectedCourse, experiences: updated })
+          toast.success("Experiencia eliminada correctamente")
+        }
+      },
+      cancel: {
+        label: "Cancelar",
+        onClick: () => {}
+      }
+    })
   }
 
   return (
@@ -146,7 +208,7 @@ export function AdminCourses() {
           </p>
         </div>
 
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog open={isDialogOpen} onOpenChange={(v) => { setIsDialogOpen(v); if (!v) setIsSubmitting(false); }}>
           <button
             type="button"
             onClick={() => setIsDialogOpen(true)}
@@ -195,7 +257,7 @@ export function AdminCourses() {
               </div>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Cancelar</Button>
-                <Button type="submit" className="bg-[#00AEEF] hover:bg-[#33C4F4] text-white hover:scale-105 hover:shadow-lg transition-all duration-200">Guardar</Button>
+                <Button type="submit" disabled={isSubmitting} className="bg-[#00AEEF] hover:bg-[#33C4F4] text-white hover:scale-105 hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">Guardar</Button>
               </DialogFooter>
             </form>
           </DialogContent>
@@ -285,7 +347,7 @@ export function AdminCourses() {
         </CardContent>
       </Card>
 
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+      <Dialog open={isEditDialogOpen} onOpenChange={(v) => { setIsEditDialogOpen(v); if (!v) setIsSubmitting(false); }}>
         <DialogContent className="sm:max-w-[425px]">
           <form onSubmit={handleEditCourse}>
             <DialogHeader>
@@ -326,7 +388,7 @@ export function AdminCourses() {
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancelar</Button>
-              <Button type="submit" className="bg-[#00AEEF] hover:bg-[#33C4F4] text-white hover:scale-105 hover:shadow-lg transition-all duration-200">Guardar Cambios</Button>
+              <Button type="submit" disabled={isSubmitting} className="bg-[#00AEEF] hover:bg-[#33C4F4] text-white hover:scale-105 hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">Guardar Cambios</Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -426,7 +488,7 @@ export function AdminCourses() {
                       />
                     </div>
                   </div>
-                  <Button type="submit" className="w-full rounded-full bg-[#00AEEF] hover:bg-[#33C4F4]">
+                  <Button type="submit" disabled={isSubmitting} className="w-full rounded-full bg-[#00AEEF] hover:bg-[#33C4F4] disabled:opacity-50 disabled:cursor-not-allowed">
                     <Plus className="size-4 mr-2" />
                     Agregar Experiencia
                   </Button>
