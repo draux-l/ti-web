@@ -5,7 +5,6 @@ import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
 import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
 
@@ -15,27 +14,11 @@ import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { ForgotPasswordModal } from "./ForgotPasswordModal"
+import { loginSchema, type LoginFormData } from "@/validators/auth.schema"
+import { ROLE_REDIRECT } from "@/types/auth.types"
+import apiClient from "@/lib/api-client"
+import { useAuthStore } from "@/stores/auth.store"
 import tecsupLogin from "@/app/assets/tecsup_login.png"
-
-const loginSchema = z.object({
-  username: z.string().min(1, "El usuario es requerido"),
-  password: z.string().min(1, "La contraseña es requerida"),
-  remember: z.boolean().optional(),
-})
-
-type LoginForm = z.infer<typeof loginSchema>
-
-const ROLE_REDIRECT: Record<string, string> = {
-  student: "/dashboard/student",
-  instructor: "/dashboard/instructor",
-  admin: "/dashboard/admin",
-}
-
-const CREDENTIALS: Record<string, { password: string; role: string; name: string }> = {
-  ander: { password: "123456", role: "student", name: "Ander García" },
-  pareja: { password: "123456", role: "instructor", name: "Pareja Instructor" },
-  admin: { password: "123456", role: "admin", name: "Administrador" },
-}
 
 export function LoginForm() {
   const router = useRouter()
@@ -48,10 +31,10 @@ export function LoginForm() {
     setValue,
     watch,
     formState: { errors },
-  } = useForm<LoginForm>({
+  } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      username: "",
+      email: "",
       password: "",
       remember: false,
     },
@@ -60,26 +43,42 @@ export function LoginForm() {
 
   const remember = watch("remember")
 
-  const onSubmit = async (data: LoginForm) => {
+  const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true)
 
-    await new Promise((resolve) => setTimeout(resolve, 800))
-
-    const user = CREDENTIALS[data.username]
-
-    if (!user || user.password !== data.password) {
-      toast.error("Credenciales inválidas", {
-        description: "El usuario o la contraseña son incorrectos.",
+    try {
+      const res = await apiClient.post("/auth/sign-in", {
+        email: data.email,
+        password: data.password,
       })
+
+      const { token, user } = res.data
+
+      useAuthStore.getState().login(token, user)
+
+      toast.success("¡Bienvenido!", {
+        description: `Inicio de sesión exitoso.`,
+      })
+
+      const redirectPath = ROLE_REDIRECT[user.roleId] || "/dashboard/student"
+      router.push(redirectPath)
+    } catch (error: unknown) {
+      const message =
+        (error as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message || "No se pudo conectar con el servidor."
+
+      toast.error("Error de inicio de sesión", {
+        description: message,
+      })
+    } finally {
       setIsLoading(false)
-      return
     }
+  }
 
-    toast.success("¡Bienvenido!", {
-      description: `Inicio de sesión exitoso como ${user.name}.`,
-    })
-
-    router.push(ROLE_REDIRECT[user.role])
+  const handleGoogleLogin = () => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api"
+    const baseUrl = apiUrl.replace(/\/api$/, "")
+    window.location.href = `${baseUrl}/better-auth/google`
   }
 
   return (
@@ -101,16 +100,16 @@ export function LoginForm() {
 
                 <div className="grid gap-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="username">Usuario</Label>
+                    <Label htmlFor="email">Correo electrónico</Label>
                     <Input
-                      id="username"
-                      type="text"
-                      placeholder="Ingresa tu usuario"
+                      id="email"
+                      type="email"
+                      placeholder="correo@tecsup.edu.pe"
                       className="border-none shadow-none bg-slate-50/50 focus-visible:ring-1 focus-visible:ring-[#00AEEF]"
-                      {...register("username")}
+                      {...register("email")}
                     />
-                    {errors.username && (
-                      <p className="text-sm text-destructive">{errors.username.message}</p>
+                    {errors.email && (
+                      <p className="text-sm text-destructive">{errors.email.message}</p>
                     )}
                   </div>
 
@@ -171,7 +170,7 @@ export function LoginForm() {
                 </div>
 
                 <div className="grid grid-cols-3 gap-4">
-                  <Button variant="outline" type="button" className="w-full" onClick={() => router.push("/google-verify")}>
+                  <Button variant="outline" type="button" className="w-full" onClick={handleGoogleLogin}>
                     <svg className="mr-2 size-4" viewBox="0 0 24 24">
                       <path
                         d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"

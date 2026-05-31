@@ -7,6 +7,9 @@ import { Sidebar } from "@/components/Sidebar"
 import { Menu, X, Monitor, BookOpen, TrendingUp, Users, Settings } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { RouteGuard } from "@/components/guards/RouteGuard"
+import { useAuthStore } from "@/stores/auth.store"
+import { ROLE_LABEL_MAP } from "@/types/auth.types"
 import { HeaderButtonProvider, useHeaderButton } from "@/contexts/HeaderButtonContext"
 
 const MOBILE_MENU_ITEMS: Record<string, { label: string; href: string; icon: React.ElementType }[]> = {
@@ -22,12 +25,11 @@ function StudentLayoutContent({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
   const { headerButton } = useHeaderButton()
-  
+  const user = useAuthStore((s) => s.user)
+
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const userName = "Ander García"
-  const role = "student"
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768)
@@ -39,15 +41,15 @@ function StudentLayoutContent({ children }: { children: React.ReactNode }) {
   const menuItems = MOBILE_MENU_ITEMS["/dashboard/student"] || []
 
   const handleLogout = () => {
-    router.push("/login")
+    useAuthStore.getState().logout()
   }
 
   return (
     <div className="relative h-screen bg-slate-50">
       <div className="hidden md:block">
         <Sidebar 
-          role={role} 
-          userName={userName} 
+          role={(ROLE_LABEL_MAP[user?.roleId || 0] as "student") || "student"} 
+          userName={user?.name || "Estudiante"} 
           onLogout={handleLogout}
           onSettings={() => router.push("/dashboard/student/settings")}
           isCollapsed={isCollapsed}
@@ -128,7 +130,7 @@ function StudentLayoutContent({ children }: { children: React.ReactNode }) {
               className="mt-6 w-full rounded-full border-red-300 text-red-600 hover:bg-red-50"
               onClick={() => {
                 setIsMobileMenuOpen(false)
-                router.push("/login")
+                useAuthStore.getState().logout()
               }}
             >
               Cerrar sesión
@@ -146,8 +148,10 @@ export default function StudentLayout({
   children: React.ReactNode
 }) {
   return (
-    <HeaderButtonProvider>
-      <StudentLayoutContent>{children}</StudentLayoutContent>
-    </HeaderButtonProvider>
+    <RouteGuard allowedRoleIds={[4]}>
+      <HeaderButtonProvider>
+        <StudentLayoutContent>{children}</StudentLayoutContent>
+      </HeaderButtonProvider>
+    </RouteGuard>
   )
 }

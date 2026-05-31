@@ -7,6 +7,9 @@ import { Home, Users, Layout, TrendingUp, Settings, Menu, X, Eye, BookOpen } fro
 
 import { Sidebar } from "@/components/Sidebar"
 import { Button } from "@/components/ui/button"
+import { RouteGuard } from "@/components/guards/RouteGuard"
+import { useAuthStore } from "@/stores/auth.store"
+import { ROLE_LABEL_MAP } from "@/types/auth.types"
 
 export default function InstructorLayout({
   children,
@@ -17,6 +20,7 @@ export default function InstructorLayout({
   const [isMobile, setIsMobile] = useState(false)
   const router = useRouter()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const user = useAuthStore((s) => s.user)
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768)
@@ -35,12 +39,13 @@ export default function InstructorLayout({
   ]
 
   return (
+    <RouteGuard allowedRoleIds={[3]}>
     <div className="relative h-screen bg-slate-50">
       <div className="hidden md:block">
         <Sidebar
-          role="instructor"
-          userName="Pareja Instructor"
-          onLogout={() => router.push("/login")}
+          role={(ROLE_LABEL_MAP[user?.roleId || 0] as "instructor") || "instructor"}
+          userName={user?.name || "Instructor"}
+          onLogout={() => useAuthStore.getState().logout()}
           onSettings={() => router.push("/dashboard/instructor/settings")}
           isCollapsed={isCollapsed}
           onToggleCollapse={setIsCollapsed}
@@ -117,7 +122,7 @@ export default function InstructorLayout({
               className="mt-6 w-full rounded-full border-red-300 text-red-600 hover:bg-red-50"
               onClick={() => {
                 setIsMobileMenuOpen(false)
-                router.push("/login")
+                useAuthStore.getState().logout()
               }}
             >
               Cerrar sesión
@@ -126,5 +131,6 @@ export default function InstructorLayout({
         </div>
       )}
     </div>
+    </RouteGuard>
   )
 }

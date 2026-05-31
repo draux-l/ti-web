@@ -38,3 +38,10 @@ export const ROLE_REDIRECT: Record<number, string> = {
   3: "/dashboard/instructor",
   4: "/dashboard/student",
 }
+
+export const ROLE_LABEL_MAP: Record<number, string> = {
+  1: "superadmin",
+  2: "admin",
+  3: "instructor",
+  4: "student",
+}

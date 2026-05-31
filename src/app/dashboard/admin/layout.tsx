@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter, usePathname } from "next/navigation"
+import { usePathname } from "next/navigation"
 import Link from "next/link"
 import { Sidebar } from "@/components/Sidebar"
 import { Menu, X, Plus, Users, BookOpen, UserPlus } from "lucide-react"
@@ -17,6 +17,9 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
+import { RouteGuard } from "@/components/guards/RouteGuard"
+import { useAuthStore } from "@/stores/auth.store"
+import { ROLE_LABEL_MAP } from "@/types/auth.types"
 import { HeaderButtonProvider, useHeaderButton } from "@/contexts/HeaderButtonContext"
 
 const MOBILE_MENU_ITEMS: Record<string, { label: string; href: string; icon: React.ElementType }[]> = {
@@ -29,9 +32,9 @@ const MOBILE_MENU_ITEMS: Record<string, { label: string; href: string; icon: Rea
 }
 
 function AdminLayoutContent({ children }: { children: React.ReactNode }) {
-  const router = useRouter()
   const pathname = usePathname()
   const { headerButton } = useHeaderButton()
+  const user = useAuthStore((s) => s.user)
   
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
@@ -49,7 +52,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const menuItems = MOBILE_MENU_ITEMS["/dashboard/admin"] || []
 
   const handleLogout = () => {
-    router.push("/login")
+    useAuthStore.getState().logout()
   }
 
   const handlePasswordSubmit = (e: React.FormEvent) => {
@@ -67,8 +70,8 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     <div className="relative h-screen bg-slate-50">
       <div className="hidden md:block">
         <Sidebar 
-          role="admin" 
-          userName="Administrador" 
+          role={(ROLE_LABEL_MAP[user?.roleId || 0] as "admin") || "admin"} 
+          userName={user?.name || "Administrador"} 
           onLogout={handleLogout}
           onChangePassword={() => setIsPasswordModalOpen(true)}
           isCollapsed={isCollapsed}
@@ -149,7 +152,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
               className="mt-6 w-full rounded-full border-red-300 text-red-600 hover:bg-red-50"
               onClick={() => {
                 setIsMobileMenuOpen(false)
-                router.push("/login")
+                useAuthStore.getState().logout()
               }}
             >
               Cerrar sesión
@@ -198,8 +201,10 @@ export default function AdminLayout({
   children: React.ReactNode
 }) {
   return (
-    <HeaderButtonProvider>
-      <AdminLayoutContent>{children}</AdminLayoutContent>
-    </HeaderButtonProvider>
+    <RouteGuard allowedRoleIds={[1, 2]}>
+      <HeaderButtonProvider>
+        <AdminLayoutContent>{children}</AdminLayoutContent>
+      </HeaderButtonProvider>
+    </RouteGuard>
   )
 }
