@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
 import { Sidebar } from "@/components/Sidebar"
-import { Menu, X, Plus, Users, BookOpen, UserPlus } from "lucide-react"
+import { Menu, X, Plus, Users, BookOpen, UserPlus, Building, Layout } from "lucide-react"
 
 import {
   Dialog,
@@ -27,6 +27,8 @@ const MOBILE_MENU_ITEMS: Record<string, { label: string; href: string; icon: Rea
     { label: "Inicio", href: "/dashboard/admin", icon: Users },
     { label: "Usuarios", href: "/dashboard/admin/users", icon: Users },
     { label: "Cursos", href: "/dashboard/admin/courses", icon: BookOpen },
+    { label: "Departamentos", href: "/dashboard/admin/departments", icon: Building },
+    { label: "Especialidades", href: "/dashboard/admin/specialties", icon: Layout },
     { label: "Asignaciones", href: "/dashboard/admin/assignments", icon: Users },
   ],
 }

@@ -61,8 +61,10 @@ export function Sidebar({ role, userName, onLogout, onChangePassword, onSettings
     admin: [
       { label: t("sidebar", "inicio"), href: "/dashboard/admin", icon: Home },
       { label: t("sidebar", "usuarios"), href: "/dashboard/admin/users", icon: Users },
-      { label: t("sidebar", "cursos"), href: "/dashboard/admin/courses", icon: BookOpen },
-      { label: t("sidebar", "asignaciones"), href: "/dashboard/admin/assignments", icon: ClipboardList },
+      { label: t("sidebar", "Cursos"), href: "/dashboard/admin/courses", icon: BookOpen },
+      { label: t("sidebar", "Departamentos"), href: "/dashboard/admin/departments", icon: Building },
+      { label: t("sidebar", "Especialidades"), href: "/dashboard/admin/specialties", icon: Layout },
+      { label: t("sidebar", "Asignaciones"), href: "/dashboard/admin/assignments", icon: ClipboardList },
     ],
     superadmin: [
       { label: t("sidebar", "inicio"), href: "/dashboard/superadmin", icon: Home },
