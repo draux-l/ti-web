@@ -20,7 +20,7 @@ import { useAuthStore } from "@/stores/auth.store"
 import type { User, Specialty } from "@/types/auth.types"
 
 const EMPTY_FORM = {
-  id: 0,
+  id: "",
   nombre: "",
   apellidos: "",
   dni: "",
@@ -149,7 +149,9 @@ export function AdminUsers() {
       name: formData.nombre.trim(),
       lastName: formData.apellidos.trim(),
       documentNumber: formData.dni.trim(),
-      username: formData.email.trim().split("@")[0],
+      username: formData.email.trim().split("@")[0]
+        .replace(/[^a-zA-Z0-9_-]/g, "")
+        .slice(0, 30) || "user_" + Math.random().toString(36).slice(2, 8),
       orgId: currentOrgId,
       roleId,
       status: formData.status === "Activo",
@@ -231,23 +233,19 @@ export function AdminUsers() {
   }
 
   const openEdit = (user: User) => {
-    const [nombre, ...apellidos] = (user.name || "").split(" ")
-    const roleId = user.roleId
     setFormData({
-      id: 0,
-      nombre,
-      apellidos: apellidos.join(" "),
+      id: user.id,
+      nombre: user.name || "",
+      apellidos: user.lastName || "",
       dni: user.documentNumber || "",
       email: user.email,
       password: "",
-      rol: roleId === 3 ? "instructor" : "alumno",
+      rol: user.roleId === 3 ? "instructor" : "alumno",
       status: user.status ? "Activo" : "Inactivo",
       position: user.position || "",
       specialtyId: user.specialtyId ? String(user.specialtyId) : "",
       phone: user.phone || "",
     })
-    setFormData((prev) => ({ ...prev, id: Number(user.id) || 0 }))
-
     setIsEditOpen(true)
   }
 
@@ -285,7 +283,7 @@ export function AdminUsers() {
           <TableBody>
             {data.map((user) => (
               <TableRow key={user.id} className="hover:bg-slate-50/50 transition-colors">
-                <TableCell className="font-medium">{user.name}</TableCell>
+                <TableCell className="font-medium">{[user.name, user.lastName].filter(Boolean).join(" ") || "-"}</TableCell>
                 <TableCell>{user.documentNumber || "-"}</TableCell>
                 <TableCell>{user.email}</TableCell>
                 <TableCell>

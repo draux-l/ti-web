@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
-import { Plus, Pencil, Trash2, Search, X, FileArchive, Clock } from "lucide-react"
+import { useState, useEffect, useMemo, useCallback } from "react"
+import { Plus, Pencil, Trash2, Search, X, FileArchive, Clock, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
@@ -13,62 +13,106 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useHeaderButton } from "@/contexts/HeaderButtonContext"
+import apiClient from "@/lib/api-client"
+import { useAuthStore } from "@/stores/auth.store"
+import type { Specialty } from "@/types/auth.types"
 
-interface Experience {
-  id: string
-  title: string
-  duration: number
-  description: string
-  zipUploaded: boolean
-}
-
-interface Course {
+interface ApiCourse {
   id: number
   name: string
-  specialty: string
   description: string
-  students: number
-  status: string
-  experiences: Experience[]
+  specialtyId: number | null
+  status: boolean
 }
 
-const INITIAL_COURSES: Course[] = [
-  { id: 1, name: "Fundamentos de Realidad Virtual", specialty: "Desarrollo", description: "Introducción a los conceptos básicos de VR y entornos immersivos.", students: 14, status: "Activo", experiences: [
-    { id: "e1", title: "VR Lab 1 - Introducción", duration: 45, description: "Lab introductorio de VR", zipUploaded: true },
-    { id: "e2", title: "VR Lab 2 - Instalación del Ambiente", duration: 60, description: "Configuración del entorno de desarrollo", zipUploaded: true },
-    { id: "e3", title: "VR Lab 3 - Configuración SDK", duration: 55, description: "Instalación y configuración de SDK", zipUploaded: false },
-  ]},
-  { id: 2, name: "Desarrollo de Experiencias AR", specialty: "Diseño", description: "Creación de aplicaciones de realidad aumentada interactiva.", students: 19, status: "Activo", experiences: [
-    { id: "e4", title: "AR Fundamentals - Tracking", duration: 40, description: "Fundamentos de tracking en AR", zipUploaded: true },
-    { id: "e5", title: "AR Interactions - Gestures", duration: 50, description: "Interacciones mediante gestos", zipUploaded: false },
-  ]},
-  { id: 3, name: "Unity XR Basics", specialty: "Desarrollo", description: "Aprende los fundamentos de Unity para XR.", students: 8, status: "Inactivo", experiences: [
-    { id: "e6", title: "Unity Setup & Interface", duration: 30, description: "Configuración inicial de Unity", zipUploaded: true },
-    { id: "e7", title: "XR Interaction Toolkit", duration: 45, description: "Uso del toolkit de interacción XR", zipUploaded: true },
-    { id: "e8", title: "Building VR Scenes", duration: 60, description: "Construcción de escenas VR", zipUploaded: false },
-    { id: "e9", title: "Optimization Techniques", duration: 50, description: "Técnicas de optimización", zipUploaded: false },
-  ]},
-  { id: 4, name: "Diseño de Experiencias Inmersivas", specialty: "Diseño", description: "Principios de diseño para experiencias VR/AR.", students: 12, status: "Activo", experiences: [] },
-]
+interface ApiExperience {
+  id: number
+  courseId: number
+  name: string
+  type: string
+  score: number
+  order: number
+  description: string | null
+}
+
+const EMPTY_FORM = { id: 0, name: "", specialtyId: "", description: "", status: "Activo" }
+const EMPTY_EXP = { name: "", type: "VR", score: "100", duration: "", order: "", description: "" }
 
 export function AdminCourses() {
-  const [courses, setCourses] = useState<Course[]>(INITIAL_COURSES)
+  const [courses, setCourses] = useState<ApiCourse[]>([])
+  const [specialties, setSpecialties] = useState<Specialty[]>([])
+  const [isLoadingCourses, setIsLoadingCourses] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isExperiencesOpen, setIsExperiencesOpen] = useState(false)
-  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null)
-  const [formData, setFormData] = useState({ id: 0, name: "", specialty: "", description: "", status: "Activo" })
-  const [experienceForm, setExperienceForm] = useState({ title: "", duration: "", description: "" })
+  const [selectedCourse, setSelectedCourse] = useState<ApiCourse | null>(null)
+  const [experiences, setExperiences] = useState<ApiExperience[]>([])
+  const [isLoadingExperiences, setIsLoadingExperiences] = useState(false)
+  const [formData, setFormData] = useState(EMPTY_FORM)
+  const [experienceForm, setExperienceForm] = useState(EMPTY_EXP)
   const [searchQuery, setSearchQuery] = useState("")
   const [specialtyFilter, setSpecialtyFilter] = useState<string>("todos")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { setHeaderButton } = useHeaderButton()
+  const currentOrgId = useAuthStore((s) => s.user?.orgId)
+
+  const fetchCourses = useCallback(async () => {
+    setIsLoadingCourses(true)
+    try {
+      const res = await apiClient.get("/courses", {
+        params: { pageSize: 500, orgId: currentOrgId },
+      })
+      setCourses(res.data.data)
+    } catch {
+      toast.error("Error al cargar cursos")
+    } finally {
+      setIsLoadingCourses(false)
+    }
+  }, [currentOrgId])
+
+  const fetchSpecialties = useCallback(async () => {
+    try {
+      const res = await apiClient.get("/specialties", {
+        params: { pageSize: 500, orgId: currentOrgId },
+      })
+      setSpecialties(res.data.data)
+    } catch {
+      // silent
+    }
+  }, [currentOrgId])
+
+  const fetchExperiences = useCallback(async (courseId: number) => {
+    setIsLoadingExperiences(true)
+    try {
+      const res = await apiClient.get("/experiences", {
+        params: { courseId, orgId: currentOrgId },
+      })
+      setExperiences(res.data.data)
+    } catch {
+      setExperiences([])
+    } finally {
+      setIsLoadingExperiences(false)
+    }
+  }, [currentOrgId])
+
+  useEffect(() => {
+    fetchCourses()
+    fetchSpecialties()
+  }, [fetchCourses, fetchSpecialties])
+
+  const specialtyName = (specialtyId: number | null) => {
+    if (!specialtyId) return "-"
+    const s = specialties.find((sp) => sp.id === specialtyId)
+    return s?.name || "-"
+  }
 
   const filteredCourses = useMemo(() => {
     return courses.filter((course) => {
-      const matchesSearch = course.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          course.description.toLowerCase().includes(searchQuery.toLowerCase())
-      const matchesSpecialty = specialtyFilter === "todos" || course.specialty === specialtyFilter
+      const matchesSearch =
+        course.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (course.description || "").toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesSpecialty =
+        specialtyFilter === "todos" || String(course.specialtyId || "") === specialtyFilter
       return matchesSearch && matchesSpecialty
     })
   }, [courses, searchQuery, specialtyFilter])
@@ -82,137 +126,129 @@ export function AdminCourses() {
     return () => setHeaderButton(null)
   }, [setHeaderButton])
 
-  const handleAddCourse = (e: React.FormEvent) => {
+  const resetForm = () => {
+    setFormData(EMPTY_FORM)
+    setIsSubmitting(false)
+  }
+
+  const handleAddCourse = async (e: React.FormEvent) => {
     e.preventDefault()
     if (isSubmitting) return
     setIsSubmitting(true)
-    toast.warning("¿Crear este curso?", {
-      description: "El curso se agregará a la lista",
-      action: {
-        label: "Crear",
-        onClick: () => {
-          setCourses([...courses, { ...formData, id: courses.length + 1, students: 0, experiences: [] }])
-          setIsDialogOpen(false)
-          setFormData({ id: 0, name: "", specialty: "", description: "", status: "Activo" })
-          toast.success("Curso creado correctamente")
-        }
-      },
-      cancel: { label: "Cancelar", onClick: () => {} },
-      onDismiss: () => setIsSubmitting(false)
-    })
+    try {
+      await apiClient.post("/courses", {
+        name: formData.name.trim(),
+        description: formData.description.trim(),
+        specialtyId: formData.specialtyId ? Number(formData.specialtyId) : null,
+        status: formData.status === "Activo",
+      })
+      toast.success("Curso creado correctamente")
+      setIsDialogOpen(false)
+      resetForm()
+      fetchCourses()
+    } catch {
+      toast.error("Error al crear curso")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const handleEditCourse = (e: React.FormEvent) => {
+  const handleEditCourse = async (e: React.FormEvent) => {
     e.preventDefault()
     if (isSubmitting) return
     setIsSubmitting(true)
-    toast.warning("¿Guardar cambios?", {
-      description: "Se actualizarán los datos del curso",
-      action: {
-        label: "Guardar",
-        onClick: () => {
-          setCourses(courses.map(c => c.id === formData.id ? { ...c, name: formData.name, specialty: formData.specialty, description: formData.description, status: formData.status } : c))
-          setIsEditDialogOpen(false)
-          setFormData({ id: 0, name: "", specialty: "", description: "", status: "Activo" })
-          toast.success("Curso actualizado correctamente")
-        }
-      },
-      cancel: { label: "Cancelar", onClick: () => {} },
-      onDismiss: () => setIsSubmitting(false)
-    })
+    try {
+      await apiClient.patch(`/courses/${formData.id}`, {
+        name: formData.name.trim(),
+        description: formData.description.trim(),
+        specialtyId: formData.specialtyId ? Number(formData.specialtyId) : null,
+        status: formData.status === "Activo",
+      })
+      toast.success("Curso actualizado correctamente")
+      setIsEditDialogOpen(false)
+      resetForm()
+      fetchCourses()
+    } catch {
+      toast.error("Error al actualizar curso")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const openEditModal = (course: Course) => {
-    setFormData({ id: course.id, name: course.name, specialty: course.specialty, description: course.description, status: course.status })
+  const openEditModal = (course: ApiCourse) => {
+    setFormData({
+      id: course.id,
+      name: course.name,
+      specialtyId: course.specialtyId ? String(course.specialtyId) : "",
+      description: course.description || "",
+      status: course.status ? "Activo" : "Inactivo",
+    })
     setIsEditDialogOpen(true)
   }
 
-  const handleDeleteCourse = (id: number) => {
-    toast.warning("¿Eliminar este curso?", {
-      description: "Esta acción no se puede deshacer",
-      action: {
-        label: "Eliminar",
-        onClick: () => {
-          setCourses(courses.filter(c => c.id !== id))
-          toast.success("Curso eliminado correctamente")
-        }
-      },
-      cancel: {
-        label: "Cancelar",
-        onClick: () => {}
-      }
-    })
+  const handleDeleteCourse = async (id: number) => {
+    try {
+      await apiClient.delete(`/courses/${id}`)
+      toast.success("Curso eliminado correctamente")
+      fetchCourses()
+    } catch {
+      toast.error("Error al eliminar curso")
+    }
   }
 
-  const openExperiencesDrawer = (course: Course) => {
+  const openExperiencesDrawer = (course: ApiCourse) => {
     setSelectedCourse(course)
     setIsExperiencesOpen(true)
+    fetchExperiences(course.id)
   }
 
-  const handleAddExperience = (e: React.FormEvent) => {
+  const handleAddExperience = async (e: React.FormEvent) => {
     e.preventDefault()
     if (isSubmitting || !selectedCourse) return
     setIsSubmitting(true)
-    const newExp: Experience = {
-      id: `e${Date.now()}`,
-      title: experienceForm.title,
-      duration: parseInt(experienceForm.duration) || 0,
-      description: experienceForm.description,
-      zipUploaded: false,
+    try {
+      await apiClient.post("/experiences", {
+        name: experienceForm.name.trim(),
+        type: experienceForm.type,
+        score: parseInt(experienceForm.score) || 100,
+        duration: parseInt(experienceForm.duration) || 0,
+        order: parseInt(experienceForm.order) || 0,
+        description: experienceForm.description.trim(),
+        courseId: selectedCourse.id,
+      })
+      toast.success("Experiencia agregada correctamente")
+      setExperienceForm(EMPTY_EXP)
+      fetchExperiences(selectedCourse.id)
+    } catch {
+      toast.error("Error al agregar experiencia")
+    } finally {
+      setIsSubmitting(false)
     }
-    toast.warning("¿Agregar esta experiencia?", {
-      description: "La experiencia se agregará al curso",
-      action: {
-        label: "Agregar",
-        onClick: () => {
-          setCourses(courses.map(c => c.id === selectedCourse.id ? { ...c, experiences: [...c.experiences, newExp] } : c))
-          setSelectedCourse({ ...selectedCourse, experiences: [...selectedCourse.experiences, newExp] })
-          setExperienceForm({ title: "", duration: "", description: "" })
-          toast.success("Experiencia agregada correctamente")
-        }
-      },
-      cancel: { label: "Cancelar", onClick: () => {} },
-      onDismiss: () => setIsSubmitting(false)
-    })
   }
 
-  const handleDeleteExperience = (expId: string) => {
-    if (!selectedCourse) return
-    toast.warning("¿Eliminar esta experiencia?", {
-      description: "Esta acción no se puede deshacer",
-      action: {
-        label: "Eliminar",
-        onClick: () => {
-          const updated = selectedCourse.experiences.filter(e => e.id !== expId)
-          setCourses(courses.map(c => c.id === selectedCourse.id ? { ...c, experiences: updated } : c))
-          setSelectedCourse({ ...selectedCourse, experiences: updated })
-          toast.success("Experiencia eliminada correctamente")
-        }
-      },
-      cancel: {
-        label: "Cancelar",
-        onClick: () => {}
-      }
-    })
+  const handleDeleteExperience = async (expId: number) => {
+    try {
+      await apiClient.delete(`/experiences/${expId}`)
+      toast.success("Experiencia eliminada correctamente")
+      if (selectedCourse) fetchExperiences(selectedCourse.id)
+    } catch {
+      toast.error("Error al eliminar experiencia")
+    }
   }
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[#1A1A2E]">
-            Gestión de Cursos
-          </h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Administra los programas y cursos de la plataforma
-          </p>
+          <h1 className="text-2xl font-bold text-[#1A1A2E]">Gestion de Cursos</h1>
+          <p className="text-sm text-gray-500 mt-1">Administra los programas y cursos de la plataforma</p>
         </div>
 
-        <Dialog open={isDialogOpen} onOpenChange={(v) => { setIsDialogOpen(v); if (!v) setIsSubmitting(false); }}>
+        <Dialog open={isDialogOpen} onOpenChange={(v) => { setIsDialogOpen(v); if (!v) resetForm(); }}>
           <button
             type="button"
             onClick={() => setIsDialogOpen(true)}
-            className="hidden md:flex items-center justify-center bg-[#00AEEF] hover:bg-[#33C4F4] text-white font-medium transition-all px-6 py-2.5 rounded-full hover:scale-105 hover:shadow-lg transition-all duration-200"
+            className="hidden md:flex items-center justify-center bg-[#00AEEF] hover:bg-[#33C4F4] text-white font-medium transition-all px-6 py-2.5 rounded-full hover:scale-105 hover:shadow-lg"
           >
             <Plus className="w-4 h-4 mr-2" />
             Añadir Curso
@@ -230,19 +266,18 @@ export function AdminCourses() {
                 </div>
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="specialty">Especialidad</Label>
-                  <Select value={formData.specialty} onValueChange={(v) => setFormData({...formData, specialty: v})}>
+                  <Select value={formData.specialtyId} onValueChange={(v) => setFormData({...formData, specialtyId: v})}>
                     <SelectTrigger className="bg-slate-50/50"><SelectValue placeholder="Seleccionar Especialidad" /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Desarrollo">Desarrollo</SelectItem>
-                      <SelectItem value="Redes">Redes</SelectItem>
-                      <SelectItem value="Diseño">Diseño</SelectItem>
-                      <SelectItem value="Ciberseguridad">Ciberseguridad</SelectItem>
+                      {specialties.map((s) => (
+                        <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="description">Descripción</Label>
-                  <Input id="description" required value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} placeholder="Breve descripción del curso" className="bg-slate-50/50" />
+                  <Label htmlFor="description">Descripcion</Label>
+                  <Input id="description" required value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} placeholder="Breve descripcion del curso" className="bg-slate-50/50" />
                 </div>
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="status">Estado</Label>
@@ -257,7 +292,10 @@ export function AdminCourses() {
               </div>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Cancelar</Button>
-                <Button type="submit" disabled={isSubmitting} className="bg-[#00AEEF] hover:bg-[#33C4F4] text-white hover:scale-105 hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">Guardar</Button>
+                <Button type="submit" disabled={isSubmitting} className="bg-[#00AEEF] hover:bg-[#33C4F4] text-white hover:scale-105 hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                  {isSubmitting ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
+                  {isSubmitting ? "Creando..." : "Guardar"}
+                </Button>
               </DialogFooter>
             </form>
           </DialogContent>
@@ -274,7 +312,7 @@ export function AdminCourses() {
             <div className="relative flex-1 max-w-sm">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500" />
               <Input
-                placeholder="Buscar por nombre o descripción..."
+                placeholder="Buscar por nombre o descripcion..."
                 className="pl-9"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -284,10 +322,9 @@ export function AdminCourses() {
               <SelectTrigger className="w-[180px]"><SelectValue placeholder="Todas las especialidades" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="todos">Todas</SelectItem>
-                <SelectItem value="Desarrollo">Desarrollo</SelectItem>
-                <SelectItem value="Diseño">Diseño</SelectItem>
-                <SelectItem value="Redes">Redes</SelectItem>
-                <SelectItem value="Ciberseguridad">Ciberseguridad</SelectItem>
+                {specialties.map((s) => (
+                  <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -298,56 +335,70 @@ export function AdminCourses() {
                   <TableHead className="font-semibold text-slate-700">ID</TableHead>
                   <TableHead className="font-semibold text-slate-700">Nombre del Curso</TableHead>
                   <TableHead className="font-semibold text-slate-700">Especialidad</TableHead>
-                  <TableHead className="font-semibold text-slate-700">Descripción</TableHead>
-                  <TableHead className="font-semibold text-slate-700 text-center">Alumnos</TableHead>
+                  <TableHead className="font-semibold text-slate-700">Descripcion</TableHead>
                   <TableHead className="font-semibold text-slate-700 text-center">Experiencias</TableHead>
                   <TableHead className="font-semibold text-slate-700">Estado</TableHead>
                   <TableHead className="font-semibold text-slate-700 text-right">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredCourses.map((course) => (
-                  <TableRow key={course.id} className="hover:bg-slate-50/50 transition-colors">
-                    <TableCell className="font-medium text-slate-400">#00{course.id}</TableCell>
-                    <TableCell className="font-bold text-slate-900">{course.name}</TableCell>
-                    <TableCell className="text-slate-600 font-medium">
-                      <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-100">{course.specialty}</Badge>
-                    </TableCell>
-                    <TableCell className="text-slate-500 text-sm max-w-[250px] truncate">{course.description}</TableCell>
-                    <TableCell className="text-slate-500 text-center font-medium">{course.students}</TableCell>
-                    <TableCell className="text-center">
-                      <button
-                        onClick={() => openExperiencesDrawer(course)}
-                        className={`inline-flex items-center justify-center gap-1 px-3 py-1 rounded-full text-sm font-medium transition-all hover:scale-105 ${course.experiences.length > 0 ? "bg-[#00AEEF]/10 text-[#00AEEF] hover:bg-[#00AEEF]/20" : "bg-slate-100 text-slate-500 hover:bg-slate-200"}`}
-                      >
-                        <FileArchive className="size-4" />
-                        {course.experiences.length}
-                      </button>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={course.status === "Activo" ? "default" : "secondary"} className={course.status === 'Activo' ? 'bg-[#00A3E0] hover:bg-[#008cc0]' : 'bg-slate-200 text-slate-600 hover:bg-slate-300'}>
-                        {course.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button onClick={() => openEditModal(course)} variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-[#00A3E0] hover:bg-blue-50">
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button onClick={() => handleDeleteCourse(course.id)} variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-red-500 hover:bg-red-50">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                {isLoadingCourses ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-12">
+                      <div className="flex flex-col items-center gap-2">
+                        <Loader2 className="size-6 animate-spin text-[#00AEEF]" />
+                        <span className="text-sm text-gray-500">Cargando cursos...</span>
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : filteredCourses.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-12 text-gray-500">
+                      No se encontraron cursos
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredCourses.map((course) => (
+                    <TableRow key={course.id} className="hover:bg-slate-50/50 transition-colors">
+                      <TableCell className="font-medium text-slate-400">#{String(course.id).padStart(4, "0")}</TableCell>
+                      <TableCell className="font-bold text-slate-900">{course.name}</TableCell>
+                      <TableCell className="text-slate-600 font-medium">
+                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-100">{specialtyName(course.specialtyId)}</Badge>
+                      </TableCell>
+                      <TableCell className="text-slate-500 text-sm max-w-[250px] truncate">{course.description || "-"}</TableCell>
+                      <TableCell className="text-center">
+                        <button
+                          onClick={() => openExperiencesDrawer(course)}
+                          className="inline-flex items-center justify-center gap-1 px-3 py-1 rounded-full text-sm font-medium transition-all hover:scale-105 bg-[#00AEEF]/10 text-[#00AEEF] hover:bg-[#00AEEF]/20"
+                        >
+                          <FileArchive className="size-4" />
+                        </button>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={course.status ? "default" : "secondary"} className={course.status ? "bg-[#00A3E0] hover:bg-[#008cc0]" : "bg-slate-200 text-slate-600 hover:bg-slate-300"}>
+                          {course.status ? "Activo" : "Inactivo"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button onClick={() => openEditModal(course)} variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-[#00A3E0] hover:bg-blue-50">
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button onClick={() => handleDeleteCourse(course.id)} variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-red-500 hover:bg-red-50">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </div>
         </CardContent>
       </Card>
 
-      <Dialog open={isEditDialogOpen} onOpenChange={(v) => { setIsEditDialogOpen(v); if (!v) setIsSubmitting(false); }}>
+      <Dialog open={isEditDialogOpen} onOpenChange={(v) => { setIsEditDialogOpen(v); if (!v) resetForm(); }}>
         <DialogContent className="sm:max-w-[425px]">
           <form onSubmit={handleEditCourse}>
             <DialogHeader>
@@ -361,18 +412,17 @@ export function AdminCourses() {
               </div>
               <div className="flex flex-col gap-2">
                 <Label htmlFor="edit-specialty">Especialidad</Label>
-                <Select value={formData.specialty} onValueChange={(v) => setFormData({...formData, specialty: v})}>
+                <Select value={formData.specialtyId} onValueChange={(v) => setFormData({...formData, specialtyId: v})}>
                   <SelectTrigger className="bg-slate-50/50"><SelectValue placeholder="Seleccionar Especialidad" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Desarrollo">Desarrollo</SelectItem>
-                    <SelectItem value="Redes">Redes</SelectItem>
-                    <SelectItem value="Diseño">Diseño</SelectItem>
-                    <SelectItem value="Ciberseguridad">Ciberseguridad</SelectItem>
+                    {specialties.map((s) => (
+                      <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="edit-description">Descripción</Label>
+                <Label htmlFor="edit-description">Descripcion</Label>
                 <Input id="edit-description" required value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} className="bg-slate-50/50" />
               </div>
               <div className="flex flex-col gap-2">
@@ -388,7 +438,10 @@ export function AdminCourses() {
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancelar</Button>
-              <Button type="submit" disabled={isSubmitting} className="bg-[#00AEEF] hover:bg-[#33C4F4] text-white hover:scale-105 hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">Guardar Cambios</Button>
+              <Button type="submit" disabled={isSubmitting} className="bg-[#00AEEF] hover:bg-[#33C4F4] text-white hover:scale-105 hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                {isSubmitting ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
+                {isSubmitting ? "Guardando..." : "Guardar Cambios"}
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -420,43 +473,49 @@ export function AdminCourses() {
               </div>
 
               <div className="flex-1 overflow-y-auto p-6">
-                <div className="space-y-4">
-                  {selectedCourse.experiences.length === 0 ? (
-                    <div className="text-center py-12 text-slate-500">
-                      <FileArchive className="size-12 mx-auto mb-3 text-slate-300" />
-                      <p>No hay experiencias registradas</p>
-                      <p className="text-sm mt-1">Agrega la primera experiencia para este curso</p>
-                    </div>
-                  ) : (
-                    selectedCourse.experiences.map((exp) => (
-                      <div key={exp.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <h4 className="font-semibold text-slate-900">{exp.title}</h4>
-                              {exp.zipUploaded && (
-                                <Badge className="bg-emerald-100 text-emerald-700 text-xs">ZIP</Badge>
-                              )}
-                            </div>
-                            <p className="text-sm text-slate-500 mt-1">{exp.description}</p>
-                            <div className="flex items-center gap-1 mt-2 text-xs text-slate-400">
-                              <Clock className="size-3.5" />
-                              <span>{exp.duration} min</span>
-                            </div>
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDeleteExperience(exp.id)}
-                            className="size-8 rounded-full text-slate-400 hover:text-red-500 hover:bg-red-50"
-                          >
-                            <Trash2 className="size-4" />
-                          </Button>
-                        </div>
+                {isLoadingExperiences ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="size-8 animate-spin text-[#00AEEF]" />
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {experiences.length === 0 ? (
+                      <div className="text-center py-12 text-slate-500">
+                        <FileArchive className="size-12 mx-auto mb-3 text-slate-300" />
+                        <p>No hay experiencias registradas</p>
+                        <p className="text-sm mt-1">Agrega la primera experiencia para este curso</p>
                       </div>
-                    ))
-                  )}
-                </div>
+                    ) : (
+                      experiences.map((exp) => (
+                        <div key={exp.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <h4 className="font-semibold text-slate-900">{exp.name}</h4>
+                                <Badge className="bg-blue-100 text-blue-700 text-xs">{exp.type}</Badge>
+                              </div>
+                              {exp.description && (
+                                <p className="text-sm text-slate-500 mt-1">{exp.description}</p>
+                              )}
+                              <div className="flex items-center gap-3 mt-2 text-xs text-slate-400">
+                                <span className="flex items-center gap-1"><Clock className="size-3.5" />Score: {exp.score}</span>
+                                <span>Orden: {exp.order}</span>
+                              </div>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDeleteExperience(exp.id)}
+                              className="size-8 rounded-full text-slate-400 hover:text-red-500 hover:bg-red-50"
+                            >
+                              <Trash2 className="size-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className="p-6 border-t border-slate-200 bg-slate-50">
@@ -465,32 +524,57 @@ export function AdminCourses() {
                   <div className="grid gap-3">
                     <Input
                       required
-                      value={experienceForm.title}
-                      onChange={(e) => setExperienceForm({...experienceForm, title: e.target.value})}
-                      placeholder="Título de la experiencia"
+                      value={experienceForm.name}
+                      onChange={(e) => setExperienceForm({...experienceForm, name: e.target.value})}
+                      placeholder="Nombre de la experiencia"
                       className="bg-white rounded-xl"
                     />
-                    <div className="flex gap-3">
+                    <Input
+                      value={experienceForm.description}
+                      onChange={(e) => setExperienceForm({...experienceForm, description: e.target.value})}
+                      placeholder="Descripcion (opcional)"
+                      className="bg-white rounded-xl"
+                    />
+                    <div className="grid grid-cols-4 gap-3">
+                      <Select value={experienceForm.type} onValueChange={(v) => setExperienceForm({...experienceForm, type: v})}>
+                        <SelectTrigger className="bg-white rounded-xl"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="VR">VR</SelectItem>
+                          <SelectItem value="VIDEO">VIDEO</SelectItem>
+                          <SelectItem value="DOCUMENT">DOCUMENT</SelectItem>
+                          <SelectItem value="SLIDES">SLIDES</SelectItem>
+                          <SelectItem value="INDUCTION">INDUCTION</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <Input
                         required
                         type="number"
                         value={experienceForm.duration}
                         onChange={(e) => setExperienceForm({...experienceForm, duration: e.target.value})}
-                        placeholder="Duración (min)"
+                        placeholder="Duracion (min)"
                         className="bg-white rounded-xl"
                       />
                       <Input
                         required
-                        value={experienceForm.description}
-                        onChange={(e) => setExperienceForm({...experienceForm, description: e.target.value})}
-                        placeholder="Descripción"
+                        type="number"
+                        value={experienceForm.score}
+                        onChange={(e) => setExperienceForm({...experienceForm, score: e.target.value})}
+                        placeholder="Score"
+                        className="bg-white rounded-xl"
+                      />
+                      <Input
+                        required
+                        type="number"
+                        value={experienceForm.order}
+                        onChange={(e) => setExperienceForm({...experienceForm, order: e.target.value})}
+                        placeholder="Orden"
                         className="bg-white rounded-xl"
                       />
                     </div>
                   </div>
                   <Button type="submit" disabled={isSubmitting} className="w-full rounded-full bg-[#00AEEF] hover:bg-[#33C4F4] disabled:opacity-50 disabled:cursor-not-allowed">
-                    <Plus className="size-4 mr-2" />
-                    Agregar Experiencia
+                    {isSubmitting ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Plus className="size-4 mr-2" />}
+                    {isSubmitting ? "Agregando..." : "Agregar Experiencia"}
                   </Button>
                 </form>
               </div>
