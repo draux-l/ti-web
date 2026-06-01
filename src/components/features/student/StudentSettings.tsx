@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   User,
   Mail,
@@ -17,6 +17,7 @@ import {
   Monitor,
   RefreshCw,
   Key,
+  Loader2,
 } from "lucide-react"
 
 import { toast } from "sonner"
@@ -26,6 +27,8 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Label } from "@/components/ui/label"
+import apiClient from "@/lib/api-client"
+import { useAuthStore } from "@/stores/auth.store"
 
 type Tab = "perfil" | "correos" | "telefonos" | "dispositivos" | "notificaciones" | "seguridad"
 
@@ -54,12 +57,86 @@ interface GroupExperience {
 
 export function StudentSettings() {
   const [tab, setTab] = useState<Tab>("perfil")
-  const [user, setUser] = useState({
-    first_name: "Ander",
-    last_name: "García",
-    username: "ander.garcia",
-    preferred_language: "es",
-  })
+  const storeUser = useAuthStore((s) => s.user)
+  const [isSaving, setIsSaving] = useState(false)
+
+  const [firstName, setFirstName] = useState("")
+  const [lastName, setLastName] = useState("")
+
+  useEffect(() => {
+    if (storeUser) {
+      setFirstName(storeUser.name || "")
+      setLastName(storeUser.lastName || "")
+    }
+  }, [storeUser])
+
+  const handleSaveProfile = async () => {
+    if (!storeUser) return
+    setIsSaving(true)
+    try {
+      await apiClient.patch(`/users/${storeUser.id}`, {
+        name: firstName.trim(),
+        lastName: lastName.trim(),
+      })
+      toast.success("Perfil actualizado correctamente")
+    } catch {
+      toast.error("Error al guardar cambios")
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const [currentPassword, setCurrentPassword] = useState("")
+  const [newPassword, setNewPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [isChangingPassword, setIsChangingPassword] = useState(false)
+
+  const handleChangePassword = async () => {
+    if (newPassword !== confirmPassword) {
+      toast.error("Las contrasenas no coinciden")
+      return
+    }
+    if (newPassword.length < 8) {
+      toast.error("La contrasena debe tener al menos 8 caracteres")
+      return
+    }
+    setIsChangingPassword(true)
+    try {
+      await apiClient.post("/auth/change-password", {
+        currentPassword,
+        newPassword,
+      })
+      toast.success("Contrasena actualizada correctamente")
+      setCurrentPassword("")
+      setNewPassword("")
+      setConfirmPassword("")
+    } catch (err: unknown) {
+      const msg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        "No se pudo cambiar la contrasena"
+      toast.error(msg)
+    } finally {
+      setIsChangingPassword(false)
+    }
+  }
+
+  const [isGeneratingPin, setIsGeneratingPin] = useState(false)
+
+  const handleGenerateXRAccessCode = async () => {
+    setIsGeneratingPin(true)
+    try {
+      const res = await apiClient.post("/xr-auth/generate-pin")
+      const { pin } = res.data
+      toast.success(`Codigo de acceso XR: ${pin}`, {
+        description: "Ingresa este codigo en tu dispositivo VR. Expira en 5 minutos.",
+        duration: 10000,
+      })
+    } catch {
+      toast.error("Error al generar el codigo XR")
+    } finally {
+      setIsGeneratingPin(false)
+    }
+  }
 
   const [emails, setEmails] = useState<EmailRecord[]>([
     { id: "1", address: "ander.garcia@correo.com", type: "personal", is_primary: true, verified_at: "2024-01-15T10:00:00Z" },
@@ -139,22 +216,17 @@ export function StudentSettings() {
 
   const handleDeletePhone = (id: string) => setPhones((prev) => prev.filter((p) => p.id !== id))
 
-  const handleGenerateXRAccessCode = () => {
-    const code = Math.random().toString(36).substring(2, 8).toUpperCase()
-    toast.success(`Código de acceso XR generado: ${code}`)
-  }
-
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-[#1A1A2E] md:text-3xl">Configuración</h1>
+        <h1 className="text-2xl font-bold text-[#1A1A2E] md:text-3xl">Configuracion</h1>
         <p className="mt-1 text-sm text-gray-500">Gestiona tu perfil y preferencias de la plataforma.</p>
       </div>
 
       <div className="grid gap-2 rounded-2xl border border-gray-100 bg-white p-2 shadow-sm sm:grid-cols-3 lg:grid-cols-6 overflow-x-auto">
         <button className={`h-10 rounded-xl text-sm font-medium transition-colors whitespace-nowrap ${tab === "perfil" ? "bg-[#00AEEF] text-white" : "text-gray-600 hover:bg-slate-50"}`} onClick={() => setTab("perfil")}>Perfil</button>
         <button className={`h-10 rounded-xl text-sm font-medium transition-colors whitespace-nowrap ${tab === "correos" ? "bg-[#00AEEF] text-white" : "text-gray-600 hover:bg-slate-50"}`} onClick={() => setTab("correos")}>Correos</button>
-        <button className={`h-10 rounded-xl text-sm font-medium transition-colors whitespace-nowrap ${tab === "telefonos" ? "bg-[#00AEEF] text-white" : "text-gray-600 hover:bg-slate-50"}`} onClick={() => setTab("telefonos")}>Teléfonos</button>
+        <button className={`h-10 rounded-xl text-sm font-medium transition-colors whitespace-nowrap ${tab === "telefonos" ? "bg-[#00AEEF] text-white" : "text-gray-600 hover:bg-slate-50"}`} onClick={() => setTab("telefonos")}>Telefonos</button>
         <button className={`h-10 rounded-xl text-sm font-medium transition-colors whitespace-nowrap ${tab === "dispositivos" ? "bg-[#00AEEF] text-white" : "text-gray-600 hover:bg-slate-50"}`} onClick={() => setTab("dispositivos")}>Dispositivos</button>
         <button className={`h-10 rounded-xl text-sm font-medium transition-colors whitespace-nowrap ${tab === "notificaciones" ? "bg-[#00AEEF] text-white" : "text-gray-600 hover:bg-slate-50"}`} onClick={() => setTab("notificaciones")}>Notificaciones</button>
         <button className={`h-10 rounded-xl text-sm font-medium transition-colors whitespace-nowrap ${tab === "seguridad" ? "bg-[#00AEEF] text-white" : "text-gray-600 hover:bg-slate-50"}`} onClick={() => setTab("seguridad")}>Seguridad</button>
@@ -165,12 +237,15 @@ export function StudentSettings() {
           <CardHeader><CardTitle className="flex items-center gap-2"><User className="size-5 text-[#00AEEF]" />Perfil de Usuario</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-3">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4"><p className="text-sm font-medium text-[#1A1A2E] sm:w-40">Nombre:</p><Input value={user.first_name} onChange={(e) => setUser(p => ({...p, first_name: e.target.value}))} className="h-10 flex-1 rounded-full bg-slate-50" /></div>
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4"><p className="text-sm font-medium text-[#1A1A2E] sm:w-40">Apellido:</p><Input value={user.last_name} onChange={(e) => setUser(p => ({...p, last_name: e.target.value}))} className="h-10 flex-1 rounded-full bg-slate-50" /></div>
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4"><p className="text-sm font-medium text-[#1A1A2E] sm:w-40">Usuario:</p><Input value={user.username} disabled className="h-10 flex-1 rounded-full bg-slate-50 text-gray-500" /></div>
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4"><p className="text-sm font-medium text-[#1A1A2E] sm:w-40">Idioma:</p><Input value={user.preferred_language === "es" ? "Español" : user.preferred_language === "en" ? "English" : "Português"} disabled className="h-10 flex-1 rounded-full bg-slate-50 text-gray-500" /></div>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4"><p className="text-sm font-medium text-[#1A1A2E] sm:w-40">Nombre:</p><Input value={firstName} onChange={(e) => setFirstName(e.target.value)} className="h-10 flex-1 rounded-full bg-slate-50" /></div>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4"><p className="text-sm font-medium text-[#1A1A2E] sm:w-40">Apellido:</p><Input value={lastName} onChange={(e) => setLastName(e.target.value)} className="h-10 flex-1 rounded-full bg-slate-50" /></div>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4"><p className="text-sm font-medium text-[#1A1A2E] sm:w-40">Usuario:</p><Input value={storeUser?.username || ""} disabled className="h-10 flex-1 rounded-full bg-slate-50 text-gray-500" /></div>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4"><p className="text-sm font-medium text-[#1A1A2E] sm:w-40">Email:</p><Input value={storeUser?.email || ""} disabled className="h-10 flex-1 rounded-full bg-slate-50 text-gray-500" /></div>
             </div>
-            <Button className="rounded-full bg-[#00AEEF] text-white hover:bg-[#0098d1]"><Save className="size-4" />Guardar Cambios</Button>
+            <Button onClick={handleSaveProfile} disabled={isSaving} className="rounded-full bg-[#00AEEF] text-white hover:bg-[#0098d1]">
+              {isSaving ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Save className="size-4" />}
+              {isSaving ? "Guardando..." : "Guardar Cambios"}
+            </Button>
           </CardContent>
         </Card>
       )}
@@ -178,7 +253,7 @@ export function StudentSettings() {
       {tab === "correos" && (
         <Card className="rounded-3xl bg-white shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="flex items-center gap-2"><Mail className="size-5 text-[#00AEEF]" />Correos Electrónicos</CardTitle>
+            <CardTitle className="flex items-center gap-2"><Mail className="size-5 text-[#00AEEF]" />Correos Electronicos</CardTitle>
             <Button onClick={handleAddEmail} className="rounded-full bg-[#00AEEF] text-white hover:bg-[#0098d1]"><Plus className="size-4" />Agregar</Button>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -192,7 +267,7 @@ export function StudentSettings() {
                       {email.is_primary && <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100">Principal</Badge>}
                       {!email.verified_at && <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100"><AlertCircle className="size-3 mr-1" />Pendiente</Badge>}
                     </div>
-                    <span className="text-xs text-gray-500 capitalize">{email.type === "personal" ? "Personal" : email.type === "work" ? "Trabajo" : "Facturación"}</span>
+                    <span className="text-xs text-gray-500 capitalize">{email.type === "personal" ? "Personal" : email.type === "work" ? "Trabajo" : "Facturacion"}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
@@ -208,7 +283,7 @@ export function StudentSettings() {
       {tab === "telefonos" && (
         <Card className="rounded-3xl bg-white shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="flex items-center gap-2"><Phone className="size-5 text-[#00AEEF]" />Teléfonos</CardTitle>
+            <CardTitle className="flex items-center gap-2"><Phone className="size-5 text-[#00AEEF]" />Telefonos</CardTitle>
             <Button onClick={handleAddPhone} className="rounded-full bg-[#00AEEF] text-white hover:bg-[#0098d1]"><Plus className="size-4" />Agregar</Button>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -221,7 +296,7 @@ export function StudentSettings() {
                       <span className="text-sm font-medium text-[#1A1A2E]">{phone.number}</span>
                       {phone.is_primary && <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100">Principal</Badge>}
                     </div>
-                    <span className="text-xs text-gray-500 capitalize">{phone.type === "mobile" ? "Móvil" : phone.type === "landline" ? "Fijo" : "Trabajo"}</span>
+                    <span className="text-xs text-gray-500 capitalize">{phone.type === "mobile" ? "Movil" : phone.type === "landline" ? "Fijo" : "Trabajo"}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
@@ -238,7 +313,10 @@ export function StudentSettings() {
         <Card className="rounded-3xl bg-white shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="flex items-center gap-2"><Smartphone className="size-5 text-[#00AEEF]" />Dispositivos XR</CardTitle>
-            <Button onClick={handleGenerateXRAccessCode} className="rounded-full bg-[#00AEEF] text-white hover:bg-[#0098d1]"><Key className="size-4" />Generar código XR</Button>
+            <Button onClick={handleGenerateXRAccessCode} disabled={isGeneratingPin} className="rounded-full bg-[#00AEEF] text-white hover:bg-[#0098d1]">
+              {isGeneratingPin ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Key className="size-4" />}
+              {isGeneratingPin ? "Generando..." : "Generar codigo XR"}
+            </Button>
           </CardHeader>
           <CardContent className="space-y-3">
             {devices.map((device) => (
@@ -247,11 +325,11 @@ export function StudentSettings() {
                   <Monitor className="size-5 text-gray-400" />
                   <div>
                     <div className="text-sm font-medium text-[#1A1A2E]">{device.name}</div>
-                    <div className="text-xs text-gray-500">{device.platform} • {device.device_id}</div>
+                    <div className="text-xs text-gray-500">{device.platform} - {device.device_id}</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-gray-500">Última sync: {new Date(device.last_sync).toLocaleDateString("es-PE")}</span>
+                  <span className="text-xs text-gray-500">Ultima sync: {new Date(device.last_sync).toLocaleDateString("es-PE")}</span>
                   <Button variant="ghost" size="icon" className="size-8 rounded-full text-gray-400 hover:text-[#00AEEF]"><RefreshCw className="size-4" /></Button>
                 </div>
               </div>
@@ -262,7 +340,7 @@ export function StudentSettings() {
 
       {tab === "notificaciones" && (
         <Card className="rounded-3xl bg-white shadow-sm">
-          <CardHeader><CardTitle className="flex items-center gap-2"><Bell className="size-5 text-[#FFB800]" />Preferencias de Notificación</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="flex items-center gap-2"><Bell className="size-5 text-[#FFB800]" />Preferencias de Notificacion</CardTitle></CardHeader>
           <CardContent className="space-y-3">
             <NotificationItem label="Recordatorios de cursos" value={notifications.courseReminders} onChange={(v) => setNotifications(p => ({...p, courseReminders: v}))} />
             <NotificationItem label="Actualizaciones de calificaciones" value={notifications.gradeUpdates} onChange={(v) => setNotifications(p => ({...p, gradeUpdates: v}))} />
@@ -277,13 +355,19 @@ export function StudentSettings() {
           <CardHeader><CardTitle className="flex items-center gap-2"><Shield className="size-5 text-emerald-600" />Seguridad y Acceso</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div className="rounded-2xl border border-gray-100 bg-slate-50 p-4">
-              <p className="mb-2 text-sm font-semibold text-[#1A1A2E]">Actualizar contraseña</p>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <Input type="password" placeholder="Nueva contraseña" className="h-10 rounded-full bg-white" />
-                <Input type="password" placeholder="Confirmar contraseña" className="h-10 rounded-full bg-white" />
+              <p className="mb-2 text-sm font-semibold text-[#1A1A2E]">Actualizar contrasena</p>
+              <div className="grid gap-3">
+                <Input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} placeholder="Contrasena actual" className="h-10 rounded-full bg-white" />
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <Input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Nueva contrasena" className="h-10 rounded-full bg-white" />
+                  <Input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirmar contrasena" className="h-10 rounded-full bg-white" />
+                </div>
               </div>
             </div>
-            <Button variant="outline" className="rounded-full border-[#00AEEF] text-[#00AEEF] hover:bg-blue-50"><Lock className="size-4" />Cambiar contraseña</Button>
+            <Button onClick={handleChangePassword} disabled={isChangingPassword} variant="outline" className="rounded-full border-[#00AEEF] text-[#00AEEF] hover:bg-blue-50">
+              {isChangingPassword ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Lock className="size-4" />}
+              {isChangingPassword ? "Cambiando..." : "Cambiar contrasena"}
+            </Button>
           </CardContent>
         </Card>
       )}
@@ -294,7 +378,7 @@ export function StudentSettings() {
             <h3 className="text-lg font-bold text-[#1A1A2E] mb-4">{editingEmail ? "Editar correo" : "Agregar correo"}</h3>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Correo electrónico</Label>
+                <Label className="text-sm font-medium">Correo electronico</Label>
                 <Input value={emailForm.address} onChange={(e) => setEmailForm(p => ({...p, address: e.target.value}))} placeholder="correo@ejemplo.com" className="h-10 rounded-full" />
               </div>
               <div className="space-y-2">
@@ -302,7 +386,7 @@ export function StudentSettings() {
                 <select value={emailForm.type} onChange={(e) => setEmailForm(p => ({...p, type: e.target.value as EmailRecord["type"]}))} className="h-10 w-full rounded-full border border-gray-200 bg-slate-50 px-4">
                   <option value="personal">Personal</option>
                   <option value="work">Trabajo</option>
-                  <option value="billing">Facturación</option>
+                  <option value="billing">Facturacion</option>
                 </select>
               </div>
               <label className="flex items-center gap-2">
@@ -321,16 +405,16 @@ export function StudentSettings() {
       {phoneDialogOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-xl">
-            <h3 className="text-lg font-bold text-[#1A1A2E] mb-4">{editingPhone ? "Editar teléfono" : "Agregar teléfono"}</h3>
+            <h3 className="text-lg font-bold text-[#1A1A2E] mb-4">{editingPhone ? "Editar telefono" : "Agregar telefono"}</h3>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Número de teléfono</Label>
+                <Label className="text-sm font-medium">Numero de telefono</Label>
                 <Input value={phoneForm.number} onChange={(e) => setPhoneForm(p => ({...p, number: e.target.value}))} placeholder="+51 999 888 777" className="h-10 rounded-full" />
               </div>
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Tipo</Label>
                 <select value={phoneForm.type} onChange={(e) => setPhoneForm(p => ({...p, type: e.target.value as PhoneRecord["type"]}))} className="h-10 w-full rounded-full border border-gray-200 bg-slate-50 px-4">
-                  <option value="mobile">Móvil</option>
+                  <option value="mobile">Movil</option>
                   <option value="landline">Fijo</option>
                   <option value="work">Trabajo</option>
                 </select>

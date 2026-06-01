@@ -1,3 +1,9 @@
+export interface Specialty {
+  id: number
+  code: string
+  name: string
+}
+
 export interface User {
   id: string
   email: string
@@ -13,6 +19,11 @@ export interface User {
   documentNumber: string | null
   lastName: string | null
   preferredLanguage: string | null
+  status: boolean
+  position: string | null
+  phone: string | null
+  specialtyId: number | null
+  specialty: Specialty | null
 }
 
 export interface LoginRequest {

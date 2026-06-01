@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { QrCode, Copy, Check, Monitor } from "lucide-react"
+import { QrCode, Copy, Check, Monitor, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { toast } from "sonner"
+import apiClient from "@/lib/api-client"
 
 interface AccessCodeModalProps {
   isOpen: boolean
@@ -18,19 +19,17 @@ interface AccessCodeModalProps {
 }
 
 export function AccessCodeModal({ isOpen, onClose, autoTrigger = false }: AccessCodeModalProps) {
-  const [code, setCode] = useState("123 456")
+  const [code, setCode] = useState("")
   const [timeLeft, setTimeLeft] = useState(300)
   const [isCopied, setIsCopied] = useState(false)
   const [isSynced, setIsSynced] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
-    if (isOpen && !isSynced) {
-      const randomCode = Math.floor(100000 + Math.random() * 900000).toString()
-      setCode(`${randomCode.slice(0, 3)} ${randomCode.slice(3)}`)
-      setTimeLeft(300)
-      setIsCopied(false)
+    if (isOpen && !isSynced && !code) {
+      generatePin()
     }
-  }, [isOpen, isSynced])
+  }, [isOpen, isSynced, code])
 
   useEffect(() => {
     if (timeLeft > 0 && isOpen && !isSynced) {
@@ -50,20 +49,35 @@ export function AccessCodeModal({ isOpen, onClose, autoTrigger = false }: Access
     }
   }, [autoTrigger, isOpen])
 
+  const generatePin = async () => {
+    setIsLoading(true)
+    try {
+      const res = await apiClient.post("/xr-auth/generate-pin")
+      const pin: string = res.data.pin
+      setCode(`${pin.slice(0, 3)} ${pin.slice(3)}`)
+      setTimeLeft(300)
+      setIsCopied(false)
+    } catch {
+      toast.error("Error al generar el codigo de acceso")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(code.replace(" ", ""))
       setIsCopied(true)
-      toast.success("Código copiado al portapapeles")
+      toast.success("Codigo copiado al portapapeles")
       setTimeout(() => setIsCopied(false), 2000)
     } catch {
-      toast.error("Error al copiar el código")
+      toast.error("Error al copiar el codigo")
     }
   }
 
   const handleClose = () => {
     setIsSynced(false)
-    setCode("123 456")
+    setCode("")
     setTimeLeft(300)
     onClose()
   }
@@ -82,9 +96,9 @@ export function AccessCodeModal({ isOpen, onClose, autoTrigger = false }: Access
             <div className="mb-6 flex size-20 items-center justify-center rounded-full bg-green-100">
               <Check className="size-10 text-green-600" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900">¡Visor Sincronizado!</h2>
+            <h2 className="text-2xl font-bold text-gray-900">Visor Sincronizado!</h2>
             <p className="mt-2 text-center text-gray-500">
-              Tu dispositivo está conectado y listo para la experiencia XR.
+              Tu dispositivo esta conectado y listo para la experiencia XR.
             </p>
 
             <div className="mt-8 w-full rounded-xl border border-gray-200 bg-gray-50 p-4">
@@ -120,7 +134,7 @@ export function AccessCodeModal({ isOpen, onClose, autoTrigger = false }: Access
       <DialogContent className="rounded-2xl bg-white p-6 sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold text-gray-900">
-            Código de Acceso XR
+            Codigo de Acceso XR
           </DialogTitle>
         </DialogHeader>
 
@@ -137,26 +151,32 @@ export function AccessCodeModal({ isOpen, onClose, autoTrigger = false }: Access
                 <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[#00AEEF] text-xs font-bold text-white">
                   2
                 </span>
-                <span>Abrir la aplicación &quot;Tecsup Inmersivo&quot;</span>
+                <span>Abrir la aplicacion &quot;Tecsup Inmersivo&quot;</span>
               </li>
               <li className="flex gap-3">
                 <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[#00AEEF] text-xs font-bold text-white">
                   3
                 </span>
-                <span>Ingresar el código de acceso de 6 dígitos</span>
+                <span>Ingresar el codigo de acceso de 6 digitos</span>
               </li>
             </ol>
           </div>
 
           <div className="flex flex-col items-center">
-            <div className="mb-4 rounded-2xl border-2 border-dashed border-[#00AEEF] bg-blue-50/30 p-8">
-              <p className="mb-4 text-center text-sm font-medium text-gray-500">
-                Código de Acceso
-              </p>
-              <p className="text-center text-5xl font-bold tracking-widest text-[#00AEEF]">
-                {code}
-              </p>
-            </div>
+            {isLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="size-10 animate-spin text-[#00AEEF]" />
+              </div>
+            ) : (
+              <div className="mb-4 rounded-2xl border-2 border-dashed border-[#00AEEF] bg-blue-50/30 p-8">
+                <p className="mb-4 text-center text-sm font-medium text-gray-500">
+                  Codigo de Acceso
+                </p>
+                <p className="text-center text-5xl font-bold tracking-widest text-[#00AEEF]">
+                  {code}
+                </p>
+              </div>
+            )}
 
             <div className="flex w-full items-center justify-between rounded-xl bg-gray-50 px-4 py-3">
               <div className="flex items-center gap-2 text-sm text-gray-500">
@@ -174,6 +194,7 @@ export function AccessCodeModal({ isOpen, onClose, autoTrigger = false }: Access
                 variant="outline"
                 size="sm"
                 onClick={handleCopy}
+                disabled={!code}
                 className="rounded-full"
               >
                 {isCopied ? (
@@ -192,7 +213,7 @@ export function AccessCodeModal({ isOpen, onClose, autoTrigger = false }: Access
           </div>
 
           <p className="text-center text-xs text-gray-400">
-            Mantén esta pantalla visible mientras dure la sincronización
+            Manten esta pantalla visible mientras dure la sincronizacion
           </p>
         </div>
       </DialogContent>
