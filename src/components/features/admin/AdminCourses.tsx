@@ -16,6 +16,7 @@ import { useHeaderButton } from "@/contexts/HeaderButtonContext"
 import apiClient from "@/lib/api-client"
 import { useAuthStore } from "@/stores/auth.store"
 import type { Specialty } from "@/types/auth.types"
+import { isName } from "@/validators/form.validators"
 
 interface ApiCourse {
   id: number
@@ -53,6 +54,7 @@ export function AdminCourses() {
   const [searchQuery, setSearchQuery] = useState("")
   const [specialtyFilter, setSpecialtyFilter] = useState<string>("todos")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [courseNameError, setCourseNameError] = useState("")
   const { setHeaderButton } = useHeaderButton()
   const currentOrgId = useAuthStore((s) => s.user?.orgId)
 
@@ -134,9 +136,14 @@ export function AdminCourses() {
   const handleAddCourse = async (e: React.FormEvent) => {
     e.preventDefault()
     if (isSubmitting) return
+    if (!isName(formData.name)) {
+      setCourseNameError("Solo letras y espacios")
+      return
+    }
+    setCourseNameError("")
     setIsSubmitting(true)
     try {
-      await apiClient.post("/courses", {
+      const res = await apiClient.post("/courses", {
         name: formData.name.trim(),
         description: formData.description.trim(),
         specialtyId: formData.specialtyId ? Number(formData.specialtyId) : null,
@@ -186,14 +193,22 @@ export function AdminCourses() {
     setIsEditDialogOpen(true)
   }
 
-  const handleDeleteCourse = async (id: number) => {
-    try {
-      await apiClient.delete(`/courses/${id}`)
-      toast.success("Curso eliminado correctamente")
-      fetchCourses()
-    } catch {
-      toast.error("Error al eliminar curso")
-    }
+  const handleDeleteCourse = (id: number) => {
+    toast.warning("¿Eliminar este curso?", {
+      description: "Esta accion no se puede deshacer",
+      action: {
+        label: "Eliminar",
+        onClick: () => {
+          apiClient.delete(`/courses/${id}`)
+            .then(() => {
+              toast.success("Curso eliminado correctamente")
+              fetchCourses()
+            })
+            .catch(() => toast.error("Error al eliminar curso"))
+        },
+      },
+      cancel: { label: "Cancelar", onClick: () => {} },
+    })
   }
 
   const openExperiencesDrawer = (course: ApiCourse) => {
@@ -226,14 +241,22 @@ export function AdminCourses() {
     }
   }
 
-  const handleDeleteExperience = async (expId: number) => {
-    try {
-      await apiClient.delete(`/experiences/${expId}`)
-      toast.success("Experiencia eliminada correctamente")
-      if (selectedCourse) fetchExperiences(selectedCourse.id)
-    } catch {
-      toast.error("Error al eliminar experiencia")
-    }
+  const handleDeleteExperience = (expId: number) => {
+    toast.warning("¿Eliminar esta experiencia?", {
+      description: "Esta accion no se puede deshacer",
+      action: {
+        label: "Eliminar",
+        onClick: () => {
+          apiClient.delete(`/experiences/${expId}`)
+            .then(() => {
+              toast.success("Experiencia eliminada correctamente")
+              if (selectedCourse) fetchExperiences(selectedCourse.id)
+            })
+            .catch(() => toast.error("Error al eliminar experiencia"))
+        },
+      },
+      cancel: { label: "Cancelar", onClick: () => {} },
+    })
   }
 
   return (
@@ -262,7 +285,8 @@ export function AdminCourses() {
               <div className="grid gap-4 py-4">
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="name">Nombre del Curso</Label>
-                  <Input id="name" required value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} placeholder="Ej: Realidad Mixta Avanzada" className="bg-slate-50/50" />
+                  <Input id="name" required value={formData.name} onChange={(e) => { setFormData({...formData, name: e.target.value}); setCourseNameError(""); }} placeholder="Ej: Realidad Mixta Avanzada" className={courseNameError ? "border-red-500" : "bg-slate-50/50"} />
+                  {courseNameError && <p className="text-xs text-red-500 mt-1">{courseNameError}</p>}
                 </div>
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="specialty">Especialidad</Label>
@@ -582,6 +606,7 @@ export function AdminCourses() {
           )}
         </div>
       </div>
+
     </div>
   )
 }

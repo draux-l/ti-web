@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useHeaderButton } from "@/contexts/HeaderButtonContext"
 import apiClient from "@/lib/api-client"
 import { useAuthStore } from "@/stores/auth.store"
+import { isName } from "@/validators/form.validators"
 
 interface Department {
   id: number
@@ -34,6 +35,7 @@ export function AdminDepartments() {
   const [formData, setFormData] = useState(EMPTY_FORM)
   const [searchQuery, setSearchQuery] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [nameError, setNameError] = useState("")
   const { setHeaderButton } = useHeaderButton()
   const currentOrgId = useAuthStore((s) => s.user?.orgId)
 
@@ -70,6 +72,11 @@ export function AdminDepartments() {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault()
     if (isSubmitting || !formData.name.trim()) return
+    if (!isName(formData.name)) {
+      setNameError("Solo letras y espacios")
+      return
+    }
+    setNameError("")
     setIsSubmitting(true)
     try {
       await apiClient.post("/departments", {
@@ -120,14 +127,22 @@ export function AdminDepartments() {
     setIsEditDialogOpen(true)
   }
 
-  const handleDelete = async (id: number) => {
-    try {
-      await apiClient.delete(`/departments/${id}`)
-      toast.success("Departamento eliminado")
-      fetchDepartments()
-    } catch {
-      toast.error("Error al eliminar departamento")
-    }
+  const handleDelete = (id: number) => {
+    toast.warning("¿Eliminar este departamento?", {
+      description: "Esta accion no se puede deshacer",
+      action: {
+        label: "Eliminar",
+        onClick: () => {
+          apiClient.delete(`/departments/${id}`)
+            .then(() => {
+              toast.success("Departamento eliminado")
+              fetchDepartments()
+            })
+            .catch(() => toast.error("Error al eliminar departamento"))
+        },
+      },
+      cancel: { label: "Cancelar", onClick: () => {} },
+    })
   }
 
   const filtered = departments.filter((d) =>
@@ -160,7 +175,8 @@ export function AdminDepartments() {
               <div className="grid gap-4 py-4">
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="name">Nombre</Label>
-                  <Input id="name" required value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} placeholder="Ej: IT Department" className="bg-slate-50/50" />
+                  <Input id="name" required value={formData.name} onChange={(e) => { setFormData({...formData, name: e.target.value}); setNameError(""); }} placeholder="Ej: IT Department" className={nameError ? "border-red-500" : "bg-slate-50/50"} />
+                  {nameError && <p className="text-xs text-red-500 mt-1">{nameError}</p>}
                 </div>
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="desc">Descripcion</Label>
@@ -278,6 +294,7 @@ export function AdminDepartments() {
           </form>
         </DialogContent>
       </Dialog>
+
     </div>
   )
 }

@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useHeaderButton } from "@/contexts/HeaderButtonContext"
 import apiClient from "@/lib/api-client"
 import { useAuthStore } from "@/stores/auth.store"
+import { isName, isAlphaNumeric } from "@/validators/form.validators"
 
 interface Department {
   id: number
@@ -43,6 +44,8 @@ export function AdminSpecialties() {
   const [formData, setFormData] = useState(EMPTY_FORM)
   const [searchQuery, setSearchQuery] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [codeError, setCodeError] = useState("")
+  const [nameError, setNameError] = useState("")
   const { setHeaderButton } = useHeaderButton()
   const currentOrgId = useAuthStore((s) => s.user?.orgId)
 
@@ -87,6 +90,10 @@ export function AdminSpecialties() {
       toast.error("Completa todos los campos requeridos")
       return
     }
+    if (!isAlphaNumeric(formData.code)) { setCodeError("Solo letras, numeros y guiones"); return }
+    setCodeError("")
+    if (!isName(formData.name)) { setNameError("Solo letras y espacios"); return }
+    setNameError("")
     setIsSubmitting(true)
     try {
       await apiClient.post("/specialties", {
@@ -146,14 +153,22 @@ export function AdminSpecialties() {
     setIsEditDialogOpen(true)
   }
 
-  const handleDelete = async (id: number) => {
-    try {
-      await apiClient.delete(`/specialties/${id}`)
-      toast.success("Especialidad eliminada")
-      fetchData()
-    } catch {
-      toast.error("Error al eliminar especialidad")
-    }
+  const handleDelete = (id: number) => {
+    toast.warning("¿Eliminar esta especialidad?", {
+      description: "Esta accion no se puede deshacer",
+      action: {
+        label: "Eliminar",
+        onClick: () => {
+          apiClient.delete(`/specialties/${id}`)
+            .then(() => {
+              toast.success("Especialidad eliminada")
+              fetchData()
+            })
+            .catch(() => toast.error("Error al eliminar especialidad"))
+        },
+      },
+      cancel: { label: "Cancelar", onClick: () => {} },
+    })
   }
 
   const departmentName = (deptId: number) => {
@@ -202,11 +217,13 @@ export function AdminSpecialties() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex flex-col gap-2">
                     <Label htmlFor="spec-code">Codigo</Label>
-                    <Input id="spec-code" required value={formData.code} onChange={(e) => setFormData({...formData, code: e.target.value})} placeholder="Ej: VR" maxLength={10} className="bg-slate-50/50" />
+                    <Input id="spec-code" required value={formData.code} onChange={(e) => { setFormData({...formData, code: e.target.value}); setCodeError(""); }} placeholder="Ej: VR" maxLength={10} className={codeError ? "border-red-500" : "bg-slate-50/50"} />
+                    {codeError && <p className="text-xs text-red-500 mt-1">{codeError}</p>}
                   </div>
                   <div className="flex flex-col gap-2">
                     <Label htmlFor="spec-name">Nombre</Label>
-                    <Input id="spec-name" required value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} placeholder="Ej: Realidad Virtual" maxLength={25} className="bg-slate-50/50" />
+                    <Input id="spec-name" required value={formData.name} onChange={(e) => { setFormData({...formData, name: e.target.value}); setNameError(""); }} placeholder="Ej: Realidad Virtual" maxLength={25} className={nameError ? "border-red-500" : "bg-slate-50/50"} />
+                    {nameError && <p className="text-xs text-red-500 mt-1">{nameError}</p>}
                   </div>
                 </div>
                 <div className="flex flex-col gap-2">
@@ -345,6 +362,7 @@ export function AdminSpecialties() {
           </form>
         </DialogContent>
       </Dialog>
+
     </div>
   )
 }

@@ -18,6 +18,7 @@ import { useHeaderButton } from "@/contexts/HeaderButtonContext"
 import apiClient from "@/lib/api-client"
 import { useAuthStore } from "@/stores/auth.store"
 import type { User, Specialty } from "@/types/auth.types"
+import { isDNI, isName, isEmail, isMinLength } from "@/validators/form.validators"
 
 const EMPTY_FORM = {
   id: "",
@@ -43,8 +44,8 @@ export function AdminUsers() {
   const [isAddOpen, setIsAddOpen] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [formData, setFormData] = useState<FormData>({ ...EMPTY_FORM })
-  const [touched, setTouched] = useState({ nombre: false, apellidos: false, dni: false, email: false, password: false })
-  const [errors, setErrors] = useState({ nombre: false, apellidos: false, dni: false, email: false, password: false })
+  const [touched, setTouched] = useState<Record<string, boolean>>({ nombre: false, apellidos: false, dni: false, email: false, password: false })
+  const [errors, setErrors] = useState<Record<string, string>>({ nombre: "", apellidos: "", dni: "", email: "", password: "" })
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState<string>("todos")
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -90,16 +91,29 @@ export function AdminUsers() {
   }, [isAddOpen, isEditOpen, fetchSpecialties])
 
   const validateForm = () => {
+    const newErrors: Record<string, string> = {}
+    const v = formData
+
+    if (!v.nombre.trim()) newErrors.nombre = "El nombre es requerido"
+    else if (!isName(v.nombre)) newErrors.nombre = "Solo letras y espacios"
+
+    if (!v.apellidos.trim()) newErrors.apellidos = "Los apellidos son requeridos"
+    else if (!isName(v.apellidos)) newErrors.apellidos = "Solo letras y espacios"
+
+    if (!v.dni.trim()) newErrors.dni = "El DNI es requerido"
+    else if (!isDNI(v.dni)) newErrors.dni = "DNI debe tener 8 digitos sin letras"
+
+    if (!v.email.trim()) newErrors.email = "El correo es requerido"
+    else if (!isEmail(v.email)) newErrors.email = "Correo electronico invalido"
+
     const isAdd = isAddOpen
-    const newErrors = {
-      nombre: !formData.nombre.trim(),
-      apellidos: !formData.apellidos.trim(),
-      dni: !formData.dni.trim(),
-      email: !formData.email.trim(),
-      password: isAdd && !formData.password.trim(),
+    if (isAdd) {
+      if (!v.password.trim()) newErrors.password = "La contrasena es requerida"
+      else if (!isMinLength(v.password, 8)) newErrors.password = "Minimo 8 caracteres"
     }
+
     setErrors(newErrors)
-    return !Object.values(newErrors).some(Boolean)
+    return Object.keys(newErrors).length === 0
   }
 
   const userMatches = (user: User, query: string) => {
@@ -138,7 +152,7 @@ export function AdminUsers() {
   const resetForm = () => {
     setFormData({ ...EMPTY_FORM })
     setTouched({ nombre: false, apellidos: false, dni: false, email: false, password: false })
-    setErrors({ nombre: false, apellidos: false, dni: false, email: false, password: false })
+    setErrors({ nombre: "", apellidos: "", dni: "", email: "", password: "" })
     setIsSubmitting(false)
   }
 
@@ -222,14 +236,22 @@ export function AdminUsers() {
     }
   }
 
-  const handleDelete = async (userId: string) => {
-    try {
-      await apiClient.delete(`/users/${userId}`)
-      toast.success("Usuario eliminado")
-      fetchUsers()
-    } catch {
-      toast.error("Error al eliminar usuario")
-    }
+  const handleDelete = (userId: string) => {
+    toast.warning("¿Eliminar este usuario?", {
+      description: "El usuario sera eliminado permanentemente",
+      action: {
+        label: "Eliminar",
+        onClick: () => {
+          apiClient.delete(`/users/${userId}`)
+            .then(() => {
+              toast.success("Usuario eliminado")
+              fetchUsers()
+            })
+            .catch(() => toast.error("Error al eliminar usuario"))
+        },
+      },
+      cancel: { label: "Cancelar", onClick: () => {} },
+    })
   }
 
   const openEdit = (user: User) => {
@@ -299,9 +321,9 @@ export function AdminUsers() {
                     <Button variant="ghost" size="icon" onClick={() => openEdit(user)}>
                       <Pencil className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(user.id)}>
-                      <Trash2 className="h-4 w-4 text-slate-500" />
-                    </Button>
+                      <Button variant="ghost" size="icon" onClick={() => handleDelete(user.id)}>
+                        <Trash2 className="h-4 w-4 text-slate-500" />
+                      </Button>
                   </div>
                 </TableCell>
               </TableRow>
@@ -393,6 +415,7 @@ export function AdminUsers() {
                       onBlur={() => setTouched({ ...touched, nombre: true })}
                       className={errors.nombre && touched.nombre ? "border-red-500" : ""}
                     />
+                    {errors.nombre && touched.nombre && <p className="text-xs text-red-500 mt-1">{errors.nombre}</p>}
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="apellidos" className={errors.apellidos && touched.apellidos ? "text-red-500" : ""}>
@@ -409,6 +432,7 @@ export function AdminUsers() {
                       onBlur={() => setTouched({ ...touched, apellidos: true })}
                       className={errors.apellidos && touched.apellidos ? "border-red-500" : ""}
                     />
+                    {errors.apellidos && touched.apellidos && <p className="text-xs text-red-500 mt-1">{errors.apellidos}</p>}
                   </div>
                 </div>
                 <div className="grid gap-2">
@@ -424,9 +448,10 @@ export function AdminUsers() {
                       setTouched({ ...touched, dni: true })
                     }}
                     onBlur={() => setTouched({ ...touched, dni: true })}
-                    className={errors.dni && touched.dni ? "border-red-500" : ""}
-                  />
-                </div>
+                  className={errors.dni && touched.dni ? "border-red-500" : ""}
+                />
+                {errors.dni && touched.dni && <p className="text-xs text-red-500 mt-1">{errors.dni}</p>}
+              </div>
                 <div className="grid gap-2">
                   <Label htmlFor="email" className={errors.email && touched.email ? "text-red-500" : ""}>
                     Email
@@ -441,9 +466,10 @@ export function AdminUsers() {
                       setTouched({ ...touched, email: true })
                     }}
                     onBlur={() => setTouched({ ...touched, email: true })}
-                    className={errors.email && touched.email ? "border-red-500" : ""}
-                  />
-                </div>
+                  className={errors.email && touched.email ? "border-red-500" : ""}
+                />
+                {errors.email && touched.email && <p className="text-xs text-red-500 mt-1">{errors.email}</p>}
+              </div>
                 <div className="grid gap-2">
                   <Label htmlFor="password" className={errors.password && touched.password ? "text-red-500" : ""}>
                     Contrasena
@@ -459,9 +485,10 @@ export function AdminUsers() {
                     }}
                     onBlur={() => setTouched({ ...touched, password: true })}
                     placeholder="Minimo 8 caracteres"
-                    className={errors.password && touched.password ? "border-red-500" : ""}
-                  />
-                </div>
+                  className={errors.password && touched.password ? "border-red-500" : ""}
+                />
+                {errors.password && touched.password && <p className="text-xs text-red-500 mt-1">{errors.password}</p>}
+              </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-2">
                     <Label>Rol</Label>
@@ -692,6 +719,7 @@ export function AdminUsers() {
           </form>
         </DialogContent>
       </Dialog>
+
     </div>
   )
 }
