@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { StudentDashboard } from "@/components/features/student/StudentDashboard"
+import { StudentCourses } from "@/components/features/student/StudentCourses"
 import { StudentCourseDetail } from "@/components/features/student/StudentCourseDetail"
 import { StudentProgress } from "@/components/features/student/StudentProgress"
 import { AccessCodeModal } from "@/components/features/student/AccessCodeModal"
@@ -59,11 +60,7 @@ export default function StudentPage() {
         )
       case "courses":
         return (
-          <StudentDashboard
-            onNavigate={handleNavigate}
-            onSelectCourse={handleSelectCourse}
-            onOpenXRCode={() => handleOpenXRCode(false)}
-          />
+          <StudentCourses />
         )
       case "progress":
         return <StudentProgress />
