@@ -49,6 +49,8 @@ export function AdminUsers() {
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState<string>("todos")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [phoneError, setPhoneError] = useState("")
+  const [positionError, setPositionError] = useState("")
   const [specialties, setSpecialties] = useState<Specialty[]>([])
   const { setHeaderButton } = useHeaderButton()
   const currentOrgId = useAuthStore((s) => s.user?.orgId)
@@ -96,9 +98,11 @@ export function AdminUsers() {
 
     if (!v.nombre.trim()) newErrors.nombre = "El nombre es requerido"
     else if (!isName(v.nombre)) newErrors.nombre = "Solo letras y espacios"
+    else if (v.nombre.length > 50) newErrors.nombre = "Maximo 50 caracteres"
 
     if (!v.apellidos.trim()) newErrors.apellidos = "Los apellidos son requeridos"
     else if (!isName(v.apellidos)) newErrors.apellidos = "Solo letras y espacios"
+    else if (v.apellidos.length > 50) newErrors.apellidos = "Maximo 50 caracteres"
 
     if (!v.dni.trim()) newErrors.dni = "El DNI es requerido"
     else if (!isDNI(v.dni)) newErrors.dni = "DNI debe tener 8 digitos sin letras"
@@ -192,6 +196,13 @@ export function AdminUsers() {
     if (!validateForm()) {
       setIsSubmitting(false)
       return
+    }
+    if (formData.rol === "instructor") {
+      if (formData.position.length > 100) { setPositionError("Maximo 100 caracteres"); setIsSubmitting(false); return }
+      setPositionError("")
+      const digits = formData.phone.replace(/[^0-9]/g, "")
+      if (digits.length > 0 && (digits.length < 7 || digits.length > 12)) { setPhoneError("Solo numeros, entre 7 y 12 digitos"); setIsSubmitting(false); return }
+      setPhoneError("")
     }
 
     try {
@@ -340,9 +351,12 @@ export function AdminUsers() {
         <Label>Cargo</Label>
         <Input
           value={formData.position}
-          onChange={(e) => setFormData({ ...formData, position: e.target.value })}
+          onChange={(e) => { setFormData({ ...formData, position: e.target.value }); setPositionError(""); }}
           placeholder="Ej: Instructor Senior VR"
+          maxLength={100}
+          className={positionError ? "border-red-500" : ""}
         />
+        {positionError && <p className="text-xs text-red-500 mt-1">{positionError}</p>}
       </div>
       <div className="grid gap-2">
         <Label>Especialidad</Label>
@@ -363,10 +377,13 @@ export function AdminUsers() {
         <Label>Telefono</Label>
         <Input
           value={formData.phone}
-          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-          placeholder="Ej: 51999888777"
+          onChange={(e) => { const d = e.target.value.replace(/[^0-9]/g, ""); setFormData({ ...formData, phone: d }); setPhoneError(""); }}
+          placeholder="51999888777"
+          maxLength={12}
+          className={phoneError ? "border-red-500" : ""}
         />
-        <p className="text-xs text-muted-foreground">Solo digitos, sin +, espacios ni guiones</p>
+        {phoneError && <p className="text-xs text-red-500 mt-1">{phoneError}</p>}
+        <p className="text-xs text-muted-foreground">Solo digitos, entre 7 y 12</p>
       </div>
     </>
   )
@@ -407,6 +424,7 @@ export function AdminUsers() {
                     <Input
                       id="nombre"
                       required
+                      maxLength={50}
                       value={formData.nombre}
                       onChange={(e) => {
                         setFormData({ ...formData, nombre: e.target.value })
@@ -424,6 +442,7 @@ export function AdminUsers() {
                     <Input
                       id="apellidos"
                       required
+                      maxLength={50}
                       value={formData.apellidos}
                       onChange={(e) => {
                         setFormData({ ...formData, apellidos: e.target.value })
@@ -640,6 +659,7 @@ export function AdminUsers() {
                   <Input
                     id="edit-nombre"
                     required
+                    maxLength={50}
                     value={formData.nombre}
                     onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
                   />
@@ -649,6 +669,7 @@ export function AdminUsers() {
                   <Input
                     id="edit-apellidos"
                     required
+                    maxLength={50}
                     value={formData.apellidos}
                     onChange={(e) => setFormData({ ...formData, apellidos: e.target.value })}
                   />

@@ -70,6 +70,54 @@ export function StudentSettings() {
     }
   }, [storeUser])
 
+  const fetchEmails = async () => {
+    if (!storeUser) return
+    setIsLoadingEmails(true)
+    try {
+      const res = await apiClient.get(`/users/${storeUser.id}/emails`)
+      setEmails(res.data.map((e: { id: string; email: string; type: string; isPrimary: boolean; verifiedAt: string | null }) => ({
+        id: e.id,
+        address: e.email,
+        type: e.type.toLowerCase() as EmailRecord["type"],
+        is_primary: e.isPrimary,
+        verified_at: e.verifiedAt,
+      })))
+    } catch { /* silent */ } finally { setIsLoadingEmails(false) }
+  }
+
+  const fetchPhones = async () => {
+    if (!storeUser) return
+    setIsLoadingPhones(true)
+    try {
+      const res = await apiClient.get(`/users/${storeUser.id}/phones`)
+      setPhones(res.data.map((p: { id: string; phone: string; type: string; isPrimary: boolean }) => ({
+        id: p.id,
+        number: p.phone,
+        type: p.type.toLowerCase() as PhoneRecord["type"],
+        is_primary: p.isPrimary,
+      })))
+    } catch { /* silent */ } finally { setIsLoadingPhones(false) }
+  }
+
+  const fetchDevices = async () => {
+    if (!storeUser) return
+    setIsLoadingDevices(true)
+    try {
+      const res = await apiClient.get(`/users/${storeUser.id}/devices`)
+      setDevices(res.data.map((d: { id: string; name: string; platform: string; deviceId: string; lastSyncAt: string | null }) => ({
+        id: d.id,
+        name: d.name,
+        platform: d.platform,
+        device_id: d.deviceId,
+        last_sync: d.lastSyncAt || "",
+      })))
+    } catch { /* silent */ } finally { setIsLoadingDevices(false) }
+  }
+
+  useEffect(() => { fetchEmails() }, [storeUser])
+  useEffect(() => { fetchPhones() }, [storeUser])
+  useEffect(() => { fetchDevices() }, [storeUser])
+
   const handleSaveProfile = async () => {
     if (!storeUser) return
     setIsSaving(true)
@@ -138,19 +186,14 @@ export function StudentSettings() {
     }
   }
 
-  const [emails, setEmails] = useState<EmailRecord[]>([
-    { id: "1", address: "ander.garcia@correo.com", type: "personal", is_primary: true, verified_at: "2024-01-15T10:00:00Z" },
-    { id: "2", address: "ander@trabajo.com", type: "work", is_primary: false, verified_at: null },
-  ])
+  const [emails, setEmails] = useState<EmailRecord[]>([])
+  const [isLoadingEmails, setIsLoadingEmails] = useState(false)
 
-  const [phones, setPhones] = useState<PhoneRecord[]>([
-    { id: "1", number: "+51 999 888 777", type: "mobile", is_primary: true },
-    { id: "2", number: "+51 01 234 5678", type: "landline", is_primary: false },
-  ])
+  const [phones, setPhones] = useState<PhoneRecord[]>([])
+  const [isLoadingPhones, setIsLoadingPhones] = useState(false)
 
-  const [devices] = useState<GroupExperience[]>([
-    { id: "1", name: "Quest 3 - Casa", platform: "metaquest", device_id: "MQ3-2024-001", last_sync: "2024-03-10T14:30:00Z" },
-  ])
+  const [devices, setDevices] = useState<GroupExperience[]>([])
+  const [isLoadingDevices, setIsLoadingDevices] = useState(false)
 
   const [notifications, setNotifications] = useState({
     courseReminders: true,
@@ -159,62 +202,136 @@ export function StudentSettings() {
     systemAlerts: true,
   })
 
+  useEffect(() => {
+    if (!storeUser) return
+    apiClient.get(`/users/${storeUser.id}/notification-preferences`)
+      .then((res) => {
+        const prefs = { courseReminders: true, gradeUpdates: true, newExperiences: false, systemAlerts: true }
+        for (const p of res.data) prefs[p.key as keyof typeof prefs] = p.enabled
+        setNotifications(prefs)
+      })
+      .catch(() => {})
+  }, [storeUser])
+
+  const saveNotification = async (key: string, enabled: boolean) => {
+    setNotifications((p) => ({ ...p, [key]: enabled }))
+    if (!storeUser) return
+    try {
+      await apiClient.patch(`/users/${storeUser.id}/notification-preferences`, {
+        preferences: { [key]: enabled },
+      })
+    } catch {
+      setNotifications((p) => ({ ...p, [key]: !enabled }))
+    }
+  }
+
   const [emailDialogOpen, setEmailDialogOpen] = useState(false)
   const [phoneDialogOpen, setPhoneDialogOpen] = useState(false)
   const [editingEmail, setEditingEmail] = useState<EmailRecord | null>(null)
   const [editingPhone, setEditingPhone] = useState<PhoneRecord | null>(null)
   const [emailForm, setEmailForm] = useState({ address: "", type: "personal" as EmailRecord["type"], is_primary: false })
+  const [emailError, setEmailError] = useState("")
   const [phoneForm, setPhoneForm] = useState({ number: "", type: "mobile" as PhoneRecord["type"], is_primary: false })
+  const [phoneError, setPhoneError] = useState("")
 
   const handleAddEmail = () => {
     setEditingEmail(null)
     setEmailForm({ address: "", type: "personal", is_primary: false })
+    setEmailError("")
     setEmailDialogOpen(true)
   }
 
   const handleEditEmail = (email: EmailRecord) => {
     setEditingEmail(email)
     setEmailForm({ address: email.address, type: email.type, is_primary: email.is_primary })
+    setEmailError("")
     setEmailDialogOpen(true)
   }
 
-  const handleSaveEmail = () => {
-    if (!emailForm.address) return
-    if (editingEmail) {
-      setEmails((prev) => prev.map((e) => e.id === editingEmail.id ? { ...e, ...emailForm } : emailForm.is_primary ? { ...e, is_primary: false } : e))
-    } else {
-      const newEmail: EmailRecord = { id: Date.now().toString(), ...emailForm, verified_at: null }
-      setEmails((prev) => emailForm.is_primary ? [...prev.map((e) => ({ ...e, is_primary: false })), newEmail] : [...prev, newEmail])
+  const isValidEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
+
+  const handleSaveEmail = async () => {
+    if (!emailForm.address || !storeUser) return
+    if (!isValidEmail(emailForm.address)) {
+      setEmailError("Correo electronico invalido")
+      return
     }
-    setEmailDialogOpen(false)
+    try {
+      if (editingEmail) {
+        await apiClient.patch(`/users/${storeUser.id}/emails/${editingEmail.id}`, {
+          email: emailForm.address,
+          type: emailForm.type.toUpperCase(),
+          isPrimary: emailForm.is_primary,
+        })
+      } else {
+        await apiClient.post(`/users/${storeUser.id}/emails`, {
+          email: emailForm.address,
+          type: emailForm.type.toUpperCase(),
+          isPrimary: emailForm.is_primary,
+        })
+      }
+      setEmailDialogOpen(false)
+      fetchEmails()
+    } catch { toast.error("Error al guardar correo") }
   }
 
-  const handleDeleteEmail = (id: string) => setEmails((prev) => prev.filter((e) => e.id !== id))
+  const handleDeleteEmail = async (id: string) => {
+    if (!storeUser) return
+    try {
+      await apiClient.delete(`/users/${storeUser.id}/emails/${id}`)
+      fetchEmails()
+    } catch { toast.error("Error al eliminar correo") }
+  }
 
   const handleAddPhone = () => {
     setEditingPhone(null)
     setPhoneForm({ number: "", type: "mobile", is_primary: false })
+    setPhoneError("")
     setPhoneDialogOpen(true)
   }
 
   const handleEditPhone = (phone: PhoneRecord) => {
     setEditingPhone(phone)
     setPhoneForm({ number: phone.number, type: phone.type, is_primary: phone.is_primary })
+    setPhoneError("")
     setPhoneDialogOpen(true)
   }
 
-  const handleSavePhone = () => {
-    if (!phoneForm.number) return
-    if (editingPhone) {
-      setPhones((prev) => prev.map((p) => p.id === editingPhone.id ? { ...p, ...phoneForm } : phoneForm.is_primary ? { ...p, is_primary: false } : p))
-    } else {
-      const newPhone: PhoneRecord = { id: Date.now().toString(), ...phoneForm }
-      setPhones((prev) => phoneForm.is_primary ? [...prev.map((p) => ({ ...p, is_primary: false })), newPhone] : [...prev, newPhone])
+  const isValidPhone = (v: string) => { const d = v.replace(/[^0-9]/g, ""); return d.length >= 7 && d.length <= 12 }
+
+  const handleSavePhone = async () => {
+    if (!phoneForm.number || !storeUser) return
+    const digits = phoneForm.number.replace(/[^0-9]/g, "")
+    if (digits.length < 7 || digits.length > 12) {
+      setPhoneError("Solo numeros, entre 7 y 12 digitos")
+      return
     }
-    setPhoneDialogOpen(false)
+    try {
+      if (editingPhone) {
+        await apiClient.patch(`/users/${storeUser.id}/phones/${editingPhone.id}`, {
+          phone: digits,
+          type: phoneForm.type.toUpperCase(),
+          isPrimary: phoneForm.is_primary,
+        })
+      } else {
+        await apiClient.post(`/users/${storeUser.id}/phones`, {
+          phone: digits,
+          type: phoneForm.type.toUpperCase(),
+          isPrimary: phoneForm.is_primary,
+        })
+      }
+      setPhoneDialogOpen(false)
+      fetchPhones()
+    } catch { toast.error("Error al guardar telefono") }
   }
 
-  const handleDeletePhone = (id: string) => setPhones((prev) => prev.filter((p) => p.id !== id))
+  const handleDeletePhone = async (id: string) => {
+    if (!storeUser) return
+    try {
+      await apiClient.delete(`/users/${storeUser.id}/phones/${id}`)
+      fetchPhones()
+    } catch { toast.error("Error al eliminar telefono") }
+  }
 
   return (
     <div className="space-y-6">
@@ -237,15 +354,11 @@ export function StudentSettings() {
           <CardHeader><CardTitle className="flex items-center gap-2"><User className="size-5 text-[#00AEEF]" />Perfil de Usuario</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-3">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4"><p className="text-sm font-medium text-[#1A1A2E] sm:w-40">Nombre:</p><Input value={firstName} onChange={(e) => setFirstName(e.target.value)} className="h-10 flex-1 rounded-full bg-slate-50" /></div>
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4"><p className="text-sm font-medium text-[#1A1A2E] sm:w-40">Apellido:</p><Input value={lastName} onChange={(e) => setLastName(e.target.value)} className="h-10 flex-1 rounded-full bg-slate-50" /></div>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4"><p className="text-sm font-medium text-[#1A1A2E] sm:w-40">Nombre:</p><Input value={firstName} disabled className="h-10 flex-1 rounded-full bg-slate-50 text-gray-500" /></div>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4"><p className="text-sm font-medium text-[#1A1A2E] sm:w-40">Apellido:</p><Input value={lastName} disabled className="h-10 flex-1 rounded-full bg-slate-50 text-gray-500" /></div>
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4"><p className="text-sm font-medium text-[#1A1A2E] sm:w-40">Usuario:</p><Input value={storeUser?.username || ""} disabled className="h-10 flex-1 rounded-full bg-slate-50 text-gray-500" /></div>
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4"><p className="text-sm font-medium text-[#1A1A2E] sm:w-40">Email:</p><Input value={storeUser?.email || ""} disabled className="h-10 flex-1 rounded-full bg-slate-50 text-gray-500" /></div>
             </div>
-            <Button onClick={handleSaveProfile} disabled={isSaving} className="rounded-full bg-[#00AEEF] text-white hover:bg-[#0098d1]">
-              {isSaving ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Save className="size-4" />}
-              {isSaving ? "Guardando..." : "Guardar Cambios"}
-            </Button>
           </CardContent>
         </Card>
       )}
@@ -342,10 +455,10 @@ export function StudentSettings() {
         <Card className="rounded-3xl bg-white shadow-sm">
           <CardHeader><CardTitle className="flex items-center gap-2"><Bell className="size-5 text-[#FFB800]" />Preferencias de Notificacion</CardTitle></CardHeader>
           <CardContent className="space-y-3">
-            <NotificationItem label="Recordatorios de cursos" value={notifications.courseReminders} onChange={(v) => setNotifications(p => ({...p, courseReminders: v}))} />
-            <NotificationItem label="Actualizaciones de calificaciones" value={notifications.gradeUpdates} onChange={(v) => setNotifications(p => ({...p, gradeUpdates: v}))} />
-            <NotificationItem label="Nuevas experiencias disponibles" value={notifications.newExperiences} onChange={(v) => setNotifications(p => ({...p, newExperiences: v}))} />
-            <NotificationItem label="Alertas del sistema" value={notifications.systemAlerts} onChange={(v) => setNotifications(p => ({...p, systemAlerts: v}))} />
+            <NotificationItem label="Recordatorios de cursos" value={notifications.courseReminders} onChange={(v) => saveNotification("courseReminders", v)} />
+            <NotificationItem label="Actualizaciones de calificaciones" value={notifications.gradeUpdates} onChange={(v) => saveNotification("gradeUpdates", v)} />
+            <NotificationItem label="Nuevas experiencias disponibles" value={notifications.newExperiences} onChange={(v) => saveNotification("newExperiences", v)} />
+            <NotificationItem label="Alertas del sistema" value={notifications.systemAlerts} onChange={(v) => saveNotification("systemAlerts", v)} />
           </CardContent>
         </Card>
       )}
@@ -379,7 +492,8 @@ export function StudentSettings() {
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Correo electronico</Label>
-                <Input value={emailForm.address} onChange={(e) => setEmailForm(p => ({...p, address: e.target.value}))} placeholder="correo@ejemplo.com" className="h-10 rounded-full" />
+                <Input value={emailForm.address} onChange={(e) => { setEmailForm(p => ({...p, address: e.target.value})); setEmailError(""); }} placeholder="correo@ejemplo.com" className={`h-10 rounded-full ${emailError ? "border-red-500" : ""}`} />
+                {emailError && <p className="text-xs text-red-500">{emailError}</p>}
               </div>
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Tipo</Label>
@@ -396,7 +510,7 @@ export function StudentSettings() {
             </div>
             <div className="mt-6 flex justify-end gap-3">
               <Button variant="outline" onClick={() => setEmailDialogOpen(false)} className="rounded-full">Cancelar</Button>
-              <Button onClick={handleSaveEmail} className="rounded-full bg-[#00AEEF] text-white hover:bg-[#0098d1]">Guardar</Button>
+              <Button onClick={handleSaveEmail} disabled={!isValidEmail(emailForm.address)} className="rounded-full bg-[#00AEEF] text-white hover:bg-[#0098d1] disabled:opacity-50">Guardar</Button>
             </div>
           </div>
         </div>
@@ -409,7 +523,9 @@ export function StudentSettings() {
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Numero de telefono</Label>
-                <Input value={phoneForm.number} onChange={(e) => setPhoneForm(p => ({...p, number: e.target.value}))} placeholder="+51 999 888 777" className="h-10 rounded-full" />
+                <Input value={phoneForm.number} onChange={(e) => { const digits = e.target.value.replace(/[^0-9]/g, ""); setPhoneForm(p => ({...p, number: digits})); setPhoneError(""); }} placeholder="51999888777" maxLength={12} className={`h-10 rounded-full ${phoneError ? "border-red-500" : ""}`} />
+                {phoneError && <p className="text-xs text-red-500">{phoneError}</p>}
+                <p className="text-xs text-gray-400">Solo numeros, entre 7 y 12 digitos</p>
               </div>
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Tipo</Label>
@@ -426,7 +542,7 @@ export function StudentSettings() {
             </div>
             <div className="mt-6 flex justify-end gap-3">
               <Button variant="outline" onClick={() => setPhoneDialogOpen(false)} className="rounded-full">Cancelar</Button>
-              <Button onClick={handleSavePhone} className="rounded-full bg-[#00AEEF] text-white hover:bg-[#0098d1]">Guardar</Button>
+              <Button onClick={handleSavePhone} disabled={!isValidPhone(phoneForm.number)} className="rounded-full bg-[#00AEEF] text-white hover:bg-[#0098d1] disabled:opacity-50">Guardar</Button>
             </div>
           </div>
         </div>

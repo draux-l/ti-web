@@ -36,6 +36,7 @@ export function AdminDepartments() {
   const [searchQuery, setSearchQuery] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [nameError, setNameError] = useState("")
+  const [descError, setDescError] = useState("")
   const { setHeaderButton } = useHeaderButton()
   const currentOrgId = useAuthStore((s) => s.user?.orgId)
 
@@ -76,7 +77,16 @@ export function AdminDepartments() {
       setNameError("Solo letras y espacios")
       return
     }
+    if (formData.name.length > 25) {
+      setNameError("Maximo 25 caracteres")
+      return
+    }
     setNameError("")
+    if (formData.description.length > 200) {
+      setDescError("Maximo 200 caracteres")
+      return
+    }
+    setDescError("")
     setIsSubmitting(true)
     try {
       await apiClient.post("/departments", {
@@ -175,12 +185,13 @@ export function AdminDepartments() {
               <div className="grid gap-4 py-4">
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="name">Nombre</Label>
-                  <Input id="name" required value={formData.name} onChange={(e) => { setFormData({...formData, name: e.target.value}); setNameError(""); }} placeholder="Ej: IT Department" className={nameError ? "border-red-500" : "bg-slate-50/50"} />
+                  <Input id="name" required maxLength={25} value={formData.name} onChange={(e) => { setFormData({...formData, name: e.target.value}); setNameError(""); }} placeholder="Ej: IT Department" className={nameError ? "border-red-500" : "bg-slate-50/50"} />
                   {nameError && <p className="text-xs text-red-500 mt-1">{nameError}</p>}
                 </div>
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="desc">Descripcion</Label>
-                  <Input id="desc" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} placeholder="Breve descripcion" className="bg-slate-50/50" />
+                  <Input id="desc" maxLength={200} value={formData.description} onChange={(e) => { setFormData({...formData, description: e.target.value}); setDescError(""); }} placeholder="Breve descripcion" className={descError ? "border-red-500" : "bg-slate-50/50"} />
+                  {descError && <p className="text-xs text-red-500 mt-1">{descError}</p>}
                 </div>
                 <div className="flex flex-col gap-2">
                   <Label>Estado</Label>
@@ -267,11 +278,12 @@ export function AdminDepartments() {
             <div className="grid gap-4 py-4">
               <div className="flex flex-col gap-2">
                 <Label htmlFor="edit-name">Nombre</Label>
-                <Input id="edit-name" required value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="bg-slate-50/50" />
+                <Input id="edit-name" required maxLength={25} value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="bg-slate-50/50" />
               </div>
               <div className="flex flex-col gap-2">
                 <Label htmlFor="edit-desc">Descripcion</Label>
-                <Input id="edit-desc" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} className="bg-slate-50/50" />
+                <Input id="edit-desc" maxLength={200} value={formData.description} onChange={(e) => { setFormData({...formData, description: e.target.value}); setDescError(""); }} className={descError ? "border-red-500" : "bg-slate-50/50"} />
+                {descError && <p className="text-xs text-red-500 mt-1">{descError}</p>}
               </div>
               <div className="flex flex-col gap-2">
                 <Label>Estado</Label>

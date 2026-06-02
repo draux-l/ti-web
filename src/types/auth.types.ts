@@ -24,6 +24,7 @@ export interface User {
   phone: string | null
   specialtyId: number | null
   specialty: Specialty | null
+  bio: string | null
 }
 
 export interface LoginRequest {

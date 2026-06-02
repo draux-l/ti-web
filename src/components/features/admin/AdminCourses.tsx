@@ -16,7 +16,7 @@ import { useHeaderButton } from "@/contexts/HeaderButtonContext"
 import apiClient from "@/lib/api-client"
 import { useAuthStore } from "@/stores/auth.store"
 import type { Specialty } from "@/types/auth.types"
-import { isName } from "@/validators/form.validators"
+import { isCourseName } from "@/validators/form.validators"
 
 interface ApiCourse {
   id: number
@@ -55,6 +55,7 @@ export function AdminCourses() {
   const [specialtyFilter, setSpecialtyFilter] = useState<string>("todos")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [courseNameError, setCourseNameError] = useState("")
+  const [descError, setDescError] = useState("")
   const { setHeaderButton } = useHeaderButton()
   const currentOrgId = useAuthStore((s) => s.user?.orgId)
 
@@ -136,11 +137,20 @@ export function AdminCourses() {
   const handleAddCourse = async (e: React.FormEvent) => {
     e.preventDefault()
     if (isSubmitting) return
-    if (!isName(formData.name)) {
-      setCourseNameError("Solo letras y espacios")
+    if (!isCourseName(formData.name)) {
+      setCourseNameError("Solo letras, espacios y guiones")
+      return
+    }
+    if (formData.name.length > 50) {
+      setCourseNameError("Maximo 50 caracteres")
       return
     }
     setCourseNameError("")
+    if (formData.description.length > 250) {
+      setDescError("Maximo 250 caracteres")
+      return
+    }
+    setDescError("")
     setIsSubmitting(true)
     try {
       const res = await apiClient.post("/courses", {
@@ -285,7 +295,7 @@ export function AdminCourses() {
               <div className="grid gap-4 py-4">
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="name">Nombre del Curso</Label>
-                  <Input id="name" required value={formData.name} onChange={(e) => { setFormData({...formData, name: e.target.value}); setCourseNameError(""); }} placeholder="Ej: Realidad Mixta Avanzada" className={courseNameError ? "border-red-500" : "bg-slate-50/50"} />
+                  <Input id="name" required maxLength={50} value={formData.name} onChange={(e) => { setFormData({...formData, name: e.target.value}); setCourseNameError(""); }} placeholder="Ej: Realidad Mixta Avanzada" className={courseNameError ? "border-red-500" : "bg-slate-50/50"} />
                   {courseNameError && <p className="text-xs text-red-500 mt-1">{courseNameError}</p>}
                 </div>
                 <div className="flex flex-col gap-2">
@@ -301,7 +311,8 @@ export function AdminCourses() {
                 </div>
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="description">Descripcion</Label>
-                  <Input id="description" required value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} placeholder="Breve descripcion del curso" className="bg-slate-50/50" />
+                  <Input id="description" required maxLength={250} value={formData.description} onChange={(e) => { setFormData({...formData, description: e.target.value}); setDescError(""); }} placeholder="Breve descripcion del curso" className={descError ? "border-red-500" : "bg-slate-50/50"} />
+                  {descError && <p className="text-xs text-red-500 mt-1">{descError}</p>}
                 </div>
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="status">Estado</Label>
@@ -447,7 +458,8 @@ export function AdminCourses() {
               </div>
               <div className="flex flex-col gap-2">
                 <Label htmlFor="edit-description">Descripcion</Label>
-                <Input id="edit-description" required value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} className="bg-slate-50/50" />
+                <Input id="edit-description" required maxLength={250} value={formData.description} onChange={(e) => { setFormData({...formData, description: e.target.value}); setDescError(""); }} className={descError ? "border-red-500" : "bg-slate-50/50"} />
+                {descError && <p className="text-xs text-red-500 mt-1">{descError}</p>}
               </div>
               <div className="flex flex-col gap-2">
                 <Label htmlFor="edit-status">Estado</Label>

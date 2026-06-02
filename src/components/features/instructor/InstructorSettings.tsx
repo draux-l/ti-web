@@ -22,6 +22,8 @@ export function InstructorSettings() {
   const [position, setPosition] = useState("")
   const [phone, setPhone] = useState("")
   const [bio, setBio] = useState("")
+  const [phoneError, setPhoneError] = useState("")
+  const [bioError, setBioError] = useState("")
 
   const [currentPassword, setCurrentPassword] = useState("")
   const [newPassword, setNewPassword] = useState("")
@@ -34,18 +36,29 @@ export function InstructorSettings() {
       setLastName(storeUser.lastName || "")
       setPosition(storeUser.position || "")
       setPhone(storeUser.phone || "")
+      setBio(storeUser.bio || "")
     }
   }, [storeUser])
 
   const handleSaveProfile = async () => {
     if (!storeUser) return
+    const digits = phone.replace(/[^0-9]/g, "")
+    if (digits.length > 0 && (digits.length < 7 || digits.length > 12)) {
+      setPhoneError("Solo numeros, entre 7 y 12 digitos")
+      return
+    }
+    setPhoneError("")
+    if (bio.length > 250) {
+      setBioError("Maximo 250 caracteres")
+      return
+    }
+    setBioError("")
     setIsSaving(true)
     try {
       await apiClient.patch(`/users/${storeUser.id}`, {
-        name: name.trim(),
-        lastName: lastName.trim(),
         position: position.trim() || null,
         phone: phone.replace(/[^0-9]/g, "") || null,
+        bio: bio.trim() || null,
       })
       toast.success("Perfil actualizado correctamente")
     } catch {
@@ -85,6 +98,31 @@ export function InstructorSettings() {
   }
 
   const [alerts, setAlerts] = useState({ completions: true, retries: true, inactiveGroups: false })
+  const [alertsLoaded, setAlertsLoaded] = useState(false)
+
+  useEffect(() => {
+    if (!storeUser) return
+    apiClient.get(`/users/${storeUser.id}/notification-preferences`)
+      .then((res) => {
+        const prefs: Record<string, boolean> = { completions: true, retries: true, inactiveGroups: false }
+        for (const p of res.data) prefs[p.key] = p.enabled
+        setAlerts(prefs as typeof alerts)
+      })
+      .catch(() => {})
+      .finally(() => setAlertsLoaded(true))
+  }, [storeUser])
+
+  const saveNotification = async (key: string, enabled: boolean) => {
+    setAlerts((p) => ({ ...p, [key]: enabled }))
+    if (!storeUser) return
+    try {
+      await apiClient.patch(`/users/${storeUser.id}/notification-preferences`, {
+        preferences: { [key]: enabled },
+      })
+    } catch {
+      setAlerts((p) => ({ ...p, [key]: !enabled }))
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -104,14 +142,15 @@ export function InstructorSettings() {
           <CardHeader><CardTitle className="flex items-center gap-2"><UserIcon className="size-5 text-[#00AEEF]" />Perfil de Usuario</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-3">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4"><p className="text-sm font-medium text-[#1A1A2E] sm:w-40">Nombres:</p><Input value={name} onChange={(e) => setName(e.target.value)} className="h-10 flex-1 rounded-full bg-slate-50" /></div>
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4"><p className="text-sm font-medium text-[#1A1A2E] sm:w-40">Apellidos:</p><Input value={lastName} onChange={(e) => setLastName(e.target.value)} className="h-10 flex-1 rounded-full bg-slate-50" /></div>
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4"><p className="text-sm font-medium text-[#1A1A2E] sm:w-40">Cargo:</p><Input value={position} onChange={(e) => setPosition(e.target.value)} placeholder="Ej: Instructor Senior VR" className="h-10 flex-1 rounded-full bg-slate-50" /></div>
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4"><p className="text-sm font-medium text-[#1A1A2E] sm:w-40">Telefono:</p><div className="relative flex-1"><Phone className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-gray-400" /><Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="51999888777" className="h-10 rounded-full bg-slate-50 pl-10" /></div></div>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4"><p className="text-sm font-medium text-[#1A1A2E] sm:w-40">Nombres:</p><Input value={name} disabled className="h-10 flex-1 rounded-full bg-slate-50 text-gray-500" /></div>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4"><p className="text-sm font-medium text-[#1A1A2E] sm:w-40">Apellidos:</p><Input value={lastName} disabled className="h-10 flex-1 rounded-full bg-slate-50 text-gray-500" /></div>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4"><p className="text-sm font-medium text-[#1A1A2E] sm:w-40">Cargo:</p><Input value={position} disabled className="h-10 flex-1 rounded-full bg-slate-50 text-gray-500" /></div>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4"><p className="text-sm font-medium text-[#1A1A2E] sm:w-40">Telefono:</p><div className="relative flex-1 flex-col"><div className="relative"><Phone className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-gray-400" /><Input value={phone} onChange={(e) => { const d = e.target.value.replace(/[^0-9]/g, ""); setPhone(d); setPhoneError(""); }} placeholder="51999888777" maxLength={12} className={`h-10 rounded-full bg-slate-50 pl-10 ${phoneError ? "border-red-500" : ""}`} /></div>{phoneError && <p className="text-xs text-red-500 mt-1 ml-4">{phoneError}</p>}</div></div>
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4"><p className="text-sm font-medium text-[#1A1A2E] sm:w-40">Especialidad:</p><Input value={storeUser?.specialty?.name || "No asignada"} disabled className="h-10 flex-1 rounded-full bg-slate-50 text-gray-500" /></div>
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4"><p className="text-sm font-medium text-[#1A1A2E] sm:w-40">Biografia:</p><Input value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Cuentanos sobre ti..." className="h-10 flex-1 rounded-full bg-slate-50" /></div>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4"><p className="text-sm font-medium text-[#1A1A2E] sm:w-40">Biografia:</p><div className="flex-1 flex-col"><Input value={bio} onChange={(e) => { setBio(e.target.value); setBioError(""); }} placeholder="Cuentanos sobre ti..." className={`h-10 flex-1 rounded-full bg-slate-50 ${bioError ? "border-red-500" : ""}`} /><p className={`text-xs mt-1 ml-4 ${bioError ? "text-red-500" : "text-gray-400"}`}>{bio.length}/250 caracteres</p></div></div>
             </div>
-            <Button onClick={handleSaveProfile} disabled={isSaving} className="rounded-full bg-[#00AEEF] text-white hover:bg-[#0098d1]">
+            <Button onClick={handleSaveProfile} disabled={isSaving} className="rounded-full bg-[#00AEEF] text-white hover:bg-[#0098d1] disabled:opacity-50">
+              {isSaving ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Save className="size-4" />}
               {isSaving ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Save className="size-4" />}
               {isSaving ? "Guardando..." : "Guardar Cambios"}
             </Button>
@@ -123,9 +162,9 @@ export function InstructorSettings() {
         <Card className="rounded-3xl bg-white shadow-sm">
           <CardHeader><CardTitle className="flex items-center gap-2"><Bell className="size-5 text-[#FFB800]" />Preferencias de Notificacion</CardTitle></CardHeader>
           <CardContent className="space-y-3">
-            <NotificationItem label="Evaluaciones completadas" value={alerts.completions} onChange={(v) => setAlerts(p => ({...p, completions: v}))} />
-            <NotificationItem label="Solicitudes de reintento" value={alerts.retries} onChange={(v) => setAlerts(p => ({...p, retries: v}))} />
-            <NotificationItem label="Alertas de grupos inactivos" value={alerts.inactiveGroups} onChange={(v) => setAlerts(p => ({...p, inactiveGroups: v}))} />
+            <NotificationItem label="Evaluaciones completadas" value={alerts.completions} onChange={(v) => saveNotification("completions", v)} />
+            <NotificationItem label="Solicitudes de reintento" value={alerts.retries} onChange={(v) => saveNotification("retries", v)} />
+            <NotificationItem label="Alertas de grupos inactivos" value={alerts.inactiveGroups} onChange={(v) => saveNotification("inactiveGroups", v)} />
           </CardContent>
         </Card>
       )}

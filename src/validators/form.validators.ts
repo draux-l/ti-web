@@ -17,3 +17,7 @@ export function isMinLength(value: string, min: number): boolean {
 export function isAlphaNumeric(value: string): boolean {
   return /^[a-zA-Z0-9_-]+$/.test(value)
 }
+
+export function isCourseName(value: string): boolean {
+  return /^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s-]+$/.test(value)
+}
