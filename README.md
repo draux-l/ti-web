@@ -2,7 +2,7 @@
 
 Ecosistema educativo híbrido que combina una plataforma de gestión web (LMS) con entornos de evaluación en Realidad Virtual (VR). Diseñado para instituciones técnicas que requieren simulaciones de alta fidelidad en áreas como Minería, Mecánica y Electricidad.
 
-
+.-
 📋 Tabla de Contenidos
 
 Descripción General
