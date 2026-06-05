@@ -47,6 +47,7 @@ export function InstructorGroups() {
   const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([])
   const [studentSearch, setStudentSearch] = useState("")
   const [isSaving, setIsSaving] = useState(false)
+  const [groupNameError, setGroupNameError] = useState("")
   const [courses, setCourses] = useState<{ id: number; name: string }[]>([])
   const currentOrgId = useAuthStore((s) => s.user?.orgId)
   const currentUserId = useAuthStore((s) => s.user?.id)
@@ -142,6 +143,11 @@ export function InstructorGroups() {
 
   const handleSaveGroup = async () => {
     if (!modalGroupName.trim() || isSaving) return
+    if (!/^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ0-9\s-]+$/.test(modalGroupName)) {
+      setGroupNameError("Solo letras, numeros, espacios y guiones")
+      return
+    }
+    setGroupNameError("")
     setIsSaving(true)
 
     try {
@@ -364,11 +370,13 @@ export function InstructorGroups() {
               <Label htmlFor="groupName">Nombre del Grupo</Label>
               <Input
                 id="groupName"
+                maxLength={50}
                 value={modalGroupName}
-                onChange={(e) => setModalGroupName(e.target.value)}
+                onChange={(e) => { setModalGroupName(e.target.value); setGroupNameError(""); }}
                 placeholder="Ej. Grupo D - Metalurgia"
-                className="rounded-xl bg-slate-50"
+                className={`rounded-xl bg-slate-50 ${groupNameError ? "border-red-500" : ""}`}
               />
+              {groupNameError && <p className="text-xs text-red-500 mt-1">{groupNameError}</p>}
             </div>
 
             <div className="flex flex-col gap-2">

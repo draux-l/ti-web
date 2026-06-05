@@ -308,7 +308,7 @@ export function InstructorExperiences() {
                     <p className="mb-2 text-xs font-semibold text-gray-500 uppercase">Reprogramar fecha limite</p>
                     <div className="flex items-center gap-2">
                       <CalendarDays className="size-4 text-[#00AEEF]" />
-                      <Input type="date" value={item.dueDate ? item.dueDate.split("T")[0] : ""} onChange={(e) => updateDueDate(item, e.target.value)} className="h-8 rounded-lg bg-slate-50 text-sm" />
+                      <Input type="date" min={new Date().toISOString().split("T")[0]} max={new Date(new Date().setFullYear(new Date().getFullYear() + 2)).toISOString().split("T")[0]} value={item.dueDate ? item.dueDate.split("T")[0] : ""} onChange={(e) => updateDueDate(item, e.target.value)} className="h-8 rounded-lg bg-slate-50 text-sm" />
                     </div>
                   </div>
                   <div className="rounded-xl border border-slate-200 bg-white p-3">
@@ -364,8 +364,8 @@ export function InstructorExperiences() {
               </Select>
             </div>
             <div className="flex flex-col gap-2">
-              <Label>Fecha limite (opcional)</Label>
-              <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className="rounded-xl bg-slate-50" />
+              <Label>Fecha limite (opcional, max 2 años)</Label>
+              <Input type="date" min={new Date().toISOString().split("T")[0]} max={new Date(new Date().setFullYear(new Date().getFullYear() + 2)).toISOString().split("T")[0]} value={dueDate} onChange={(e) => setDueDate(e.target.value)} className="rounded-xl bg-slate-50" />
             </div>
           </div>
           <DialogFooter className="gap-2 sm:gap-0">

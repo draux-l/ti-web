@@ -228,7 +228,7 @@ export function AdminSpecialties() {
                 </div>
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="spec-desc">Descripcion</Label>
-                  <Input id="spec-desc" required value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} placeholder="Breve descripcion" className="bg-slate-50/50" />
+                  <Input id="spec-desc" required maxLength={100} value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} placeholder="Breve descripcion" className="bg-slate-50/50" />
                 </div>
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="spec-image">Imagen (opcional)</Label>
@@ -335,7 +335,7 @@ export function AdminSpecialties() {
               </div>
               <div className="flex flex-col gap-2">
                 <Label htmlFor="edit-desc">Descripcion</Label>
-                <Input id="edit-desc" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} className="bg-slate-50/50" />
+                <Input id="edit-desc" maxLength={100} value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} className="bg-slate-50/50" />
               </div>
               <div className="flex flex-col gap-2">
                 <Label htmlFor="edit-image">Imagen (opcional)</Label>

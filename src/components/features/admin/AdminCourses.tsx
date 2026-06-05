@@ -57,6 +57,11 @@ export function AdminCourses() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [courseNameError, setCourseNameError] = useState("")
   const [descError, setDescError] = useState("")
+  const [expNameError, setExpNameError] = useState("")
+  const [expDescError, setExpDescError] = useState("")
+  const [expDurationError, setExpDurationError] = useState("")
+  const [expScoreError, setExpScoreError] = useState("")
+  const [expOrderError, setExpOrderError] = useState("")
   const { setHeaderButton } = useHeaderButton()
   const currentOrgId = useAuthStore((s) => s.user?.orgId)
 
@@ -233,6 +238,23 @@ export function AdminCourses() {
   const handleAddExperience = async (e: React.FormEvent) => {
     e.preventDefault()
     if (isSubmitting || !selectedCourse) return
+
+    if (!experienceForm.name.trim()) { setExpNameError("El nombre es requerido"); return }
+    setExpNameError("")
+    if (experienceForm.name.length > 50) { setExpNameError("Maximo 50 caracteres"); return }
+    setExpNameError("")
+    if (experienceForm.description.length > 200) { setExpDescError("Maximo 200 caracteres"); return }
+    setExpDescError("")
+    const dur = parseInt(experienceForm.duration)
+    if (!dur || dur < 1) { setExpDurationError("La duracion debe ser mayor a 0"); return }
+    setExpDurationError("")
+    const sc = parseInt(experienceForm.score)
+    if (isNaN(sc) || sc < 0 || sc > 100) { setExpScoreError("Score entre 0 y 100"); return }
+    setExpScoreError("")
+    const ord = parseInt(experienceForm.order)
+    if (isNaN(ord) || ord < 0) { setExpOrderError("El orden debe ser mayor o igual a 0"); return }
+    setExpOrderError("")
+
     setIsSubmitting(true)
     try {
       await apiClient.post("/experiences", {
@@ -572,17 +594,21 @@ export function AdminCourses() {
                   <div className="grid gap-3">
                     <Input
                       required
+                      maxLength={50}
                       value={experienceForm.name}
-                      onChange={(e) => setExperienceForm({...experienceForm, name: e.target.value})}
+                      onChange={(e) => { setExperienceForm({...experienceForm, name: e.target.value}); setExpNameError(""); }}
                       placeholder="Nombre de la experiencia"
-                      className="bg-white rounded-xl"
+                      className={`bg-white rounded-xl ${expNameError ? "border-red-500" : ""}`}
                     />
+                    {expNameError && <p className="text-xs text-red-500">{expNameError}</p>}
                     <Input
+                      maxLength={200}
                       value={experienceForm.description}
-                      onChange={(e) => setExperienceForm({...experienceForm, description: e.target.value})}
+                      onChange={(e) => { setExperienceForm({...experienceForm, description: e.target.value}); setExpDescError(""); }}
                       placeholder="Descripcion (opcional)"
-                      className="bg-white rounded-xl"
+                      className={`bg-white rounded-xl ${expDescError ? "border-red-500" : ""}`}
                     />
+                    {expDescError && <p className="text-xs text-red-500">{expDescError}</p>}
                     <div className="grid grid-cols-4 gap-3">
                       <Select value={experienceForm.type} onValueChange={(v) => setExperienceForm({...experienceForm, type: v})}>
                         <SelectTrigger className="bg-white rounded-xl"><SelectValue /></SelectTrigger>
@@ -594,30 +620,39 @@ export function AdminCourses() {
                           <SelectItem value="INDUCTION">INDUCTION</SelectItem>
                         </SelectContent>
                       </Select>
-                      <Input
-                        required
-                        type="number"
-                        value={experienceForm.duration}
-                        onChange={(e) => setExperienceForm({...experienceForm, duration: e.target.value})}
-                        placeholder="Duracion (min)"
-                        className="bg-white rounded-xl"
-                      />
-                      <Input
-                        required
-                        type="number"
-                        value={experienceForm.score}
-                        onChange={(e) => setExperienceForm({...experienceForm, score: e.target.value})}
-                        placeholder="Score"
-                        className="bg-white rounded-xl"
-                      />
-                      <Input
-                        required
-                        type="number"
-                        value={experienceForm.order}
-                        onChange={(e) => setExperienceForm({...experienceForm, order: e.target.value})}
-                        placeholder="Orden"
-                        className="bg-white rounded-xl"
-                      />
+                      <div>
+                        <Input
+                          required
+                          type="number"
+                          value={experienceForm.duration}
+                          onChange={(e) => { setExperienceForm({...experienceForm, duration: e.target.value}); setExpDurationError(""); }}
+                          placeholder="Duracion (min)"
+                          className={`bg-white rounded-xl ${expDurationError ? "border-red-500" : ""}`}
+                        />
+                        {expDurationError && <p className="text-xs text-red-500">{expDurationError}</p>}
+                      </div>
+                      <div>
+                        <Input
+                          required
+                          type="number"
+                          value={experienceForm.score}
+                          onChange={(e) => { setExperienceForm({...experienceForm, score: e.target.value}); setExpScoreError(""); }}
+                          placeholder="Score (0-100)"
+                          className={`bg-white rounded-xl ${expScoreError ? "border-red-500" : ""}`}
+                        />
+                        {expScoreError && <p className="text-xs text-red-500">{expScoreError}</p>}
+                      </div>
+                      <div>
+                        <Input
+                          required
+                          type="number"
+                          value={experienceForm.order}
+                          onChange={(e) => { setExperienceForm({...experienceForm, order: e.target.value}); setExpOrderError(""); }}
+                          placeholder="Orden"
+                          className={`bg-white rounded-xl ${expOrderError ? "border-red-500" : ""}`}
+                        />
+                        {expOrderError && <p className="text-xs text-red-500">{expOrderError}</p>}
+                      </div>
                     </div>
                   </div>
                   <Button type="submit" disabled={isSubmitting} className="w-full rounded-full bg-[#00AEEF] hover:bg-[#33C4F4] disabled:opacity-50 disabled:cursor-not-allowed">
