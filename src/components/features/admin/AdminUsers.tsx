@@ -41,6 +41,7 @@ export function AdminUsers() {
   const [students, setStudents] = useState<User[]>([])
   const [instructors, setInstructors] = useState<User[]>([])
   const [isLoadingUsers, setIsLoadingUsers] = useState(true)
+  const [fetchError, setFetchError] = useState<string | null>(null)
   const [isAddOpen, setIsAddOpen] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [formData, setFormData] = useState<FormData>({ ...EMPTY_FORM })
@@ -57,6 +58,7 @@ export function AdminUsers() {
 
   const fetchUsers = useCallback(async () => {
     setIsLoadingUsers(true)
+    setFetchError(null)
     try {
       const [studentsRes, instructorsRes] = await Promise.all([
         apiClient.get("/users", { params: { roleId: 4, pageSize: 500, orgId: currentOrgId } }),
@@ -65,6 +67,7 @@ export function AdminUsers() {
       setStudents(studentsRes.data.data)
       setInstructors(instructorsRes.data.data)
     } catch {
+      setFetchError("No se pudieron cargar los usuarios")
       toast.error("Error al cargar usuarios", {
         description: "No se pudo conectar con el servidor.",
       })
@@ -283,6 +286,15 @@ export function AdminUsers() {
   }
 
   const renderTable = (data: User[]) => {
+    if (fetchError) {
+      return (
+        <div className="flex flex-col items-center gap-3 py-12">
+          <p className="text-sm text-red-600">{fetchError}</p>
+          <Button variant="outline" onClick={fetchUsers}>Reintentar</Button>
+        </div>
+      )
+    }
+
     if (isLoadingUsers) {
       return (
         <div className="flex flex-col items-center gap-2 py-12 text-gray-500">

@@ -43,6 +43,7 @@ export function AdminCourses() {
   const [courses, setCourses] = useState<ApiCourse[]>([])
   const [specialties, setSpecialties] = useState<Specialty[]>([])
   const [isLoadingCourses, setIsLoadingCourses] = useState(true)
+  const [fetchError, setFetchError] = useState<string | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isExperiencesOpen, setIsExperiencesOpen] = useState(false)
@@ -61,12 +62,14 @@ export function AdminCourses() {
 
   const fetchCourses = useCallback(async () => {
     setIsLoadingCourses(true)
+    setFetchError(null)
     try {
       const res = await apiClient.get("/courses", {
         params: { pageSize: 500, orgId: currentOrgId },
       })
       setCourses(res.data.data)
     } catch {
+      setFetchError("No se pudieron cargar los cursos")
       toast.error("Error al cargar cursos")
     } finally {
       setIsLoadingCourses(false)
@@ -377,7 +380,16 @@ export function AdminCourses() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {isLoadingCourses ? (
+                {fetchError ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-12">
+                      <div className="flex flex-col items-center gap-3">
+                        <p className="text-sm text-red-600">{fetchError}</p>
+                        <Button variant="outline" size="sm" onClick={fetchCourses}>Reintentar</Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : isLoadingCourses ? (
                   <TableRow>
                     <TableCell colSpan={7} className="text-center py-12">
                       <div className="flex flex-col items-center gap-2">

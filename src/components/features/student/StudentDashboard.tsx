@@ -55,7 +55,7 @@ export function StudentDashboard({ onNavigate, onSelectCourse, onOpenXRCode }: S
           // sessions are optional
         }
       } catch {
-        // silent
+        setGreeting(userName || "Estudiante")
       } finally {
         setIsLoading(false)
       }

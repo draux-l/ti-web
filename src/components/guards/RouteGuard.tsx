@@ -13,12 +13,8 @@ interface RouteGuardProps {
 
 export function RouteGuard({ children, allowedRoleIds }: RouteGuardProps) {
   const router = useRouter()
-  const { isAuthenticated, isLoading, user, initialize } = useAuthStore()
+  const { isAuthenticated, isLoading, user } = useAuthStore()
   const [pendingRedirect, setPendingRedirect] = useState(false)
-
-  useEffect(() => {
-    initialize()
-  }, [initialize])
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {

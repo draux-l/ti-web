@@ -60,7 +60,7 @@ export function InstructorGroups() {
         }),
         apiClient.get("/users", {
           params: { roleId: 4, orgId: currentOrgId, pageSize: 500 },
-        }).catch(() => ({ data: { data: [] } })),
+        }),
         apiClient.get("/courses", {
           params: { orgId: currentOrgId, pageSize: 500 },
         }),

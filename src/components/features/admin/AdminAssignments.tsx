@@ -124,7 +124,7 @@ export function AdminAssignments() {
       const userIds = [selectedInstructor, ...selectedStudents]
       await Promise.all(
         userIds.map((userId) =>
-          apiClient.post("/user-groups", { userId, groupId }).catch(() => {})
+          apiClient.post("/user-groups", { userId, groupId }).catch(() => toast.error("Error al asignar usuario al grupo"))
         )
       )
 

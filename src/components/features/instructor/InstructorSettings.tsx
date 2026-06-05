@@ -108,7 +108,7 @@ export function InstructorSettings() {
         for (const p of res.data) prefs[p.key] = p.enabled
         setAlerts(prefs as typeof alerts)
       })
-      .catch(() => {})
+      .catch(() => toast.error("Error al cargar preferencias"))
       .finally(() => setAlertsLoaded(true))
   }, [storeUser])
 

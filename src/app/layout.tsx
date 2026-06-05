@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
+import { AuthInitializer } from "@/components/guards/AuthInitializer";
 import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
@@ -17,7 +18,9 @@ export default function RootLayout({
     <html lang="es" suppressHydrationWarning>
       <body suppressHydrationWarning>
         <LanguageProvider>
-          {children}
+          <AuthInitializer>
+            {children}
+          </AuthInitializer>
         </LanguageProvider>
         <Toaster />
       </body>
