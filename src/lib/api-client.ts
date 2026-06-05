@@ -20,6 +20,9 @@ apiClient.interceptors.request.use((config) => {
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
+    if (!error.response && typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("server-down"))
+    }
     if (error.response?.status === 401 && typeof window !== "undefined") {
       const url: string = error.config?.url || ""
       if (!url.includes("/auth/sign-in")) {

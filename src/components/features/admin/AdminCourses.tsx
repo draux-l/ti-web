@@ -624,9 +624,10 @@ export function AdminCourses() {
                         <Input
                           required
                           type="number"
+                          min={1}
                           value={experienceForm.duration}
                           onChange={(e) => { setExperienceForm({...experienceForm, duration: e.target.value}); setExpDurationError(""); }}
-                          placeholder="Duracion (min)"
+                          placeholder="Duracion (min 1)"
                           className={`bg-white rounded-xl ${expDurationError ? "border-red-500" : ""}`}
                         />
                         {expDurationError && <p className="text-xs text-red-500">{expDurationError}</p>}
@@ -646,9 +647,10 @@ export function AdminCourses() {
                         <Input
                           required
                           type="number"
+                          min={0}
                           value={experienceForm.order}
                           onChange={(e) => { setExperienceForm({...experienceForm, order: e.target.value}); setExpOrderError(""); }}
-                          placeholder="Orden"
+                          placeholder="Orden (min 0)"
                           className={`bg-white rounded-xl ${expOrderError ? "border-red-500" : ""}`}
                         />
                         {expOrderError && <p className="text-xs text-red-500">{expOrderError}</p>}
