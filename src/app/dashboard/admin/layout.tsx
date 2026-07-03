@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { RouteGuard } from "@/components/guards/RouteGuard"
+import { ChatWidget } from "@/components/chat/ChatWidget"
 import { useAuthStore } from "@/stores/auth.store"
 import { ROLE_LABEL_MAP } from "@/types/auth.types"
 import { HeaderButtonProvider, useHeaderButton } from "@/contexts/HeaderButtonContext"
@@ -193,6 +194,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
           </form>
         </DialogContent>
       </Dialog>
+      <ChatWidget />
     </div>
   )
 }

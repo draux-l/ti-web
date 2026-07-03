@@ -8,6 +8,7 @@ import { Home, Users, Layout, TrendingUp, Settings, Menu, X, Eye, BookOpen } fro
 import { Sidebar } from "@/components/Sidebar"
 import { Button } from "@/components/ui/button"
 import { RouteGuard } from "@/components/guards/RouteGuard"
+import { ChatWidget } from "@/components/chat/ChatWidget"
 import { useAuthStore } from "@/stores/auth.store"
 import { ROLE_LABEL_MAP } from "@/types/auth.types"
 
@@ -131,6 +132,7 @@ export default function InstructorLayout({
         </div>
       )}
     </div>
+    <ChatWidget />
     </RouteGuard>
   )
 }

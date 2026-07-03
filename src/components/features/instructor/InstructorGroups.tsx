@@ -194,9 +194,7 @@ export function InstructorGroups() {
   const toggleStudentInGroup = async (groupId: number, studentId: string, currentlyIn: boolean) => {
     try {
       if (currentlyIn) {
-        await apiClient.delete("/user-groups", {
-          data: { userId: studentId, groupId },
-        })
+        await apiClient.delete(`/user-groups/${studentId}/${groupId}`)
       } else {
         await apiClient.post("/user-groups", { userId: studentId, groupId })
       }
@@ -214,7 +212,7 @@ export function InstructorGroups() {
       action: {
         label: "Quitar",
         onClick: () => {
-          apiClient.delete("/user-groups", { data: { userId: studentId, groupId } })
+          apiClient.delete(`/user-groups/${studentId}/${groupId}`)
             .then(() => {
               toast.success("Estudiante removido del grupo")
               fetchData()

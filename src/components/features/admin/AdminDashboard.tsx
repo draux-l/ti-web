@@ -12,12 +12,9 @@ import { useHeaderButton } from "@/contexts/HeaderButtonContext"
 import { Pie, PieChart, ResponsiveContainer, Cell } from "recharts"
 import apiClient from "@/lib/api-client"
 import { useAuthStore } from "@/stores/auth.store"
-
-interface ActivityLog {
-  id: number
-  text: string
-  time: string
-}
+import { useChat } from "@/hooks/useChat"
+import { ConversationList } from "@/components/chat/ConversationList"
+import { ChatDrawer } from "@/components/chat/ChatDrawer"
 
 export function AdminDashboard() {
   const { t } = useLanguage()
@@ -28,10 +25,10 @@ export function AdminDashboard() {
   const [studentCount, setStudentCount] = useState(0)
   const [courseCount, setCourseCount] = useState(0)
   const [courses, setCourses] = useState<{ id: number; name: string; status: boolean }[]>([])
-  const [activities, setActivities] = useState<ActivityLog[]>([])
   const [isLoadingStats, setIsLoadingStats] = useState(true)
   const [isLoadingCourses, setIsLoadingCourses] = useState(true)
-  const [isLoadingActivity, setIsLoadingActivity] = useState(true)
+
+  const chat = useChat()
 
   useEffect(() => {
     async function fetchStats() {
@@ -65,26 +62,6 @@ export function AdminDashboard() {
       }
     }
     fetchCourses()
-  }, [])
-
-  useEffect(() => {
-    async function fetchActivity() {
-      try {
-        const res = await apiClient.get("/activity-log", { params: { pageSize: 5, orgId: currentOrgId } })
-        setActivities(
-          (res.data.data || []).map((entry: { id: number; action: string; createdAt: string }) => ({
-            id: entry.id,
-            text: entry.action,
-            time: new Date(entry.createdAt).toLocaleString(),
-          }))
-        )
-      } catch {
-        // activity log might not be available
-      } finally {
-        setIsLoadingActivity(false)
-      }
-    }
-    fetchActivity()
   }, [])
 
   const userDistData = useMemo(
@@ -258,31 +235,14 @@ export function AdminDashboard() {
           <Card className="shadow-sm border-slate-200/60 flex-1">
             <CardHeader className="py-5">
               <CardTitle className="text-sm font-semibold text-slate-700">
-                {t("dashboard", "recentAct")}
+                Mensajes
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {isLoadingActivity ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="size-6 animate-spin text-[#00AEEF]" />
-                </div>
-              ) : activities.length === 0 ? (
-                <p className="text-sm text-gray-500 text-center py-8">Sin actividad reciente</p>
-              ) : (
-                <div className="flex flex-col gap-3">
-                  {activities.map((activity) => (
-                    <div
-                      key={activity.id}
-                      className="flex flex-col sm:flex-row sm:items-center justify-between bg-[#f8fafc] px-4 py-3 rounded-lg border border-slate-100 gap-2"
-                    >
-                      <span className="text-[13px] font-medium text-slate-600">{activity.text}</span>
-                      <span className="text-[11px] font-medium text-slate-400 whitespace-nowrap">
-                        {activity.time}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
+              <ConversationList
+                conversations={chat.conversations}
+                onSelect={chat.selectConversation}
+              />
             </CardContent>
           </Card>
         </div>
