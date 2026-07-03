@@ -62,15 +62,14 @@ export function Sidebar({ role, userName, onLogout, onChangePassword, onSettings
       { label: t("sidebar", "inicio"), href: "/dashboard/admin", icon: Home },
       { label: t("sidebar", "usuarios"), href: "/dashboard/admin/users", icon: Users },
       { label: t("sidebar", "Cursos"), href: "/dashboard/admin/courses", icon: BookOpen },
-      { label: t("sidebar", "Departamentos"), href: "/dashboard/admin/departments", icon: Building },
-      { label: t("sidebar", "Especialidades"), href: "/dashboard/admin/specialties", icon: Layout },
       { label: t("sidebar", "Asignaciones"), href: "/dashboard/admin/assignments", icon: ClipboardList },
     ],
     superadmin: [
       { label: t("sidebar", "inicio"), href: "/dashboard/superadmin", icon: Home },
-      { label: t("sidebar", "instituciones"), href: "/dashboard/superadmin/institutions", icon: Building },
-      { label: t("sidebar", "reportes"), href: "/dashboard/superadmin/reports", icon: BarChart3 },
-      { label: t("sidebar", "ajustesSistema"), href: "/dashboard/superadmin/system", icon: Settings },
+      { label: "Organizaciones", href: "/dashboard/superadmin/organizations", icon: Building },
+      { label: t("sidebar", "usuarios"), href: "/dashboard/superadmin/users", icon: Users },
+      { label: "Departamentos", href: "/dashboard/superadmin/departments", icon: Layout },
+      { label: "Especialidades", href: "/dashboard/superadmin/specialties", icon: BookOpen },
     ],
   }
 

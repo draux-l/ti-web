@@ -28,8 +28,6 @@ const MOBILE_MENU_ITEMS: Record<string, { label: string; href: string; icon: Rea
     { label: "Inicio", href: "/dashboard/admin", icon: Users },
     { label: "Usuarios", href: "/dashboard/admin/users", icon: Users },
     { label: "Cursos", href: "/dashboard/admin/courses", icon: BookOpen },
-    { label: "Departamentos", href: "/dashboard/admin/departments", icon: Building },
-    { label: "Especialidades", href: "/dashboard/admin/specialties", icon: Layout },
     { label: "Asignaciones", href: "/dashboard/admin/assignments", icon: Users },
   ],
 }

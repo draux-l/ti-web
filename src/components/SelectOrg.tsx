@@ -15,7 +15,6 @@ interface SelectOrgProps {
 export function SelectOrg({ value, onChange }: SelectOrgProps) {
   const [open, setOpen] = useState(false)
   const [orgs, setOrgs] = useState<{ id: number; name: string }[]>([])
-  const [search, setSearch] = useState("")
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const doSearch = async (q: string) => {
@@ -34,7 +33,6 @@ export function SelectOrg({ value, onChange }: SelectOrgProps) {
   }, [open])
 
   const onSearch = (q: string) => {
-    setSearch(q)
     if (debounceRef.current) clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(() => doSearch(q), 300)
   }
@@ -55,7 +53,7 @@ export function SelectOrg({ value, onChange }: SelectOrgProps) {
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full min-w-[300px] p-0">
-        <Command>
+        <Command shouldFilter={false}>
           <CommandInput placeholder="Buscar organizacion..." onValueChange={onSearch} />
           <CommandList>
             <CommandEmpty>No se encontraron organizaciones</CommandEmpty>
