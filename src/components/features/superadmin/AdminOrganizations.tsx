@@ -31,6 +31,9 @@ export function AdminOrganizations() {
   const [formData, setFormData] = useState(EMPTY_FORM)
   const [searchQuery, setSearchQuery] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [nameError, setNameError] = useState("")
+  const [rucError, setRucError] = useState("")
+  const [countryError, setCountryError] = useState("")
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [total, setTotal] = useState(0)
@@ -52,11 +55,15 @@ export function AdminOrganizations() {
 
   useEffect(() => { fetchOrgs() }, [fetchOrgs])
 
-  const resetForm = () => { setFormData(EMPTY_FORM); setIsSubmitting(false) }
+  const resetForm = () => { setFormData(EMPTY_FORM); setIsSubmitting(false); setNameError(""); setRucError(""); setCountryError("") }
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (isSubmitting || !formData.name.trim() || !formData.ruc.trim()) return
+    if (isSubmitting) return
+    setNameError(""); setRucError("")
+    if (!formData.name.trim()) { setNameError("El nombre es requerido"); return }
+    if (!formData.ruc.trim()) { setRucError("El RUC es requerido"); return }
+    if (!/^\d{11}$/.test(formData.ruc.trim())) { setRucError("El RUC debe tener exactamente 11 digitos numericos. Ej: 20123456789"); return }
     setIsSubmitting(true)
     try {
       await apiClient.post("/organizations", {
@@ -69,13 +76,21 @@ export function AdminOrganizations() {
       setIsDialogOpen(false)
       resetForm()
       fetchOrgs()
-    } catch { toast.error("Error al crear organizacion") }
+    } catch (err: unknown) {
+      const backend = (err as { response?: { data?: { errors?: { path: string[]; message: string }[] } } })?.response?.data?.errors
+      if (backend) { for (const e of backend) { if (e.path[0] === "name") setNameError(e.message); else if (e.path[0] === "ruc") setRucError(e.message); else if (e.path[0] === "country") setCountryError(e.message) } }
+      else { toast.error("Error al crear organizacion") }
+    }
     finally { setIsSubmitting(false) }
   }
 
   const handleEdit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (isSubmitting || !formData.name.trim()) return
+    if (isSubmitting) return
+    setNameError(""); setRucError("")
+    if (!formData.name.trim()) { setNameError("El nombre es requerido"); return }
+    if (!formData.ruc.trim()) { setRucError("El RUC es requerido"); return }
+    if (!/^\d{11}$/.test(formData.ruc.trim())) { setRucError("El RUC debe tener exactamente 11 digitos numericos. Ej: 20123456789"); return }
     setIsSubmitting(true)
     try {
       await apiClient.patch(`/organizations/${formData.id}`, {
@@ -88,8 +103,18 @@ export function AdminOrganizations() {
       setIsEditDialogOpen(false)
       resetForm()
       fetchOrgs()
-    } catch { toast.error("Error al actualizar") }
-    finally { setIsSubmitting(false) }
+    } catch (err: unknown) {
+      const backend = (err as { response?: { data?: { errors?: { path: string[]; message: string }[] } } })?.response?.data?.errors
+      if (backend) {
+        for (const e of backend) {
+          if (e.path[0] === "name") setNameError(e.message)
+          else if (e.path[0] === "ruc") setRucError(e.message)
+          else if (e.path[0] === "country") setCountryError(e.message)
+        }
+      } else {
+        toast.error("Error al actualizar")
+      }
+    } finally { setIsSubmitting(false) }
   }
 
   const openEdit = (org: Organization) => {
@@ -132,9 +157,9 @@ export function AdminOrganizations() {
             <form onSubmit={handleCreate}>
               <DialogHeader><DialogTitle>Nueva Organizacion</DialogTitle><DialogDescription>Completa los datos de la organizacion.</DialogDescription></DialogHeader>
               <div className="grid gap-4 py-4">
-                <div className="flex flex-col gap-2"><Label>Nombre</Label><Input required value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} placeholder="Ej: Tecsup" className="bg-slate-50/50" /></div>
-                <div className="flex flex-col gap-2"><Label>RUC</Label><Input required value={formData.ruc} onChange={(e) => setFormData({...formData, ruc: e.target.value})} placeholder="Ej: 20123456789" className="bg-slate-50/50" /></div>
-                <div className="flex flex-col gap-2"><Label>Pais</Label><Input value={formData.country} onChange={(e) => setFormData({...formData, country: e.target.value})} placeholder="PE" className="bg-slate-50/50" /></div>
+                <div className="flex flex-col gap-2"><Label>Nombre</Label><Input required value={formData.name} onChange={(e) => { setFormData({...formData, name: e.target.value}); setNameError(""); }} placeholder="Ej: Tecsup (max 100)" maxLength={100} className={nameError ? "border-red-500 bg-slate-50/50" : "bg-slate-50/50"} />{nameError && <p className="text-xs text-red-500">{nameError}</p>}</div>
+                <div className="flex flex-col gap-2"><Label>RUC</Label><Input required value={formData.ruc} onChange={(e) => { setFormData({...formData, ruc: e.target.value}); setRucError(""); }} placeholder="Ej: 20123456789 (11 digitos)" maxLength={11} className={rucError ? "border-red-500 bg-slate-50/50" : "bg-slate-50/50"} />{rucError && <p className="text-xs text-red-500">{rucError}</p>}</div>
+                <div className="flex flex-col gap-2"><Label>Pais</Label><Input value={formData.country} onChange={(e) => { setFormData({...formData, country: e.target.value}); setCountryError(""); }} placeholder="PE (ISO 2 chars)" maxLength={10} className={countryError ? "border-red-500 bg-slate-50/50" : "bg-slate-50/50"} />{countryError && <p className="text-xs text-red-500">{countryError}</p>}</div>
                 <div className="flex flex-col gap-2"><Label>Logo URL (opcional)</Label><Input value={formData.logo} onChange={(e) => setFormData({...formData, logo: e.target.value})} placeholder="https://..." className="bg-slate-50/50" /></div>
               </div>
               <DialogFooter>
@@ -206,9 +231,9 @@ export function AdminOrganizations() {
           <form onSubmit={handleEdit}>
             <DialogHeader><DialogTitle>Editar Organizacion</DialogTitle><DialogDescription>Modifica los datos de la organizacion.</DialogDescription></DialogHeader>
             <div className="grid gap-4 py-4">
-              <div className="flex flex-col gap-2"><Label>Nombre</Label><Input required value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="bg-slate-50/50" /></div>
-              <div className="flex flex-col gap-2"><Label>RUC</Label><Input required value={formData.ruc} onChange={(e) => setFormData({...formData, ruc: e.target.value})} className="bg-slate-50/50" /></div>
-              <div className="flex flex-col gap-2"><Label>Pais</Label><Input value={formData.country} onChange={(e) => setFormData({...formData, country: e.target.value})} className="bg-slate-50/50" /></div>
+              <div className="flex flex-col gap-2"><Label>Nombre</Label><Input required maxLength={100} value={formData.name} onChange={(e) => { setFormData({...formData, name: e.target.value}); setNameError(""); }} className={nameError ? "border-red-500 bg-slate-50/50" : "bg-slate-50/50"} />{nameError && <p className="text-xs text-red-500">{nameError}</p>}</div>
+              <div className="flex flex-col gap-2"><Label>RUC</Label><Input required maxLength={11} value={formData.ruc} onChange={(e) => { setFormData({...formData, ruc: e.target.value}); setRucError(""); }} className={rucError ? "border-red-500 bg-slate-50/50" : "bg-slate-50/50"} />{rucError && <p className="text-xs text-red-500">{rucError}</p>}</div>
+              <div className="flex flex-col gap-2"><Label>Pais</Label><Input maxLength={10} value={formData.country} onChange={(e) => { setFormData({...formData, country: e.target.value}); setCountryError(""); }} className={countryError ? "border-red-500 bg-slate-50/50" : "bg-slate-50/50"} />{countryError && <p className="text-xs text-red-500">{countryError}</p>}</div>
               <div className="flex flex-col gap-2"><Label>Logo URL (opcional)</Label><Input value={formData.logo} onChange={(e) => setFormData({...formData, logo: e.target.value})} className="bg-slate-50/50" /></div>
             </div>
             <DialogFooter>

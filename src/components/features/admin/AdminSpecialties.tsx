@@ -52,12 +52,20 @@ export function AdminSpecialties({ showOrgSelector }: { showOrgSelector?: boolea
   const currentOrgId = useAuthStore((s) => s.user?.orgId)
 
   const fetchData = useCallback(async () => {
-    const orgParam = showOrgSelector && orgFilterId ? Number(orgFilterId) : currentOrgId
     setIsLoading(true)
     try {
+      const specsParams: Record<string, unknown> = { pageSize: 500 }
+      const deptParams: Record<string, unknown> = { pageSize: 500 }
+      if (showOrgSelector && orgFilterId) {
+        specsParams.orgId = Number(orgFilterId)
+        deptParams.orgId = Number(orgFilterId)
+      } else if (!showOrgSelector) {
+        specsParams.orgId = currentOrgId
+        deptParams.orgId = currentOrgId
+      }
       const [specRes, deptRes] = await Promise.all([
-        apiClient.get("/specialties", { params: { pageSize: 500, orgId: orgParam } }),
-        apiClient.get("/departments", { params: { pageSize: 500, orgId: orgParam } }),
+        apiClient.get("/specialties", { params: specsParams }),
+        apiClient.get("/departments", { params: deptParams }),
       ])
       setSpecialties(specRes.data.data)
       setDepartments(deptRes.data.data)

@@ -62,9 +62,11 @@ export function AdminUsers({ readonly, showOrgSelector }: { readonly?: boolean; 
     setIsLoadingUsers(true)
     setFetchError(null)
     try {
+      const params: Record<string, unknown> = { pageSize: 500 }
+      if (!showOrgSelector) params.orgId = currentOrgId
       const [studentsRes, instructorsRes] = await Promise.all([
-        apiClient.get("/users", { params: { roleId: 4, pageSize: 500, orgId: currentOrgId } }),
-        apiClient.get("/users", { params: { roleId: 3, pageSize: 500, orgId: currentOrgId } }),
+        apiClient.get("/users", { params: { ...params, roleId: 4 } }),
+        apiClient.get("/users", { params: { ...params, roleId: 3 } }),
       ])
       setStudents(studentsRes.data.data)
       setInstructors(instructorsRes.data.data)
@@ -76,7 +78,7 @@ export function AdminUsers({ readonly, showOrgSelector }: { readonly?: boolean; 
     } finally {
       setIsLoadingUsers(false)
     }
-  }, [currentOrgId])
+  }, [currentOrgId, showOrgSelector])
 
   const fetchSpecialties = useCallback(async () => {
     try {

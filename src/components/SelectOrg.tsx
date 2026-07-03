@@ -45,10 +45,6 @@ export function SelectOrg({ value, onChange }: SelectOrgProps) {
     debounceRef.current = setTimeout(() => doSearch(q), 300)
   }
 
-  useEffect(() => {
-    if (!showDropdown) doSearch("")
-  }, [showDropdown])
-
   return (
     <div ref={wrapperRef} className="relative">
       <div className="relative">

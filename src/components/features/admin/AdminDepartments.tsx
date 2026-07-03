@@ -45,14 +45,16 @@ export function AdminDepartments({ showOrgSelector }: { showOrgSelector?: boolea
   const fetchDepartments = useCallback(async () => {
     setIsLoading(true)
     try {
-      const res = await apiClient.get("/departments", { params: { pageSize: 500, orgId: currentOrgId } })
+      const params: Record<string, unknown> = { pageSize: 500 }
+      if (!showOrgSelector) params.orgId = currentOrgId
+      const res = await apiClient.get("/departments", { params })
       setDepartments(res.data.data)
     } catch {
       toast.error("Error al cargar departamentos")
     } finally {
       setIsLoading(false)
     }
-  }, [currentOrgId])
+  }, [currentOrgId, showOrgSelector])
 
   useEffect(() => {
     fetchDepartments()
