@@ -320,7 +320,7 @@ export function AdminCourses() {
               <div className="grid gap-4 py-4">
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="name">Nombre del Curso</Label>
-                  <Input id="name" required maxLength={50} value={formData.name} onChange={(e) => { setFormData({...formData, name: e.target.value}); setCourseNameError(""); }} placeholder="Ej: Realidad Mixta Avanzada" className={courseNameError ? "border-red-500" : "bg-slate-50/50"} />
+                  <Input id="name" required maxLength={50} value={formData.name} onChange={(e) => { setFormData({...formData, name: e.target.value}); setCourseNameError(""); }} placeholder="Ej: Realidad Mixta (letras y guiones, max 50)" className={courseNameError ? "border-red-500" : "bg-slate-50/50"} />
                   {courseNameError && <p className="text-xs text-red-500 mt-1">{courseNameError}</p>}
                 </div>
                 <div className="flex flex-col gap-2">
@@ -336,7 +336,7 @@ export function AdminCourses() {
                 </div>
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="description">Descripcion</Label>
-                  <Input id="description" required maxLength={250} value={formData.description} onChange={(e) => { setFormData({...formData, description: e.target.value}); setDescError(""); }} placeholder="Breve descripcion del curso" className={descError ? "border-red-500" : "bg-slate-50/50"} />
+                  <Input id="description" required maxLength={250} value={formData.description} onChange={(e) => { setFormData({...formData, description: e.target.value}); setDescError(""); }} placeholder="Ej: Curso enfocado en... (max 250)" className={descError ? "border-red-500" : "bg-slate-50/50"} />
                   {descError && <p className="text-xs text-red-500 mt-1">{descError}</p>}
                 </div>
                 <div className="flex flex-col gap-2">
@@ -597,7 +597,7 @@ export function AdminCourses() {
                       maxLength={50}
                       value={experienceForm.name}
                       onChange={(e) => { setExperienceForm({...experienceForm, name: e.target.value}); setExpNameError(""); }}
-                      placeholder="Nombre de la experiencia"
+                      placeholder="Ej: VR Lab 1 (max 50)"
                       className={`bg-white rounded-xl ${expNameError ? "border-red-500" : ""}`}
                     />
                     {expNameError && <p className="text-xs text-red-500">{expNameError}</p>}
@@ -605,7 +605,7 @@ export function AdminCourses() {
                       maxLength={200}
                       value={experienceForm.description}
                       onChange={(e) => { setExperienceForm({...experienceForm, description: e.target.value}); setExpDescError(""); }}
-                      placeholder="Descripcion (opcional)"
+                      placeholder="Ej: Descripcion breve (max 200)"
                       className={`bg-white rounded-xl ${expDescError ? "border-red-500" : ""}`}
                     />
                     {expDescError && <p className="text-xs text-red-500">{expDescError}</p>}

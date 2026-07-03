@@ -371,7 +371,7 @@ export function InstructorGroups() {
                 maxLength={50}
                 value={modalGroupName}
                 onChange={(e) => { setModalGroupName(e.target.value); setGroupNameError(""); }}
-                placeholder="Ej. Grupo D - Metalurgia"
+                placeholder="Ej: Grupo A (letras, numeros y guiones)"
                 className={`rounded-xl bg-slate-50 ${groupNameError ? "border-red-500" : ""}`}
               />
               {groupNameError && <p className="text-xs text-red-500 mt-1">{groupNameError}</p>}

@@ -364,7 +364,7 @@ export function AdminUsers() {
         <Input
           value={formData.position}
           onChange={(e) => { setFormData({ ...formData, position: e.target.value }); setPositionError(""); }}
-          placeholder="Ej: Instructor Senior VR"
+          placeholder="Ej: Instructor Senior VR (max 100)"
           maxLength={100}
           className={positionError ? "border-red-500" : ""}
         />
@@ -390,7 +390,7 @@ export function AdminUsers() {
         <Input
           value={formData.phone}
           onChange={(e) => { const d = e.target.value.replace(/[^0-9]/g, ""); setFormData({ ...formData, phone: d }); setPhoneError(""); }}
-          placeholder="51999888777"
+          placeholder="Ej: 51999888777 (7-12 digitos)"
           maxLength={12}
           className={phoneError ? "border-red-500" : ""}
         />

@@ -40,15 +40,6 @@ export function AccessCodeModal({ isOpen, onClose, autoTrigger = false }: Access
     }
   }, [timeLeft, isOpen, isSynced])
 
-  useEffect(() => {
-    if (autoTrigger && isOpen) {
-      const syncTimer = setTimeout(() => {
-        setIsSynced(true)
-      }, 3000)
-      return () => clearTimeout(syncTimer)
-    }
-  }, [autoTrigger, isOpen])
-
   const generatePin = async () => {
     setIsLoading(true)
     try {

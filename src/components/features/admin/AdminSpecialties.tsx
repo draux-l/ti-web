@@ -217,18 +217,18 @@ export function AdminSpecialties() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex flex-col gap-2">
                     <Label htmlFor="spec-code">Codigo</Label>
-                    <Input id="spec-code" required value={formData.code} onChange={(e) => { setFormData({...formData, code: e.target.value}); setCodeError(""); }} placeholder="Ej: VR" maxLength={10} className={codeError ? "border-red-500" : "bg-slate-50/50"} />
+                    <Input id="spec-code" required value={formData.code} onChange={(e) => { setFormData({...formData, code: e.target.value}); setCodeError(""); }} placeholder="Ej: VR (alfanumerico, max 10)" maxLength={10} className={codeError ? "border-red-500" : "bg-slate-50/50"} />
                     {codeError && <p className="text-xs text-red-500 mt-1">{codeError}</p>}
                   </div>
                   <div className="flex flex-col gap-2">
                     <Label htmlFor="spec-name">Nombre</Label>
-                    <Input id="spec-name" required value={formData.name} onChange={(e) => { setFormData({...formData, name: e.target.value}); setNameError(""); }} placeholder="Ej: Realidad Virtual" maxLength={25} className={nameError ? "border-red-500" : "bg-slate-50/50"} />
+                    <Input id="spec-name" required value={formData.name} onChange={(e) => { setFormData({...formData, name: e.target.value}); setNameError(""); }} placeholder="Ej: Realidad Virtual (solo letras, max 25)" maxLength={25} className={nameError ? "border-red-500" : "bg-slate-50/50"} />
                     {nameError && <p className="text-xs text-red-500 mt-1">{nameError}</p>}
                   </div>
                 </div>
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="spec-desc">Descripcion</Label>
-                  <Input id="spec-desc" required maxLength={100} value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} placeholder="Breve descripcion" className="bg-slate-50/50" />
+                  <Input id="spec-desc" required maxLength={100} value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} placeholder="Ej: Especialidad enfocada en... (max 100)" className="bg-slate-50/50" />
                 </div>
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="spec-image">Imagen (opcional)</Label>
