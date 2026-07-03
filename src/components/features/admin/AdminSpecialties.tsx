@@ -16,6 +16,7 @@ import { useHeaderButton } from "@/contexts/HeaderButtonContext"
 import apiClient from "@/lib/api-client"
 import { useAuthStore } from "@/stores/auth.store"
 import { isName, isAlphaNumeric } from "@/validators/form.validators"
+import { SelectOrg } from "@/components/SelectOrg"
 
 interface Department {
   id: number
@@ -35,7 +36,7 @@ interface Specialty {
 
 const EMPTY_FORM = { id: 0, code: "", name: "", description: "", image: "", departmentId: "", status: "Activo" }
 
-export function AdminSpecialties() {
+export function AdminSpecialties({ showOrgSelector }: { showOrgSelector?: boolean }) {
   const [specialties, setSpecialties] = useState<Specialty[]>([])
   const [departments, setDepartments] = useState<Department[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -46,15 +47,17 @@ export function AdminSpecialties() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [codeError, setCodeError] = useState("")
   const [nameError, setNameError] = useState("")
+  const [orgFilterId, setOrgFilterId] = useState("")
   const { setHeaderButton } = useHeaderButton()
   const currentOrgId = useAuthStore((s) => s.user?.orgId)
 
   const fetchData = useCallback(async () => {
+    const orgParam = showOrgSelector && orgFilterId ? Number(orgFilterId) : currentOrgId
     setIsLoading(true)
     try {
       const [specRes, deptRes] = await Promise.all([
-        apiClient.get("/specialties", { params: { pageSize: 500, orgId: currentOrgId } }),
-        apiClient.get("/departments", { params: { pageSize: 500, orgId: currentOrgId } }),
+        apiClient.get("/specialties", { params: { pageSize: 500, orgId: orgParam } }),
+        apiClient.get("/departments", { params: { pageSize: 500, orgId: orgParam } }),
       ])
       setSpecialties(specRes.data.data)
       setDepartments(deptRes.data.data)
@@ -63,7 +66,7 @@ export function AdminSpecialties() {
     } finally {
       setIsLoading(false)
     }
-  }, [currentOrgId])
+  }, [currentOrgId, showOrgSelector, orgFilterId])
 
   useEffect(() => {
     fetchData()
@@ -205,6 +208,12 @@ export function AdminSpecialties() {
                 <DialogDescription>Completa los datos de la nueva especialidad.</DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
+                {showOrgSelector && (
+                  <div className="flex flex-col gap-2">
+                    <Label>Organizacion <span className="text-red-500">*</span></Label>
+                    <SelectOrg value={orgFilterId} onChange={(v) => { setOrgFilterId(v); setFormData({...formData, departmentId: ""}) }} />
+                  </div>
+                )}
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="spec-dept">Departamento</Label>
                   <Select value={formData.departmentId} onValueChange={(v) => setFormData({...formData, departmentId: v})}>

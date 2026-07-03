@@ -16,6 +16,7 @@ import { useHeaderButton } from "@/contexts/HeaderButtonContext"
 import apiClient from "@/lib/api-client"
 import { useAuthStore } from "@/stores/auth.store"
 import { isName } from "@/validators/form.validators"
+import { SelectOrg } from "@/components/SelectOrg"
 
 interface Department {
   id: number
@@ -27,7 +28,7 @@ interface Department {
 
 const EMPTY_FORM = { id: 0, name: "", description: "", status: "Activo" }
 
-export function AdminDepartments() {
+export function AdminDepartments({ showOrgSelector }: { showOrgSelector?: boolean }) {
   const [departments, setDepartments] = useState<Department[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -39,6 +40,7 @@ export function AdminDepartments() {
   const [descError, setDescError] = useState("")
   const { setHeaderButton } = useHeaderButton()
   const currentOrgId = useAuthStore((s) => s.user?.orgId)
+  const [selectedOrgId, setSelectedOrgId] = useState("")
 
   const fetchDepartments = useCallback(async () => {
     setIsLoading(true)
@@ -90,7 +92,7 @@ export function AdminDepartments() {
     setIsSubmitting(true)
     try {
       await apiClient.post("/departments", {
-        orgId: currentOrgId,
+        orgId: showOrgSelector && selectedOrgId ? Number(selectedOrgId) : currentOrgId,
         name: formData.name.trim(),
         description: formData.description.trim() || undefined,
         status: formData.status === "Activo",
@@ -199,6 +201,12 @@ export function AdminDepartments() {
                 <DialogDescription>Completa los datos del nuevo departamento.</DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
+                {showOrgSelector && (
+                  <div className="flex flex-col gap-2">
+                    <Label>Organizacion <span className="text-red-500">*</span></Label>
+                    <SelectOrg value={selectedOrgId} onChange={setSelectedOrgId} />
+                  </div>
+                )}
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="name">Nombre</Label>
                   <Input id="name" required maxLength={25} value={formData.name} onChange={(e) => { setFormData({...formData, name: e.target.value}); setNameError(""); }} placeholder="Ej: IT Department (solo letras, max 25)" className={nameError ? "border-red-500" : "bg-slate-50/50"} />

@@ -19,6 +19,7 @@ import apiClient from "@/lib/api-client"
 import { useAuthStore } from "@/stores/auth.store"
 import type { User, Specialty } from "@/types/auth.types"
 import { isDNI, isName, isEmail, isValidPassword } from "@/validators/form.validators"
+import { SelectOrg } from "@/components/SelectOrg"
 
 const EMPTY_FORM = {
   id: "",
@@ -36,7 +37,7 @@ const EMPTY_FORM = {
 
 type FormData = typeof EMPTY_FORM
 
-export function AdminUsers() {
+export function AdminUsers({ readonly, showOrgSelector }: { readonly?: boolean; showOrgSelector?: boolean }) {
   const [activeTab, setActiveTab] = useState("alumnos")
   const [students, setStudents] = useState<User[]>([])
   const [instructors, setInstructors] = useState<User[]>([])
@@ -53,6 +54,7 @@ export function AdminUsers() {
   const [phoneError, setPhoneError] = useState("")
   const [positionError, setPositionError] = useState("")
   const [specialties, setSpecialties] = useState<Specialty[]>([])
+  const [selectedOrgId, setSelectedOrgId] = useState("")
   const { setHeaderButton } = useHeaderButton()
   const currentOrgId = useAuthStore((s) => s.user?.orgId)
 
@@ -148,13 +150,14 @@ export function AdminUsers() {
   }, [instructors, searchQuery, statusFilter])
 
   useEffect(() => {
+    if (readonly) return
     setHeaderButton({
       icon: UserPlus,
       label: "Agregar",
       onClick: () => setIsAddOpen(true),
     })
     return () => setHeaderButton(null)
-  }, [setHeaderButton])
+  }, [setHeaderButton, readonly])
 
   const resetForm = () => {
     setFormData({ ...EMPTY_FORM })
@@ -164,7 +167,7 @@ export function AdminUsers() {
   }
 
   const buildRequestBody = () => {
-    const roleId = formData.rol === "alumno" ? 4 : 3
+    const roleId = formData.rol === "alumno" ? 4 : formData.rol === "instructor" ? 3 : 2
     const body: Record<string, unknown> = {
       email: formData.email.trim(),
       name: formData.nombre.trim(),
@@ -173,7 +176,7 @@ export function AdminUsers() {
       username: formData.email.trim().split("@")[0]
         .replace(/[^a-zA-Z0-9_-]/g, "")
         .slice(0, 30) || "user_" + Math.random().toString(36).slice(2, 8),
-      orgId: currentOrgId,
+      orgId: showOrgSelector && selectedOrgId ? Number(selectedOrgId) : currentOrgId,
       roleId,
       status: formData.status === "Activo",
     }
@@ -366,6 +369,7 @@ export function AdminUsers() {
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right">
+                  {!readonly && (
                   <div className="flex justify-end gap-2">
                     <Button variant="ghost" size="icon" onClick={() => openEdit(user)}>
                       <Pencil className="h-4 w-4" />
@@ -374,6 +378,7 @@ export function AdminUsers() {
                         <Trash2 className="h-4 w-4 text-slate-500" />
                       </Button>
                   </div>
+                  )}
                 </TableCell>
               </TableRow>
             ))}
@@ -433,6 +438,7 @@ export function AdminUsers() {
           <h1 className="text-2xl font-bold text-[#1A1A2E]">Gestion de Usuarios</h1>
           <p className="text-sm text-gray-500 mt-1">Administra estudiantes e instructores de la plataforma</p>
         </div>
+        {!readonly && (
         <Dialog
           open={isAddOpen}
           onOpenChange={(val) => {
@@ -546,6 +552,12 @@ export function AdminUsers() {
                 />
                 {errors.password && touched.password && <p className="text-xs text-red-500 mt-1">{errors.password}</p>}
               </div>
+                {showOrgSelector && (
+                  <div className="grid gap-2">
+                    <Label>Organizacion <span className="text-red-500">*</span></Label>
+                    <SelectOrg value={selectedOrgId} onChange={setSelectedOrgId} />
+                  </div>
+                )}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-2">
                     <Label>Rol</Label>
@@ -558,6 +570,7 @@ export function AdminUsers() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="alumno">Alumno</SelectItem>
+                        {showOrgSelector && <SelectItem value="admin">Admin de Organizacion</SelectItem>}
                         <SelectItem value="instructor">Instructor</SelectItem>
                       </SelectContent>
                     </Select>
@@ -599,6 +612,7 @@ export function AdminUsers() {
             </form>
           </DialogContent>
         </Dialog>
+        )}
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
