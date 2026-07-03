@@ -74,16 +74,16 @@ export function AdminDepartments() {
     e.preventDefault()
     if (isSubmitting || !formData.name.trim()) return
     if (!isName(formData.name)) {
-      setNameError("Solo letras y espacios")
+      setNameError("Solo letras y espacios. Sin numeros ni caracteres especiales")
       return
     }
     if (formData.name.length > 25) {
-      setNameError("Maximo 25 caracteres")
+      setNameError(`Maximo 25 caracteres (tienes ${formData.name.length})`)
       return
     }
     setNameError("")
     if (formData.description.length > 200) {
-      setDescError("Maximo 200 caracteres")
+      setDescError(`Maximo 200 caracteres (tienes ${formData.description.length})`)
       return
     }
     setDescError("")
@@ -99,8 +99,16 @@ export function AdminDepartments() {
       setIsDialogOpen(false)
       resetForm()
       fetchDepartments()
-    } catch {
-      toast.error("Error al crear departamento")
+    } catch (err: unknown) {
+      const backend = (err as { response?: { data?: { errors?: { path: string[]; message: string }[] } } })?.response?.data?.errors
+      if (backend) {
+        for (const e of backend) {
+          if (e.path[0] === "name") setNameError(e.message)
+          else if (e.path[0] === "description") setDescError(e.message)
+        }
+      } else {
+        toast.error("Error al crear departamento")
+      }
     } finally {
       setIsSubmitting(false)
     }
@@ -120,8 +128,16 @@ export function AdminDepartments() {
       setIsEditDialogOpen(false)
       resetForm()
       fetchDepartments()
-    } catch {
-      toast.error("Error al actualizar departamento")
+    } catch (err: unknown) {
+      const backend = (err as { response?: { data?: { errors?: { path: string[]; message: string }[] } } })?.response?.data?.errors
+      if (backend) {
+        for (const e of backend) {
+          if (e.path[0] === "name") setNameError(e.message)
+          else if (e.path[0] === "description") setDescError(e.message)
+        }
+      } else {
+        toast.error("Error al actualizar departamento")
+      }
     } finally {
       setIsSubmitting(false)
     }

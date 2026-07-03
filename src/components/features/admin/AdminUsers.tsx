@@ -18,7 +18,7 @@ import { useHeaderButton } from "@/contexts/HeaderButtonContext"
 import apiClient from "@/lib/api-client"
 import { useAuthStore } from "@/stores/auth.store"
 import type { User, Specialty } from "@/types/auth.types"
-import { isDNI, isName, isEmail, isMinLength } from "@/validators/form.validators"
+import { isDNI, isName, isEmail, isValidPassword } from "@/validators/form.validators"
 
 const EMPTY_FORM = {
   id: "",
@@ -100,23 +100,23 @@ export function AdminUsers() {
     const v = formData
 
     if (!v.nombre.trim()) newErrors.nombre = "El nombre es requerido"
-    else if (!isName(v.nombre)) newErrors.nombre = "Solo letras y espacios"
-    else if (v.nombre.length > 50) newErrors.nombre = "Maximo 50 caracteres"
+    else if (!isName(v.nombre)) newErrors.nombre = "Solo letras y espacios. Sin numeros ni caracteres especiales"
+    else if (v.nombre.length > 50) newErrors.nombre = `Maximo 50 caracteres (tienes ${v.nombre.length})`
 
     if (!v.apellidos.trim()) newErrors.apellidos = "Los apellidos son requeridos"
-    else if (!isName(v.apellidos)) newErrors.apellidos = "Solo letras y espacios"
-    else if (v.apellidos.length > 50) newErrors.apellidos = "Maximo 50 caracteres"
+    else if (!isName(v.apellidos)) newErrors.apellidos = "Solo letras y espacios. Sin numeros ni caracteres especiales"
+    else if (v.apellidos.length > 50) newErrors.apellidos = `Maximo 50 caracteres (tienes ${v.apellidos.length})`
 
     if (!v.dni.trim()) newErrors.dni = "El DNI es requerido"
-    else if (!isDNI(v.dni)) newErrors.dni = "DNI debe tener 8 digitos sin letras"
+    else if (!isDNI(v.dni)) newErrors.dni = "Debe tener exactamente 8 digitos numericos. Ej: 12345678"
 
-    if (!v.email.trim()) newErrors.email = "El correo es requerido"
-    else if (!isEmail(v.email)) newErrors.email = "Correo electronico invalido"
+    if (!v.email.trim()) newErrors.email = "El correo electronico es requerido"
+    else if (!isEmail(v.email)) newErrors.email = "Formato invalido. Ej: usuario@dominio.com"
 
     const isAdd = isAddOpen
     if (isAdd) {
       if (!v.password.trim()) newErrors.password = "La contrasena es requerida"
-      else if (!isMinLength(v.password, 8)) newErrors.password = "Minimo 8 caracteres"
+      else if (!isValidPassword(v.password)) newErrors.password = "Minimo 8 caracteres, 1 mayuscula (A-Z), 1 minuscula (a-z), 1 numero (0-9) y 1 caracter especial (!@#$...)"
     }
 
     setErrors(newErrors)
@@ -215,10 +215,23 @@ export function AdminUsers() {
       resetForm()
       fetchUsers()
     } catch (err: unknown) {
-      const msg =
-        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
-        "No se pudo crear el usuario."
-      toast.error("Error al crear usuario", { description: msg })
+      const backend = (err as { response?: { data?: { errors?: { path: string[]; message: string }[] } } })?.response?.data?.errors
+      if (backend) {
+        const FIELD_MAP: Record<string, string> = {
+          name: "nombre", lastName: "apellidos", documentNumber: "dni",
+          email: "email", password: "password", position: "position", phone: "phone", username: "email",
+        }
+        const fieldErrors: Record<string, string> = {}
+        for (const e of backend) {
+          const field = FIELD_MAP[e.path[0]] || e.path[0]
+          if (!fieldErrors[field]) fieldErrors[field] = e.message
+        }
+        setErrors(fieldErrors)
+        setTouched(Object.fromEntries(Object.keys(fieldErrors).map((k) => [k, true])))
+      } else {
+        const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || "No se pudo crear el usuario."
+        toast.error("Error al crear usuario", { description: msg })
+      }
     } finally {
       setIsSubmitting(false)
     }
@@ -241,10 +254,23 @@ export function AdminUsers() {
       resetForm()
       fetchUsers()
     } catch (err: unknown) {
-      const msg =
-        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
-        "No se pudo actualizar el usuario."
-      toast.error("Error al actualizar", { description: msg })
+      const backend = (err as { response?: { data?: { errors?: { path: string[]; message: string }[] } } })?.response?.data?.errors
+      if (backend) {
+        const FIELD_MAP: Record<string, string> = {
+          name: "nombre", lastName: "apellidos", documentNumber: "dni",
+          email: "email", password: "password", position: "position", phone: "phone", username: "email",
+        }
+        const fieldErrors: Record<string, string> = {}
+        for (const e of backend) {
+          const field = FIELD_MAP[e.path[0]] || e.path[0]
+          if (!fieldErrors[field]) fieldErrors[field] = e.message
+        }
+        setErrors(fieldErrors)
+        setTouched(Object.fromEntries(Object.keys(fieldErrors).map((k) => [k, true])))
+      } else {
+        const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || "No se pudo actualizar el usuario."
+        toast.error("Error al actualizar", { description: msg })
+      }
     } finally {
       setIsSubmitting(false)
     }
@@ -515,7 +541,7 @@ export function AdminUsers() {
                       setTouched({ ...touched, password: true })
                     }}
                     onBlur={() => setTouched({ ...touched, password: true })}
-                    placeholder="Minimo 8 caracteres"
+                    placeholder="Ej: MiClave123! (min 8, 1 mayus, 1 minus, 1 num, 1 especial)"
                   className={errors.password && touched.password ? "border-red-500" : ""}
                 />
                 {errors.password && touched.password && <p className="text-xs text-red-500 mt-1">{errors.password}</p>}

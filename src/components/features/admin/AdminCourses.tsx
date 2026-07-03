@@ -241,9 +241,9 @@ export function AdminCourses() {
 
     if (!experienceForm.name.trim()) { setExpNameError("El nombre es requerido"); return }
     setExpNameError("")
-    if (experienceForm.name.length > 50) { setExpNameError("Maximo 50 caracteres"); return }
+    if (experienceForm.name.length > 50) { setExpNameError(`Maximo 50 caracteres (tienes ${experienceForm.name.length})`); return }
     setExpNameError("")
-    if (experienceForm.description.length > 200) { setExpDescError("Maximo 200 caracteres"); return }
+    if (experienceForm.description.length > 200) { setExpDescError(`Maximo 200 caracteres (tienes ${experienceForm.description.length})`); return }
     setExpDescError("")
     const dur = parseInt(experienceForm.duration)
     if (!dur || dur < 1) { setExpDurationError("La duracion debe ser mayor a 0"); return }

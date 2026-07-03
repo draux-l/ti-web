@@ -90,9 +90,9 @@ export function AdminSpecialties() {
       toast.error("Completa todos los campos requeridos")
       return
     }
-    if (!isAlphaNumeric(formData.code)) { setCodeError("Solo letras, numeros y guiones"); return }
+    if (!isAlphaNumeric(formData.code)) { setCodeError("Solo letras, numeros y guiones. Sin espacios ni caracteres especiales"); return }
     setCodeError("")
-    if (!isName(formData.name)) { setNameError("Solo letras y espacios"); return }
+    if (!isName(formData.name)) { setNameError("Solo letras y espacios. Sin numeros ni caracteres especiales"); return }
     setNameError("")
     setIsSubmitting(true)
     try {

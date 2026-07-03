@@ -21,3 +21,7 @@ export function isAlphaNumeric(value: string): boolean {
 export function isCourseName(value: string): boolean {
   return /^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s-]+$/.test(value)
 }
+
+export function isValidPassword(value: string): boolean {
+  return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/.test(value)
+}
